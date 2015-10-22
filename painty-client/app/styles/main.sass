@@ -1,0 +1,87 @@
+@import "reset"
+@import "vendors"
+
+html,
+body
+  height: 100%
+
+body
+  background: #fafafa
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+  color: #333
+
+#content
+  min-height: 100%
+  overflow: hidden
+
+.canvas-wrapper
+  position: relative
+  display: inline-block
+  border: 1px solid #000
+  font-size: 0
+
+  &.opponent
+    &:before
+      z-index: 555
+      content: ''
+      display: block
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+
+  *
+    cursor: none
+
+  .canvas
+    &.upper
+      position: relative
+      z-index: 2
+
+    &.lower
+      position: absolute
+      top: 0
+      right: 0
+      left: 0
+      bottom: 0
+      z-index: 1
+
+  .painty-area
+    position: absolute
+    top: 0
+    right: 0
+    left: 0
+    bottom: 0
+    z-index: 555
+
+.brush
+  position: absolute
+  width: 100px
+  height: 100px
+  margin-top: -100px
+  z-index: 10
+
+  img
+    display: block
+    width: 100px
+    position: relative
+
+.cursor
+  position: absolute
+  z-index: 5
+
+  i
+    display: block
+    border-radius: 100%
+    border: 1px solid #000
+    margin-top: -50%
+    margin-left: -50%
+
+.tools
+  position: relative
+  z-index: 10
+  margin-top: 20px
+
+  & > *
+    margin-bottom: 20px

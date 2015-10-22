@@ -1,0 +1,25 @@
+{
+  "name": "panty",
+  "version": "0.0.0",
+  "authors": [
+    "Jane Doe"
+  ],
+  "moduleType": [
+    "node"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "app/vendor",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "underscore": "~1.8.3",
+    "jquery": "~2.1.4",
+    "jquery-ui": "~1.11.4",
+    "jquery-minicolors": "~2.1.12",
+    "jquery.cookie": "~1.4.1"
+  }
+}
