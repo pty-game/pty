@@ -4,9 +4,7 @@ $ = require('gulp-load-plugins')()
 del = require 'del'
 source = require 'vinyl-source-stream'
 browserify = require 'browserify'
-preprocessify = require 'preprocessify'
 runSequence = require 'run-sequence'
-domain = require 'domain'
 bower = require 'gulp-concat-vendor'
 
 gulp.task 'clean:dev', ->
@@ -22,18 +20,16 @@ gulp.task 'clean:dist', ->
   ], force: true
 
 gulp.task 'scripts:dev', ->
-  base = '../painty-rest/assets'
+  base = 'dist'
 
-  filePath = './app/scripts/app.coffee'
-  extensions = ['.cjsx', '.coffee']
+  filePath = './app/scripts/app.js'
+  extensions = ['.js', '.jsx']
 
   browserify
     entries: [filePath]
     extensions: extensions
     debug: true
-  .transform preprocessify {env: true},
-    includeExtensions: extensions
-  .transform 'coffee-reactify'
+  .transform 'reactify'
   .bundle()
   .pipe source 'app.js'
   .pipe gulp.dest base + '/scripts'
@@ -42,18 +38,16 @@ gulp.task 'scripts:dev', ->
 
 
 gulp.task 'scripts:dist', ->
-  base = '../painty-rest/assets'
+  base = 'build'
 
-  filePath = './app/scripts/app.coffee'
-  extensions = ['.cjsx', '.coffee']
+  filePath = './app/scripts/app.js'
+  extensions = ['.jsx', '.js']
 
   browserify
     entries: [filePath]
     extensions: extensions
     debug: true
-  .transform preprocessify {env: true},
-    includeExtensions: extensions
-  .transform 'coffee-reactify'
+  .transform 'reactify'
   .bundle()
   .pipe source 'app.js'
   .pipe $.streamify($.uglify())
@@ -67,7 +61,7 @@ gulp.task 'scripts:dist', ->
 
 
 gulp.task 'compass:dev', ->
-  base = '../painty-rest/assets'
+  base = 'dist'
 
   return gulp.src 'app/styles/main.sass'
   .pipe $.compass
@@ -78,7 +72,7 @@ gulp.task 'compass:dev', ->
   .pipe gulp.dest base + '/styles'
 
 gulp.task 'compass:dist', ->
-  base = '../painty-rest/assets'
+  base = 'build'
 
   return gulp.src 'app/styles/main.sass'
   .pipe $.compass
@@ -91,7 +85,7 @@ gulp.task 'compass:dist', ->
 
 
 gulp.task 'imagemin:dev', ->
-  base = '../painty-rest/assets'
+  base = 'dist'
 
   return gulp.src 'app/images/*'
   .pipe $.imagemin
@@ -100,7 +94,7 @@ gulp.task 'imagemin:dev', ->
   .pipe gulp.dest base + '/images'
 
 gulp.task 'imagemin:dist', ->
-  base = '../painty-rest/assets'
+  base = 'build'
 
   return gulp.src 'app/images/*'
   .pipe $.imagemin
@@ -110,19 +104,19 @@ gulp.task 'imagemin:dist', ->
 
 
 gulp.task 'copy:dev', ->
-  base = '../painty-rest/assets'
+  base = 'dist'
 
   return gulp.src ['app/*.txt', 'app/*.ico', 'app/*.html']
   .pipe gulp.dest base
 
 gulp.task 'copy:dist', ->
-  base = '../painty-rest/assets'
+  base = 'build'
 
   return gulp.src ['app/*.txt', 'app/*.ico', 'app/*.html']
   .pipe gulp.dest base
 
 gulp.task 'webserver', ->
-  webserver = gulp.src ['.tmp']
+  webserver = gulp.src ['dist']
   .pipe $.webserver
     host: '0.0.0.0' #change to 'localhost' to disable outside connections
     livereload:
@@ -132,8 +126,8 @@ gulp.task 'webserver', ->
 gulp.task 'serve', ->
   runSequence 'clean:dev', ['scripts:dev', 'compass:dev', 'copy:dev', 'webserver']
   gulp.watch 'app/*.html'
-  gulp.watch 'app/scripts/**/*.coffee', ['scripts:dev']
-  gulp.watch 'app/scripts/**/*.cjsx', ['scripts:dev']
+  gulp.watch 'app/scripts/**/*.js', ['scripts:dev']
+  gulp.watch 'app/scripts/**/*.jsx', ['scripts:dev']
   gulp.watch 'app/styles/**/*.sass', ['compass:dev']
 
 gulp.task 'build', ->
