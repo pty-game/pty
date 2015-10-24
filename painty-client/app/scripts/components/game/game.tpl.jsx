@@ -1,5 +1,5 @@
-var React;
-React = require('react');
+import React from 'react'
+
 module.exports = function() {
   var cursorStyle = {
     width: this.state.brush.size,

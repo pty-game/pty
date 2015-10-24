@@ -1,15 +1,17 @@
-var Layout, React, Template, componentDidMount;
-React = require('react');
-Template = require('./layout.tpl.jsx');
+import React from 'react'
+import Template from './layout.tpl.jsx'
 
-componentDidMount = function() {
-  return console.log(11);
-};
+function componentDidMount() {
+  console.log(12)
+}
 
-Layout = React.createClass({
+function render() {
+  return Template.apply(this)
+}
+
+var Layout = React.createClass({
   componentDidMount: componentDidMount,
-  render: function() {
-    return Template.apply(this);
-  }
-});
-module.exports = Layout;
+  render: render
+})
+
+module.exports = Layout

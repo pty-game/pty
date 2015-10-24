@@ -20,6 +20,7 @@
     "jquery": "~2.1.4",
     "jquery-ui": "~1.11.4",
     "jquery-minicolors": "~2.1.12",
-    "jquery.cookie": "~1.4.1"
+    "jquery.cookie": "~1.4.1",
+    "bootstrap-sass": "~3.3.5"
   }
 }

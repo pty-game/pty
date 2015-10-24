@@ -1,8 +1,8 @@
-var Constants, EventEmitter, checkStatesActions, drawing, makeAction, onChange, redo, renderFromImage, renderFromState, setMode, startDraw, stopDraw, undo, vow, _actionsQueueChanged, _addState, _makeAction;
-Constants = require('../constants/constants');
-EventEmitter = require('events').EventEmitter;
-vow = require('vow');
-_addState = function(state) {
+import Constants from '../constants/constants'
+import EventEmitter from 'events'
+import vow from 'vow'
+
+function _addState(state) {
   var countSplice, startIndex, statesIsFull, undoActive;
   undoActive = this._stateObj.index < this._stateObj.states.length - 1;
   statesIsFull = this._stateObj.states.length >= Constants.STATES_LENGTH;
@@ -27,7 +27,8 @@ _addState = function(state) {
   this._stateObj.states.push(state);
   return this.checkStatesActions();
 };
-_makeAction = function(action, options) {
+
+function _makeAction(action, options) {
   var beforeActionPromise;
   if (options == null) {
     options = {};
@@ -55,7 +56,8 @@ _makeAction = function(action, options) {
     }).bind(this));
   }).bind(this));
 };
-_actionsQueueChanged = function() {
+
+function _actionsQueueChanged() {
   var item;
   if (this.drawingInProcess || this.beforeMakeActionProcess || !this._actionsQueue.length) {
     return;
@@ -63,7 +65,8 @@ _actionsQueueChanged = function() {
   item = this._actionsQueue.shift();
   return this._makeAction(item.action, item.options);
 };
-makeAction = function(action, options) {
+
+function makeAction(action, options) {
   if (options == null) {
     options = {};
   }
@@ -73,15 +76,18 @@ makeAction = function(action, options) {
   });
   return this._eventEmitter.emit('actionsQueueChange');
 };
-checkStatesActions = function() {
+
+function checkStatesActions() {
   this._stateObj.enabled.undo = this._stateObj.index > 0;
   return this._stateObj.enabled.redo = this._stateObj.index < this._stateObj.states.length - 1;
 };
-setMode = function(property, mode) {
+
+function setMode(property, mode) {
   this._mode[property] = mode;
   return this;
 };
-undo = function() {
+
+function undo() {
   if (!this._stateObj.enabled.undo) {
     return;
   }
@@ -92,7 +98,8 @@ undo = function() {
     instrument: 'undo'
   });
 };
-redo = function() {
+
+function redo() {
   if (!this._stateObj.enabled.redo) {
     return;
   }
@@ -103,12 +110,14 @@ redo = function() {
     instrument: 'redo'
   });
 };
-renderFromImage = function(image) {
+
+function renderFromImage(image) {
   if (image) {
     return this._lowerCanvas.drawImage(image, 0, 0);
   }
 };
-renderFromState = function(state, options) {
+
+function renderFromState(state, options) {
   var defer, pathIndex, pathsInterval, pathsIntervalTime;
   if (options == null) {
     options = {};
@@ -138,14 +147,16 @@ renderFromState = function(state, options) {
   }).bind(this), pathsIntervalTime);
   return defer.promise();
 };
-onChange = function(changeCallback) {
+
+ function onChange(changeCallback) {
   if (changeCallback == null) {
     changeCallback = function() {
     };
   }
   return this._changeCallback = changeCallback;
 };
-startDraw = function(coords) {
+
+function startDraw(coords) {
   var color, dateObject, i, intervalRandomPoint, lastX, lastY, radius;
   this.drawingInProcess = true;
   dateObject = new Date();
@@ -256,7 +267,8 @@ startDraw = function(coords) {
   this._lastCoords.x = coords.x;
   return this._lastCoords.y = coords.y;
 };
-drawing = function(coords) {
+
+function drawing(coords) {
   if (!this.drawingInProcess) {
     return;
   }
@@ -279,7 +291,8 @@ drawing = function(coords) {
   this._lastCoords.x = coords.x;
   return this._lastCoords.y = coords.y;
 };
-stopDraw = function() {
+
+function stopDraw() {
   var dateObject, image;
   if (!this.drawingInProcess) {
     return;
@@ -300,6 +313,7 @@ stopDraw = function() {
   this._stateObj.states[this._stateObj.index].image = image;
   return this._changeCallback(this._stateObj.states[this._stateObj.index]);
 };
+
 module.exports = function(idUpper, idLower) {
   var obj, _mode, _stateObj;
   _mode = {

@@ -1,11 +1,8 @@
-var Layout, React, RouteHandler, Router;
-React = require('react');
-Router = require('react-router');
-RouteHandler = Router.RouteHandler;
-Layout = React.createClass;
+import React from 'react'
+import Router from 'react-router'
 
 module.exports = function() {
-  return <div className="App">
-    <RouteHandler />
+  return <div className="app">
+    {this.props.children}
   </div>
 };

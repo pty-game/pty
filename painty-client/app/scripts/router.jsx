@@ -1,22 +1,20 @@
-var React = require('react')
-var Router = require('react-router')
-var Route = Router.Route
-var Routes = Router.Routes
-var DefaultRoute = Router.DefaultRoute
+import React from 'react'
+import {Router, Route} from 'react-router'
+import createBrowserHistory from 'react-router/node_modules/history/lib/createBrowserHistory'
 
-var Layout = require('./components/layout/layout')
-var Home = require('./components/home/home')
-var Game = require('./components/game/game')
+import Layout from './components/layout/layout.jsx'
+import Home from './components/home/home.jsx'
+import Game from './components/game/game.jsx'
 
 var routes = (
-	<Route name="layout" path="/" handler={Layout}>
-		<DefaultRoute handler={Home} />
-		<Route name="game" path="/game" handler={Game} />
-	</Route>
+  <Route path="/" component={Layout}>
+    <Route path="home" component={Home}/>
+    <Route path="game" component={Game}/>
+  </Route>
 )
 
 exports.start = function() {
-	Router.run(routes, function(Handler) {
-		return React.render(<Handler/>, document.getElementById('content'))
-	})
+  React.render(<Router>
+    {routes}
+  </Router>, document.getElementById('content'))
 }

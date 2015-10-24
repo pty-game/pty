@@ -1,9 +1,12 @@
-var Home, React, Template;
-React = require('react');
-Template = require('./home.tpl.jsx');
-Home = React.createClass({
-  render: function() {
-    return Template.apply(this);
-  }
+import React from 'react'
+import Template from './home.tpl.jsx'
+
+function render() {
+  return Template.apply(this);
+}
+
+var Home = React.createClass({
+  render: render
 });
+
 module.exports = Home;
