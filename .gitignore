@@ -117,3 +117,6 @@ nbproject
 .idea
 .node_history
 painty-client/build
+painty-client/dist
+./**/.*
+
