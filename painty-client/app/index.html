@@ -9,10 +9,7 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width">
   <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-
-  <!-- build:css(.tmp) styles/main.css -->
   <link rel="stylesheet" href="styles/main.css">
-  <!-- endbuild -->
 </head>
 <body>
 <!--[if lt IE 10]>
@@ -21,9 +18,15 @@
 
 <div id="content"></div>
 
-<!-- build:js(.tmp) scripts/app.js -->
 <script src="scripts/vendor.js"></script>
+<script type="text/javascript">
+  io.sails.autoConnect = false;
+  io.sails.transports = ['websocket', 'pooling'];
+  // e.g. at some point later, connect 3 sockets, using default settings
+
+    // but socket2's `url` option will be overridden as specified:
+    window.socket = io.sails.connect('http://127.0.0.1:1337');
+</script>
 <script src="scripts/app.js"></script>
-<!-- endbuild -->
 </body>
 </html>

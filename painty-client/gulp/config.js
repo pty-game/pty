@@ -37,6 +37,7 @@ module.exports = {
   },
   vendors: {
     src: [
+      src + '/scripts/libs/sails.io.js',
       'bower_components/*',
       '!bower_components/bootstrap-sass',
     ],
