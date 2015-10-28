@@ -3,6 +3,7 @@ var gutil = require('gulp-util');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
+var babelify = require('babelify');
 var watchify = require('watchify');
 var connect = require('gulp-connect');
 var config = require('../config').browserify;
@@ -10,9 +11,11 @@ var config = require('../config').browserify;
 watchify.args.debug = config.debug;
 var bundler = watchify(browserify(config.src, watchify.args));
 
-config.settings.transform.forEach(function(t) {
-  bundler.transform(t);
-});
+bundler.transform(babelify.configure({
+  optional: []
+}));
+
+bundler.transform('reactify');
 
 gulp.task('browserify', bundle);
 bundler.on('update', bundle);

@@ -6,6 +6,16 @@ import Constants from '../../constants/constants'
 import vow from 'vow'
 import Template from './game.tpl.jsx'
 
+
+module.exports = React.createClass({
+  undo,
+  redo,
+  getInitialState,
+  componentDidMount,
+  toggleDrawingMode,
+  render
+})
+
 function undo() {
   return this.my.canvas.undo()
 }
@@ -134,12 +144,3 @@ function render() {
   }
   return Template.apply(this)
 }
-
-module.exports = React.createClass({
-  undo: undo,
-  redo: redo,
-  getInitialState: getInitialState,
-  componentDidMount: componentDidMount,
-  toggleDrawingMode: toggleDrawingMode,
-  render: render
-})

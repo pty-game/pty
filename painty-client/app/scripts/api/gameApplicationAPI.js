@@ -20,6 +20,11 @@ function create(userId, data) {
   return def.promise
 }
 
-function on(callback) {
-  socket.on('gameapplication', callback)
+function on() {
+  var def = Q.defer()
+  socket.on('gameapplication', function(response) {
+    def.resolve(response)
+  })
+
+  return def.promise
 }

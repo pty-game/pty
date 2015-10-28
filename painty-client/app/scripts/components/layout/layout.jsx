@@ -9,8 +9,8 @@ function render() {
 }
 
 var Layout = React.createClass({
-  componentDidMount: componentDidMount,
-  render: render
+  componentDidMount,
+  render
 })
 
 module.exports = Layout

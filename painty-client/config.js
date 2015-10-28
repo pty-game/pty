@@ -22,9 +22,6 @@ module.exports = {
     }
   },
   browserify: {
-    settings: {
-      transform: ['babelify', 'reactify']
-    },
     src: src + '/js/index.jsx',
     dest: dest + '/js',
     outputName: 'index.js',
