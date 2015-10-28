@@ -2,7 +2,6 @@ import React from 'react'
 import Template from './layout.tpl.jsx'
 
 function componentDidMount() {
-  console.log(12)
 }
 
 function render() {

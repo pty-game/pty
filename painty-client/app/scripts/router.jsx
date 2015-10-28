@@ -1,5 +1,5 @@
 import React from 'react'
-import {Router, Route} from 'react-router'
+import {Router, Route, IndexRoute} from 'react-router'
 import createBrowserHistory from 'react-router/node_modules/history/lib/createBrowserHistory'
 
 import Layout from './components/layout/layout.jsx'
@@ -8,7 +8,7 @@ import Game from './components/game/game.jsx'
 
 var routes = (
   <Route path="/" component={Layout}>
-    <Route path="home" component={Home}/>
+    <IndexRoute component={Home}/>
     <Route path="game" component={Game}/>
   </Route>
 )

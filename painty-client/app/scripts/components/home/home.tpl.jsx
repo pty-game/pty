@@ -9,10 +9,10 @@ module.exports = function() {
         placeholder="User login"
         label="Create game application"
         help="Enter user login"
-        ref="userLogin"
+        ref="userId"
         groupClassName="group-class"
         labelClassName="label-class" />
-      <Button bsStyle="primary">Create</Button>
+      <Button bsStyle="primary" onClick={this.createGameApplication}>Create</Button>
     </div>
   </div>
 };
