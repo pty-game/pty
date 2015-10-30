@@ -3,8 +3,10 @@ import Template from './home.tpl.jsx'
 import GameApplicationAPI from '../../api/gameApplicationAPI.js'
 import GameAPI from '../../api/gameAPI.js'
 import suspend from 'suspend'
+import History from 'react-router/lib/History.js'
 
 var Home = React.createClass({
+  mixins: [History],
   render,
   getInitialState,
   componentDidMount: suspend(componentDidMount),
@@ -24,8 +26,8 @@ function getInitialState() {
 function *componentDidMount() {
   var gameApplicationResult = yield GameApplicationAPI.on()
   var game = yield GameAPI.subscribe(gameApplicationResult.data.gameId)
-
   console.log(game)
+  this.history.pushState(null, '/game/' + game.id)
 }
 
 //==========================

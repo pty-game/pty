@@ -9,7 +9,7 @@ import Game from './components/game/game.jsx'
 var routes = (
   <Route path="/" component={Layout}>
     <IndexRoute component={Home}/>
-    <Route path="game" component={Game}/>
+    <Route path="game/:gameId" component={Game}/>
   </Route>
 )
 

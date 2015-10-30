@@ -20,7 +20,6 @@
     "require-dir": "^0.3.0",
     "suspend": "^0.6.1",
     "vinyl-buffer": "^1.0.0",
-    "vow": "^0.4.10",
     "watchify": "^3.4.0"
   },
   "devDependencies": {

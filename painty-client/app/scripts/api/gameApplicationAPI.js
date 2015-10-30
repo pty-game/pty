@@ -10,21 +10,15 @@ var prefix = ''
 function create(userId, data) {
   var url = prefix + '/gameapplication/user/' + userId
 
-  var def = Q.defer()
-  socket.post(url, data, function() {
-    def.resolve(arguments)
-  }, function() {
-    def.reject(arguments)
-  })
+  var defer = Q.defer()
+  socket.post(url, data, defer.resolve, defer.reject)
 
-  return def.promise
+  return defer.promise
 }
 
 function on() {
-  var def = Q.defer()
-  socket.on('gameapplication', function(response) {
-    def.resolve(response)
-  })
+  var defer = Q.defer()
+  socket.on('gameapplication', defer.resolve)
 
-  return def.promise
+  return defer.promise
 }
