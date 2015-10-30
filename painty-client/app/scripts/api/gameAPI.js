@@ -3,6 +3,7 @@ import Q from 'q'
 module.exports = {
   subscribe,
   on,
+  off,
   addAction
 };
 
@@ -23,7 +24,7 @@ function addAction(gameId, data) {
   var defer = Q.defer()
   socket.request({
     headers: {
-      userId: 11
+      userId: $.cookie('userId')
     },
     method: 'put',
     url,
@@ -33,9 +34,10 @@ function addAction(gameId, data) {
   return defer.promise
 }
 
-function on() {
-  var defer = Q.defer()
-  socket.on('game', defer.resolve)
+function on(callback) {
+  return socket.on('game', callback)
+}
 
-  return defer.promise
+function off() {
+  socket.off('game')
 }

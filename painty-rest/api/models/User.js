@@ -7,7 +7,7 @@
 
 module.exports = {
   attributes: {
-    login: 'integer'
+    login: 'string'
   }
 };
 

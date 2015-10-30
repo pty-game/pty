@@ -19,25 +19,25 @@ module.exports = {
     res.ok(game)
   }),
   addAction: function(req, res) {
-    Q.async(function *() {
-      var gameUserLogin = req.body.login
-      var gameId = req.params.gameId
+    var userId = req.headers.userId
+    var gameId = req.params.gameId
 
-      var gameUser = yield GameUser.findOne({user: gameUserLogin, game: gameId})
+    Q.async(function *() {
+      var gameUser = yield GameUser.findOne({user: userId, game: gameId})
 
       if (!gameUser) throw 'This GameUser is not allowed for this game'
 
       var gameAction = yield GameAction.create({
-        action: req.body.action,
+        action: req.body,
         game: gameId,
-        game_user: gameUserLogin
+        game_user: gameUser.id
       })
 
       return gameAction
     })().then(function(gameAction) {
-      res.ok(gameAction)
-    }, function(error) {
-      res.serverError(error)
-    })
+      Game.message(gameId, gameAction.action, req)
+
+      res.ok(gameAction.action)
+    }, res.serverError)
   }
 };

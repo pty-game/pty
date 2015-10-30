@@ -1,13 +1,15 @@
 var request = require('supertest');
 var Q = require('q');
 
+var prefix = ''
+
 describe('GameApplicationController', function () {
 
   describe('#create()', function () {
     describe('for existed user', function () {
       it('for painter', function (done) {
         request(sails.hooks.http.app)
-          .post('/api/gameapplication/user/1')
+          .post(prefix + '/gameapplication/user/1')
           .send()
           .expect(function(res) {
             delete res.body.createdAt
@@ -22,7 +24,7 @@ describe('GameApplicationController', function () {
 
       it('for estimator', function (done) {
         request(sails.hooks.http.app)
-          .post('/api/gameapplication/user/1')
+          .post(prefix + '/gameapplication/user/1')
           .send({
             is_estimator: true
           })
@@ -41,7 +43,7 @@ describe('GameApplicationController', function () {
     describe('for not existed user', function () {
       it('for painter', function (done) {
         request(sails.hooks.http.app)
-          .post('/api/gameapplication/user/555555555')
+          .post(prefix + '/gameapplication/user/555555555')
           .send()
           .expect(function(res)
           {
@@ -58,12 +60,12 @@ describe('GameApplicationController', function () {
     describe('if application already exist for current user - save only last', function () {
       it('for painter', function (done) {
         request(sails.hooks.http.app)
-          .post('/api/gameapplication/user/1')
+          .post(prefix + '/gameapplication/user/1')
           .send()
           .expect(201)
 
         request(sails.hooks.http.app)
-          .post('/api/gameapplication/user/1')
+          .post(prefix + '/gameapplication/user/1')
           .send()
           .expect(201)
 

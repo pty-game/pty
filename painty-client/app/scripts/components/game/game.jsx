@@ -5,16 +5,8 @@ import Mouse from '../../api/mouseAPI'
 import GameAPI from '../../api/gameAPI.js'
 import Constants from '../../constants/constants'
 import Q from 'q'
+import suspend from 'suspend'
 import Template from './game.tpl.jsx'
-
-module.exports = React.createClass({
-  undo,
-  redo,
-  getInitialState,
-  componentDidMount,
-  toggleDrawingMode,
-  render
-})
 
 function getInitialState() {
   return {
@@ -23,13 +15,18 @@ function getInitialState() {
 }
 
 function componentDidMount() {
-  _initCanvases.apply(this)
+  _initMyCanvas.apply(this)
+  _initOpponentCanvas.apply(this)
 
   this.setState(function(prev) {
     prev.brush.size = Constants.BRUSH_WIDTH_INIT;
     prev.brush.opacity = Constants.BRUSH_OPACITY_INIT;
     prev.brush.color = Constants.BRUSH_COLOR_INIT;
   })
+}
+
+function componentWillUnmount() {
+  _offOpponentCanvas.apply(this)
 }
 
 function render() {
@@ -57,7 +54,7 @@ function redo() {
 
 //============================================================
 
-function _initCanvases() {
+function _initMyCanvas() {
   this.my = {
     canvas: Canvas('my-upper', 'my-lower').setMode('instrument', Constants.BRUSH),
     brush: Cursor('my-brush'),
@@ -96,33 +93,6 @@ function _initCanvases() {
 
   this.my.canvas.onChange(function(action) {
     GameAPI.addAction(this.props.params.gameId, action)
-
-    /*
-    var options = {
-      pathRendered: function(path) {
-        this.opponent.brush.setPosition(path.x, path.y)
-      }.bind(this),
-      before: function(action) {
-        if (action.instrument === 'undo' || action.instrument === 'redo') {
-          return;
-        }
-
-        var defer = Q.defer()
-        var path = action.coordsArr[0];
-
-        this.opponent.brush.animate({
-          left: path.x,
-          top: path.y
-        }, function() {
-          defer.resolve()
-        })
-
-        return defer.promise
-      }.bind(this)
-    }
-
-    this.opponent.canvas.makeAction(action, options)
-    */
   }.bind(this))
 
   $('#brush-width').slider({
@@ -158,3 +128,51 @@ function _initCanvases() {
     }.bind(this)
   })
 }
+
+function _initOpponentCanvas() {
+  GameAPI
+    .on(function(result) {
+      var action = result.data
+      console.log(action)
+
+      var options = {
+        pathRendered: function(path) {
+          this.opponent.brush.setPosition(path.x, path.y)
+        }.bind(this),
+        before: function(action) {
+          if (action.instrument === 'undo' || action.instrument === 'redo') {
+            return;
+          }
+
+          var defer = Q.defer()
+          var path = action.coordsArr[0];
+
+          this.opponent.brush.animate({
+            left: path.x,
+            top: path.y
+          }, function() {
+            defer.resolve()
+          })
+
+          return defer.promise
+        }.bind(this)
+      }
+
+      this.opponent.canvas.makeAction(action, options)
+    }.bind(this))
+}
+
+function _offOpponentCanvas() {
+  GameAPI.off()
+}
+//============================================================
+
+module.exports = React.createClass({
+  undo,
+  redo,
+  getInitialState,
+  componentDidMount,
+  componentWillUnmount,
+  toggleDrawingMode,
+  render
+})

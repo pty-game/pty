@@ -3,6 +3,7 @@ import Q from 'q'
 module.exports = {
   create,
   on,
+  off
 };
 
 var prefix = ''
@@ -16,9 +17,10 @@ function create(userId, data) {
   return defer.promise
 }
 
-function on() {
-  var defer = Q.defer()
-  socket.on('gameapplication', defer.resolve)
+function on(callback) {
+  socket.on('gameapplication', callback)
+}
 
-  return defer.promise
+function off() {
+  socket.off('gameapplication')
 }
