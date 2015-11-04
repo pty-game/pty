@@ -36,7 +36,7 @@ module.exports.routes = {
     view: 'homepage'
   },
 
-  'post /gameapplication/user/:userId': {
+  'post /gameapplication': {
     controller: 'GameApplication',
     action: 'create'
   },

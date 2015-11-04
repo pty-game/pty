@@ -9,9 +9,11 @@ module.exports = function() {
         placeholder="User login"
         label="Create game application"
         help="Enter user login"
-        ref="userId"
-        groupClassName="group-class"
-        labelClassName="label-class" />
+        ref="userId"/>
+      <Input
+        type="checkbox"
+        label="Is estimator"
+        ref="isEstimator"/>
       <Button bsStyle="primary" onClick={this.createGameApplication}>Create</Button>
     </div>
   </div>

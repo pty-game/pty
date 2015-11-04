@@ -24,7 +24,8 @@ function addAction(gameId, data) {
   var defer = Q.defer()
   socket.request({
     headers: {
-      userId: $.cookie('userId')
+      //userId: $.cookie('userId')
+      userId: window.userId
     },
     method: 'put',
     url,
@@ -39,5 +40,5 @@ function on(callback) {
 }
 
 function off() {
-  socket.off('game')
+  return socket.off('game')
 }

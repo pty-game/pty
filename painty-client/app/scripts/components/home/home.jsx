@@ -15,7 +15,7 @@ function getInitialState() {
 
 function componentDidMount() {
   GameApplicationAPI
-    .on(suspend(function *(result) {console.log(1)
+    .on(suspend(function *(result) {
       var game = yield GameAPI.subscribe(result.data.gameId)
 
       this.history.pushState(null, '/game/' + game.id)
@@ -29,9 +29,12 @@ function componentWillUnmount() {
 //====================================================
 
 function createGameApplication() {
-  $.cookie('userId', this.refs.userId.getValue())
+  //$.cookie('userId', this.refs.userId.getValue())
+  window.userId = this.refs.userId.getValue()
 
-  GameApplicationAPI.create(this.refs.userId.getValue())
+  GameApplicationAPI.create({
+    is_estimator: this.refs.isEstimator.getChecked()
+  })
 }
 
 //====================================================

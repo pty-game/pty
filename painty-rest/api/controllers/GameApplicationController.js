@@ -8,15 +8,14 @@ var Q = require('q')
  */
 
 module.exports = {
-	create: Q.async(function *(req, res) {
-    try {
-      var gameApplication = yield GameApplication.createNew(req.params.userId, req.body)
+	create: function (req, res) {
+    Q.async(function *() {
+      var gameApplication = yield GameApplication.createNew(req.headers.userId, req.body)
 
       GameApplication.subscribe(req, gameApplication)
-      res.created(gameApplication)
-    } catch (error) {
-      res.badRequest(error)
-    }
-  })
+
+      return gameApplication
+    })().then(res.created, res.badRequest)
+  }
 };
 
