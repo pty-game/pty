@@ -1,4 +1,5 @@
 import Q from 'q'
+import socket from './socket.js'
 
 module.exports = {
   create,
@@ -14,10 +15,6 @@ function create(data) {console.log(data)
 
   var defer = Q.defer()
   socket.request({
-    headers: {
-      //userId: $.cookie('userId')
-      userId: window.userId
-    },
     method: 'post',
     url,
     data

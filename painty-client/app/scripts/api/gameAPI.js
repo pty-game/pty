@@ -1,4 +1,5 @@
 import Q from 'q'
+import socket from './socket.js'
 
 module.exports = {
   subscribe,
@@ -15,10 +16,6 @@ function subscribe(gameId) {
 
   var defer = Q.defer()
   socket.request({
-    headers: {
-      //userId: $.cookie('userId')
-      userId: window.userId
-    },
     method: 'get',
     url,
   }, defer.resolve, defer.reject)
@@ -31,10 +28,6 @@ function unsubscribe(gameId) {
 
   var defer = Q.defer()
   socket.request({
-    headers: {
-      //userId: $.cookie('userId')
-      userId: window.userId
-    },
     method: 'get',
     url,
   }, defer.resolve, defer.reject)
@@ -47,10 +40,6 @@ function addAction(gameId, data) {
 
   var defer = Q.defer()
   socket.request({
-    headers: {
-      //userId: $.cookie('userId')
-      userId: window.userId
-    },
     method: 'put',
     url,
     data
