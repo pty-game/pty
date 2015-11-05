@@ -46,6 +46,11 @@ module.exports.routes = {
     action: 'subscribe'
   },
 
+  'get /game/:gameId/unsubscribe': {
+    controller: 'Game',
+    action: 'unsubscribe'
+  },
+
   'put /game/:gameId': {
     controller: 'Game',
     action: 'addAction'

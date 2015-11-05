@@ -18,6 +18,13 @@ module.exports = {
     Game.subscribe(req, game)
     res.ok(game)
   }),
+  unsubscribe: Q.async(function *(req, res) {
+    var game = yield Game
+        .findOne({id: req.params.gameId})
+
+    Game.unsubscribe(req, game)
+    res.ok()
+  }),
   addAction: function(req, res) {
     var userId = req.headers.userId
     var gameId = req.params.gameId

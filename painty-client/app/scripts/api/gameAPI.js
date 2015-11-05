@@ -2,6 +2,7 @@ import Q from 'q'
 
 module.exports = {
   subscribe,
+  unsubscribe,
   on,
   off,
   addAction
@@ -9,11 +10,34 @@ module.exports = {
 
 var prefix = ''
 
-function subscribe(gameId, data) {
+function subscribe(gameId) {
   var url = prefix + '/game/' + gameId + '/subscribe'
 
   var defer = Q.defer()
-  socket.get(url, data, defer.resolve, defer.reject)
+  socket.request({
+    headers: {
+      //userId: $.cookie('userId')
+      userId: window.userId
+    },
+    method: 'get',
+    url,
+  }, defer.resolve, defer.reject)
+
+  return defer.promise
+}
+
+function unsubscribe(gameId) {
+  var url = prefix + '/game/' + gameId + '/unsubscribe'
+
+  var defer = Q.defer()
+  socket.request({
+    headers: {
+      //userId: $.cookie('userId')
+      userId: window.userId
+    },
+    method: 'get',
+    url,
+  }, defer.resolve, defer.reject)
 
   return defer.promise
 }

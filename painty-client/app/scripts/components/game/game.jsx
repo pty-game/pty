@@ -133,7 +133,6 @@ function _initOpponentCanvas() {
   GameAPI
     .on(function(result) {
       var action = result.data
-      console.log(action)
 
       var options = {
         pathRendered: function(path) {
@@ -164,6 +163,7 @@ function _initOpponentCanvas() {
 
 function _offOpponentCanvas() {
   GameAPI.off()
+  GameAPI.unsubscribe(this.props.params.gameId)
 }
 //============================================================
 

@@ -5,12 +5,12 @@
  * so in the example below it will run every minute
  */
 
+var applicationsConnect = require('../crontab/applications-connect.js')
+
 module.exports.crontab = [
   {
     cronTime: '*/3 * * * * *',
-    onTick: function() {
-      require('../crontab/applications-connect.js').run();
-    },
+    onTick: applicationsConnect,
     start: true
   }
 ];
