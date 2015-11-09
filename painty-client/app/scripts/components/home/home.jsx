@@ -2,7 +2,6 @@ import React from 'react'
 import Template from './home.tpl.jsx'
 import GameApplicationAPI from '../../api/gameApplicationAPI.js'
 import GameAPI from '../../api/gameAPI.js'
-import suspend from 'suspend'
 import History from 'react-router/lib/History.js'
 
 function render() {
@@ -15,11 +14,9 @@ function getInitialState() {
 
 function componentDidMount() {
   GameApplicationAPI
-    .on(suspend(function *(result) {
-      var game = yield GameAPI.subscribe(result.data.gameId)
-
-      this.history.pushState(null, '/game/' + game.id)
-    }).bind(this))
+    .on(function (result) {
+      this.history.pushState(null, '/game/' + result.data.gameId)
+    }.bind(this))
 }
 
 function componentWillUnmount() {

@@ -8,7 +8,6 @@
 module.exports = {
 
   attributes: {
-    is_estimator: 'boolean',
     game_user: {
       model: 'GameUser',
       required: true

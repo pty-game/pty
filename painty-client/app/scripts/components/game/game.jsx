@@ -8,37 +8,9 @@ import Q from 'q'
 import suspend from 'suspend'
 import Template from './game.tpl.jsx'
 
-function getInitialState() {
-  return {
-    brush: {}
-  }
-}
-
-function componentDidMount() {
-  _initMyCanvas.apply(this)
-  _initOpponentCanvas.apply(this)
-
-  this.setState(function(prev) {
-    prev.brush.size = Constants.BRUSH_WIDTH_INIT;
-    prev.brush.opacity = Constants.BRUSH_OPACITY_INIT;
-    prev.brush.color = Constants.BRUSH_COLOR_INIT;
-  })
-}
-
-function componentWillUnmount() {
-  _offOpponentCanvas.apply(this)
-}
-
-function render() {
-  if (this.my) {
-    this.my.canvas.setMode('size', this.state.brush.size)
-    this.my.canvas.setMode('opacity', this.state.brush.opacity / 100)
-    this.my.canvas.setMode('color', this.state.brush.color)
-  }
-  return Template.apply(this)
-}
 
 //============================================================
+
 
 function toggleDrawingMode(mode) {
   this.my.canvas.setDrawingMode(mode)
@@ -52,7 +24,15 @@ function redo() {
   return this.my.canvas.redo()
 }
 
+
 //============================================================
+
+
+var _getGame = suspend.promise(function *() {
+  var game = yield GameAPI.subscribe(this.props.params.gameId)
+
+  return game
+})
 
 function _initMyCanvas() {
   this.my = {
@@ -131,41 +111,82 @@ function _initMyCanvas() {
 
 function _initOpponentCanvas() {
   GameAPI
-    .on(function(result) {
-      var action = result.data
+      .on(function(result) {
+        var action = result.data.action
+        var gameUser = result.data.game_user
 
-      var options = {
-        pathRendered: function(path) {
-          this.opponent.brush.setPosition(path.x, path.y)
-        }.bind(this),
-        before: function(action) {
-          if (action.instrument === 'undo' || action.instrument === 'redo') {
-            return;
-          }
+        var options = {
+          pathRendered: function(path) {
+            this.opponent.brush.setPosition(path.x, path.y)
+          }.bind(this),
+          before: function(action) {
+            if (action.instrument === 'undo' || action.instrument === 'redo') {
+              return;
+            }
 
-          var defer = Q.defer()
-          var path = action.coordsArr[0];
+            var defer = Q.defer()
+            var path = action.coordsArr[0];
 
-          this.opponent.brush.animate({
-            left: path.x,
-            top: path.y
-          }, function() {
-            defer.resolve()
-          })
+            this.opponent.brush.animate({
+              left: path.x,
+              top: path.y
+            }, function() {
+              defer.resolve()
+            })
 
-          return defer.promise
-        }.bind(this)
-      }
+            return defer.promise
+          }.bind(this)
+        }
 
-      this.opponent.canvas.makeAction(action, options)
-    }.bind(this))
+        this.opponent.canvas.makeAction(action, options)
+      }.bind(this))
 }
 
 function _offOpponentCanvas() {
   GameAPI.off()
   GameAPI.unsubscribe(this.props.params.gameId)
 }
+
+
 //============================================================
+
+
+function getInitialState() {
+  return {
+    brush: {}
+  }
+}
+
+var componentDidMount = suspend(function *() {
+  var game = yield _getGame.apply(this)
+  console.log(game)
+
+  _initMyCanvas.apply(this)
+  _initOpponentCanvas.apply(this)
+
+  this.setState(function(prev) {
+    prev.brush.size = Constants.BRUSH_WIDTH_INIT;
+    prev.brush.opacity = Constants.BRUSH_OPACITY_INIT;
+    prev.brush.color = Constants.BRUSH_COLOR_INIT;
+  })
+})
+
+function componentWillUnmount() {
+  _offOpponentCanvas.apply(this)
+}
+
+function render() {
+  if (this.my) {
+    this.my.canvas.setMode('size', this.state.brush.size)
+    this.my.canvas.setMode('opacity', this.state.brush.opacity / 100)
+    this.my.canvas.setMode('color', this.state.brush.color)
+  }
+  return Template.apply(this)
+}
+
+
+//============================================================
+
 
 module.exports = React.createClass({
   undo,

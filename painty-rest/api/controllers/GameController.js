@@ -39,12 +39,12 @@ module.exports = {
         game: gameId,
         game_user: gameUser.id
       })
-
+      
       return gameAction
     })().then(function(gameAction) {
-      Game.message(gameId, gameAction.action, req)
+      Game.message(gameId, gameAction, req)
 
-      res.ok(gameAction.action)
+      res.ok(gameAction)
     }, res.serverError)
   }
 };
