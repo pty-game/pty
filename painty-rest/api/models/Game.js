@@ -20,10 +20,16 @@ module.exports = {
       via: 'game'
     }
   },
-  findWithMinEstimators: Q.async(function *() {
+  findWithMinEstimators: Q.async(function *(finderId) {
     var games = yield Game.find().populate('game_users')
 
-    return _.sortBy(games, function(game) {
+    var filteredGames = _.filter(games, function(game) {
+      return !!!_.find(game.game_users, function(gameUser) {
+        return gameUser.user == finderId
+      })
+    })
+
+    return _.sortBy(filteredGames, function(game) {
       return game.game_users.length
     })[0]
   })

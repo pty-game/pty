@@ -13,15 +13,15 @@ import Template from './game.tpl.jsx'
 
 
 function toggleDrawingMode(mode) {
-  this.my.canvas.setDrawingMode(mode)
+  this.gameUsers[this.myGameUser.id].canvas.setDrawingMode(mode)
 }
 
 function undo() {
-  return this.my.canvas.undo()
+  return this.gameUsers[this.myGameUser.id].canvas.undo()
 }
 
 function redo() {
-  return this.my.canvas.redo()
+  return this.gameUsers[this.myGameUser.id].canvas.redo()
 }
 
 
@@ -34,44 +34,39 @@ var _getGame = suspend.promise(function *() {
   return game
 })
 
-function _initMyCanvas() {
-  this.my = {
-    canvas: Canvas('my-upper', 'my-lower').setMode('instrument', Constants.BRUSH),
-    brush: Cursor('my-brush'),
-    cursor: Cursor('my-cursor'),
-    paintyArea: Mouse('.my.canvas-wrapper .painty-area')
+function _initMy(canvasId, gameUserId) {
+  this.gameUsers[gameUserId] = {
+    canvas: Canvas(canvasId + '-upper', canvasId + '-lower').setMode('instrument', Constants.BRUSH),
+    brush: Cursor(canvasId + '-brush'),
+    cursor: Cursor(canvasId + '-cursor'),
+    paintyArea: Mouse('.' + canvasId + '.canvas-wrapper .painty-area')
   }
 
-  this.opponent = {
-    canvas: Canvas('opponent-upper', 'opponent-lower', false),
-    brush: Cursor('opponent-brush')
-  }
-
-  this.my.paintyArea.onMouse('down', function(coords) {
-    this.my.canvas.startDraw(coords)
+  this.gameUsers[gameUserId].paintyArea.onMouse('down', function(coords) {
+    this.gameUsers[gameUserId].canvas.startDraw(coords)
   }.bind(this))
 
-  this.my.paintyArea.onMouse('move', function(coords) {
-    this.my.cursor.setPosition(coords.x, coords.y)
-    this.my.brush.setPosition(coords.x, coords.y)
-    this.my.canvas.drawing(coords)
+  this.gameUsers[gameUserId].paintyArea.onMouse('move', function(coords) {
+    this.gameUsers[gameUserId].cursor.setPosition(coords.x, coords.y)
+    this.gameUsers[gameUserId].brush.setPosition(coords.x, coords.y)
+    this.gameUsers[gameUserId].canvas.drawing(coords)
   }.bind(this))
 
-  this.my.paintyArea.onMouse('up', function() {
-    this.my.canvas.stopDraw()
+  this.gameUsers[gameUserId].paintyArea.onMouse('up', function() {
+    this.gameUsers[gameUserId].canvas.stopDraw()
   }.bind(this))
 
-  this.my.paintyArea.onMouse('over', function() {
-    this.my.brush.show()
-    this.my.cursor.show()
+  this.gameUsers[gameUserId].paintyArea.onMouse('over', function() {
+    this.gameUsers[gameUserId].brush.show()
+    this.gameUsers[gameUserId].cursor.show()
   }.bind(this))
 
-  this.my.paintyArea.onMouse('out', function() {
-    this.my.brush.hide()
-    this.my.cursor.hide()
+  this.gameUsers[gameUserId].paintyArea.onMouse('out', function() {
+    this.gameUsers[gameUserId].brush.hide()
+    this.gameUsers[gameUserId].cursor.hide()
   }.bind(this))
 
-  this.my.canvas.onChange(function(action) {
+  this.gameUsers[gameUserId].canvas.onChange(function(action) {
     GameAPI.addAction(this.props.params.gameId, action)
   }.bind(this))
 
@@ -109,15 +104,62 @@ function _initMyCanvas() {
   })
 }
 
-function _initOpponentCanvas() {
+function _initOpponent(canvasId, gameUserId) {
+  this.gameUsers[gameUserId] = {
+    canvas: Canvas(canvasId + '-upper', canvasId + '-lower', false),
+    brush: Cursor(canvasId + '-brush')
+  }
+}
+
+function _makeInitActions(gameActions) {
+  gameActions.forEach(function(gameAction) {
+    var action = gameAction.action
+
+    action.time = !action.time ? action.time : 0
+
+    var options = {
+      pathRendered: function(path) {
+        this.gameUsers[gameAction.game_user].brush.setPosition(path.x, path.y)
+      }.bind(this)
+    }
+
+    this.gameUsers[gameAction.game_user].canvas.makeAction(action, options)
+  }.bind(this))
+}
+
+function _initGame(game) {
+  this.gameUsers = {}
+  //this.myGameUser = _.find(game.game_users, {user: $.cookie('userId')})
+  this.myGameUser = _.find(game.game_users, {user: parseInt(window.userId)})
+
+  var nextOpponentCanvasId = this.myGameUser.is_estimator ? 0 : 1
+
+  game.game_users.forEach(function(gameUser) {
+    if (gameUser.is_estimator) return
+
+    if (gameUser.id == this.myGameUser.id) {
+      var canvasId = 0
+      var fn = _initMy
+    } else {
+      canvasId = nextOpponentCanvasId
+      fn = _initOpponent
+
+      nextOpponentCanvasId++
+    }
+
+    fn.call(this, canvasId, gameUser.id)
+  }.bind(this))
+
+  _makeInitActions.call(this, game.game_actions)
+
   GameAPI
       .on(function(result) {
         var action = result.data.action
-        var gameUser = result.data.game_user
+        var gameUserId = result.data.game_user
 
         var options = {
           pathRendered: function(path) {
-            this.opponent.brush.setPosition(path.x, path.y)
+            this.gameUsers[gameUserId].brush.setPosition(path.x, path.y)
           }.bind(this),
           before: function(action) {
             if (action.instrument === 'undo' || action.instrument === 'redo') {
@@ -127,7 +169,7 @@ function _initOpponentCanvas() {
             var defer = Q.defer()
             var path = action.coordsArr[0];
 
-            this.opponent.brush.animate({
+            this.gameUsers[gameUserId].brush.animate({
               left: path.x,
               top: path.y
             }, function() {
@@ -138,7 +180,7 @@ function _initOpponentCanvas() {
           }.bind(this)
         }
 
-        this.opponent.canvas.makeAction(action, options)
+        this.gameUsers[gameUserId].canvas.makeAction(action, options)
       }.bind(this))
 }
 
@@ -158,11 +200,9 @@ function getInitialState() {
 }
 
 var componentDidMount = suspend(function *() {
-  var game = yield _getGame.apply(this)
-  console.log(game)
+  var game = yield _getGame.call(this)
 
-  _initMyCanvas.apply(this)
-  _initOpponentCanvas.apply(this)
+  _initGame.call(this, game)
 
   this.setState(function(prev) {
     prev.brush.size = Constants.BRUSH_WIDTH_INIT;
@@ -172,16 +212,17 @@ var componentDidMount = suspend(function *() {
 })
 
 function componentWillUnmount() {
-  _offOpponentCanvas.apply(this)
+  _offOpponentCanvas.call(this)
 }
 
 function render() {
-  if (this.my) {
-    this.my.canvas.setMode('size', this.state.brush.size)
-    this.my.canvas.setMode('opacity', this.state.brush.opacity / 100)
-    this.my.canvas.setMode('color', this.state.brush.color)
+  if (this.myGameUser && !this.myGameUser.is_estimator) {
+    this.gameUsers[this.myGameUser.id].canvas.setMode('size', this.state.brush.size)
+    this.gameUsers[this.myGameUser.id].canvas.setMode('opacity', this.state.brush.opacity / 100)
+    this.gameUsers[this.myGameUser.id].canvas.setMode('color', this.state.brush.color)
   }
-  return Template.apply(this)
+
+  return Template.call(this)
 }
 
 

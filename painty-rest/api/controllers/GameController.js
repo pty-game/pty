@@ -39,7 +39,7 @@ module.exports = {
         game: gameId,
         game_user: gameUser.id
       })
-      
+
       return gameAction
     })().then(function(gameAction) {
       Game.message(gameId, gameAction, req)

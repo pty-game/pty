@@ -157,7 +157,8 @@ function renderFromState(state, options) {
       this.drawing(state.coordsArr[pathIndex]);
     }
 
-    options.pathRendered(state.coordsArr[pathIndex]);
+    if (options.pathRendered)
+      options.pathRendered(state.coordsArr[pathIndex]);
 
     if (pathIndex === state.coordsArr.length - 1) {
       clearInterval(pathsInterval);

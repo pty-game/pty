@@ -8,21 +8,21 @@ module.exports = function() {
 
   return <div>
     <div>
-      <div className="canvas-wrapper my">
-        <canvas className="canvas upper" width="300" height="300" id="my-upper"></canvas>
-        <canvas className="canvas lower" width="300" height="300" id="my-lower"></canvas>
+      <div className="canvas-wrapper 0">
+        <canvas className="canvas upper" width="300" height="300" id="0-upper"></canvas>
+        <canvas className="canvas lower" width="300" height="300" id="0-lower"></canvas>
         <div className="painty-area"></div>
-        <div className="brush" id="my-brush">
+        <div className="brush" id="0-brush">
           <img src="http://iconizer.net/files/Shimmer_Icons/orig/brush.png" alt=""/>
         </div>
-        <div className="cursor" id="my-cursor">
+        <div className="cursor" id="0-cursor">
           <i style={cursorStyle}></i>
         </div>
       </div>
-      <div className="canvas-wrapper opponent">
-        <canvas className="canvas upper" width="300" height="300" id="opponent-upper"></canvas>
-        <canvas className="canvas lower" width="300" height="300" id="opponent-lower"></canvas>
-        <div className="brush" id="opponent-brush">
+      <div className="canvas-wrapper 1">
+        <canvas className="canvas upper" width="300" height="300" id="1-upper"></canvas>
+        <canvas className="canvas lower" width="300" height="300" id="1-lower"></canvas>
+        <div className="brush" id="1-brush">
           <img src="http://iconizer.net/files/Shimmer_Icons/orig/brush.png" alt=""/>
         </div>
       </div>

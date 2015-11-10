@@ -51,7 +51,7 @@ module.exports = Q.async(function *() {
 
       index--
     } else {
-      var game = yield Game.findWithMinEstimators()
+      var game = yield Game.findWithMinEstimators(gameApplication.user)
 
       if (!game) continue
 
