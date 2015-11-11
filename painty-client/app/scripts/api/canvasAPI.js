@@ -46,18 +46,21 @@ function _makeAction(action, options) {
   }
 
   return beforeActionPromise.then((function() {
-    var actionPromise, defer;
     this.beforeMakeActionProcess = false;
+    var doActionsDelay = options.initAction ? 0 : Constants.DO_ACTIONS_DELAY
+
     if (action.instrument === 'undo' || action.instrument === 'redo') {
-      defer = Q.defer();
+      var defer = Q.defer();
+
       setTimeout((function() {
-        this[action.instrument]();
+        this[action.instrument](options.initAction);
         return defer.resolve();
-      }).bind(this), Constants.DO_ACTIONS_DELAY);
-      actionPromise = defer.promise;
-    } else {
+      }).bind(this), doActionsDelay);
+
+      var actionPromise = defer.promise;
+    } else
       actionPromise = this.renderFromState(action, options);
-    }
+
     return actionPromise.then((function() {
       return this._eventEmitter.emit('actionsQueueChange');
     }).bind(this));
@@ -99,7 +102,7 @@ function setMode(property, mode) {
   return this;
 };
 
-function undo() {
+function undo(preventChangeEvent) {
   if (!this._stateObj.enabled.undo) {
     return;
   }
@@ -108,12 +111,13 @@ function undo() {
   this.renderFromImage(this._stateObj.states[--this._stateObj.index].image);
   this.checkStatesActions();
 
-  return this._changeCallback({
-    instrument: 'undo'
-  });
+  if (!preventChangeEvent)
+    this._changeCallback({
+      instrument: 'undo'
+    });
 };
 
-function redo() {
+function redo(preventChangeEvent) {
   if (!this._stateObj.enabled.redo) {
     return;
   }
@@ -122,9 +126,10 @@ function redo() {
   this.renderFromImage(this._stateObj.states[++this._stateObj.index].image);
   this.checkStatesActions();
 
-  return this._changeCallback({
-    instrument: 'redo'
-  });
+  if (!preventChangeEvent)
+    this._changeCallback({
+      instrument: 'redo'
+    });
 };
 
 function renderFromImage(image) {
@@ -140,7 +145,7 @@ function renderFromState(state, options) {
 
   var defer = Q.defer();
   var pathIndex = 0;
-  var pathsIntervalTime = state.time / state.coordsArr.length;
+  var pathsIntervalTime = options.initAction ? 0 : state.time / state.coordsArr.length;
 
   _.each(state, (function(item, key) {
     if (key === 'coodrsArr') {
@@ -162,7 +167,7 @@ function renderFromState(state, options) {
 
     if (pathIndex === state.coordsArr.length - 1) {
       clearInterval(pathsInterval);
-      this.stopDraw();
+      this.stopDraw(options.initAction);
       return defer.resolve();
     }
 
@@ -323,7 +328,7 @@ function drawing(coords) {
   return this._lastCoords.y = coords.y;
 };
 
-function stopDraw() {
+function stopDraw(preventChangeEvent) {
   if (!this.drawingInProcess) {
     return;
   }
@@ -345,7 +350,8 @@ function stopDraw() {
   image.src = this._lowerCanvasElem[0].toDataURL();
   this._stateObj.states[this._stateObj.index].image = image;
 
-  return this._changeCallback(this._stateObj.states[this._stateObj.index]);
+  if (!preventChangeEvent)
+    this._changeCallback(this._stateObj.states[this._stateObj.index]);
 };
 
 module.exports = function(idUpper, idLower) {
