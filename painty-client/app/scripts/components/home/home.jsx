@@ -15,7 +15,8 @@ function getInitialState() {
 function componentDidMount() {
   GameApplicationAPI
     .on(function (result) {
-      this.history.pushState(null, '/game/' + result.data.gameId)
+      if (result.data.message == 'gameFound')
+      this.history.pushState(null, '/game/' + result.data.payload.gameId)
     }.bind(this))
 }
 

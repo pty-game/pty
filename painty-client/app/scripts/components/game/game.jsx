@@ -157,33 +157,46 @@ function _initGame(game) {
 
   GameAPI
       .on(function(result) {
-        var action = result.data.action
-        var gameUserId = result.data.game_user
+        switch (result.data.message) {
+          case 'actionAdded':
+            var action = result.data.payload.action
+            var gameUserId = result.data.payload.game_user
 
-        var options = {
-          pathRendered: function(path) {
-            this.state.gameUsers[gameUserId].brush.setPosition(path.x, path.y)
-          }.bind(this),
-          before: function(action) {
-            if (action.instrument === 'undo' || action.instrument === 'redo') {
-              return;
+            var options = {
+              pathRendered: function(path) {
+                this.state.gameUsers[gameUserId].brush.setPosition(path.x, path.y)
+              }.bind(this),
+              before: function(action) {
+                if (action.instrument === 'undo' || action.instrument === 'redo') {
+                  return;
+                }
+
+                var defer = Q.defer()
+                var path = action.coordsArr[0];
+
+                this.state.gameUsers[gameUserId].brush.animate({
+                  left: path.x,
+                  top: path.y
+                }, function() {
+                  defer.resolve()
+                })
+
+                return defer.promise
+              }.bind(this)
             }
 
-            var defer = Q.defer()
-            var path = action.coordsArr[0];
+            this.state.gameUsers[gameUserId].canvas.makeAction(action, options)
 
-            this.state.gameUsers[gameUserId].brush.animate({
-              left: path.x,
-              top: path.y
-            }, function() {
-              defer.resolve()
-            })
+            break
+          case 'residueTime':
+            console.log(result)
 
-            return defer.promise
-          }.bind(this)
+            break
+          case 'finishGame':
+            console.log(result)
+
+            break
         }
-
-        this.state.gameUsers[gameUserId].canvas.makeAction(action, options)
       }.bind(this))
 }
 
@@ -209,7 +222,6 @@ var componentDidMount = suspend(function *() {
   try {
     _initGame.call(this, game)
   } catch(e) {
-    console.log(e)
     this.history.pushState(null, '/')
   }
 

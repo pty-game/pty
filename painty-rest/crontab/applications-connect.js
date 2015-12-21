@@ -1,5 +1,6 @@
 var Q = require('q')
 var _ = require('lodash')
+var wsResponses = require('../api/services/wsResponses')
 
 function _findOpponentForPlayer(gameApplication, gameApplications) {
   return _.find(gameApplications, function(gameApplicationSub) {
@@ -23,7 +24,7 @@ module.exports = Q.async(function *() {
 
       if (!gameApplicationSub) continue
 
-      var game = yield Game.create()
+      var game = yield Game.createNew()
 
       yield GameUser.create([
         {
@@ -38,8 +39,10 @@ module.exports = Q.async(function *() {
         }
       ])
 
-      GameApplication.message(gameApplication.id, {gameId: game.id})
-      GameApplication.message(gameApplicationSub.id, {gameId: game.id})
+      var message = wsResponses.message('gameFound', {gameId: game.id})
+
+      GameApplication.message(gameApplication.id, message)
+      GameApplication.message(gameApplicationSub.id, message)
 
       gameApplication.destroy()
       gameApplicationSub.destroy()
@@ -61,7 +64,7 @@ module.exports = Q.async(function *() {
         is_estimator: true
       })
 
-      GameApplication.message(gameApplication.id, {gameId: game.id})
+      GameApplication.message(gameApplication.id, wsResponses.message('gameFound', {gameId: game.id}))
 
       gameApplication.destroy()
     }

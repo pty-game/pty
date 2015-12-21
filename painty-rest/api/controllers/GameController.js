@@ -1,5 +1,5 @@
 var Q = require('q')
-
+var wsResponses = require('../services/wsResponses')
 
 /**
  * GameController
@@ -31,8 +31,11 @@ module.exports = {
 
     Q.async(function *() {
       var gameUser = yield GameUser.findOne({user: userId, game: gameId})
+      var game = yield Game.findOne({id: gameId})
 
       if (!gameUser) throw 'This GameUser is not allowed for this game'
+      if (!game) throw 'This Game is not found'
+      if (game.residueTime <= 0) throw 'This Game is finished'
 
       var gameAction = yield GameAction.create({
         action: req.body,
@@ -42,7 +45,7 @@ module.exports = {
 
       return gameAction
     })().then(function(gameAction) {
-      Game.message(gameId, gameAction, req)
+      Game.message(gameId, wsResponses.message('actionAdded', gameAction), req)
 
       res.ok(gameAction)
     }, res.serverError)
