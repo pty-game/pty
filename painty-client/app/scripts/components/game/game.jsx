@@ -1,4 +1,5 @@
 import React from 'react'
+import Reflux from 'Reflux'
 import Canvas from '../../api/canvasAPI'
 import Cursor from '../../api/cursorAPI'
 import Mouse from '../../api/mouseAPI'
@@ -8,6 +9,8 @@ import Q from 'q'
 import suspend from 'suspend'
 import Template from './game.tpl.jsx'
 import History from 'react-router/lib/History.js'
+import gameHandlers from '../../utils/gameHandlers.js'
+import gameUsersStore from '../../stores/gameUsers.js'
 
 
 //============================================================
@@ -25,6 +28,15 @@ function redo() {
   return this.state.gameUsers[this.state.myGameUser.id].canvas.redo()
 }
 
+function voteFor(playerId) {
+  var action = {
+    instrument: 'estimate',
+    playerId: playerId
+  }
+
+  GameAPI.addAction(this.props.params.gameId, action)
+}
+
 
 //============================================================
 
@@ -35,13 +47,13 @@ var _getGame = suspend.promise(function *() {
   return game
 })
 
-function _initMy(canvasId, gameUserId) {
+function _initMy(gameUserId) {
   this.setState(function(prev) {
     prev.gameUsers[gameUserId] = {
-      canvas: Canvas(canvasId + '-upper', canvasId + '-lower').setMode('instrument', Constants.BRUSH),
-      brush: Cursor(canvasId + '-brush'),
-      cursor: Cursor(canvasId + '-cursor'),
-      paintyArea: Mouse('.' + canvasId + '.canvas-wrapper .painty-area')
+      canvas: Canvas(gameUserId + '-upper', gameUserId + '-lower').setMode('instrument', Constants.BRUSH),
+      brush: Cursor(gameUserId + '-brush'),
+      cursor: Cursor(gameUserId + '-cursor'),
+      paintyArea: Mouse('.' + gameUserId + '.canvas-wrapper .painty-area')
     }
   })
 
@@ -107,11 +119,11 @@ function _initMy(canvasId, gameUserId) {
   })
 }
 
-function _initOpponent(canvasId, gameUserId) {
+function _initOpponent(gameUserId) {
   this.setState(function(prev) {
     prev.gameUsers[gameUserId] = {
-      canvas: Canvas(canvasId + '-upper', canvasId + '-lower', false),
-      brush: Cursor(canvasId + '-brush')
+      canvas: Canvas(gameUserId + '-upper', gameUserId + '-lower', false),
+      brush: Cursor(gameUserId + '-brush')
     }
   })
 }
@@ -130,7 +142,9 @@ function _makeInitActions(gameActions) {
 
 function _initGame(game) {
   //this.state.myGameUser = _.find(game.game_users, {user: $.cookie('userId')})
-  this.state.myGameUser = _.find(game.game_users, {user: parseInt(window.userId)})
+  this.setState(function(prev) {
+    prev.myGameUser = _.find(game.game_users, {user: parseInt(window.userId)})
+  })
 
   if (!this.state.myGameUser)
     throw 'This game is not available'
@@ -140,64 +154,19 @@ function _initGame(game) {
   game.game_users.forEach(function(gameUser) {
     if (gameUser.is_estimator) return
 
-    if (gameUser.id == this.state.myGameUser.id) {
-      var canvasId = 0
+    if (gameUser.id == this.state.myGameUser.id)
       var fn = _initMy
-    } else {
-      canvasId = nextOpponentCanvasId
+    else
       fn = _initOpponent
 
-      nextOpponentCanvasId++
-    }
-
-    fn.call(this, canvasId, gameUser.id)
+    fn.call(this, gameUser.id)
   }.bind(this))
 
   _makeInitActions.call(this, game.game_actions)
 
-  GameAPI
-      .on(function(result) {
-        switch (result.data.message) {
-          case 'actionAdded':
-            var action = result.data.payload.action
-            var gameUserId = result.data.payload.game_user
-
-            var options = {
-              pathRendered: function(path) {
-                this.state.gameUsers[gameUserId].brush.setPosition(path.x, path.y)
-              }.bind(this),
-              before: function(action) {
-                if (action.instrument === 'undo' || action.instrument === 'redo') {
-                  return;
-                }
-
-                var defer = Q.defer()
-                var path = action.coordsArr[0];
-
-                this.state.gameUsers[gameUserId].brush.animate({
-                  left: path.x,
-                  top: path.y
-                }, function() {
-                  defer.resolve()
-                })
-
-                return defer.promise
-              }.bind(this)
-            }
-
-            this.state.gameUsers[gameUserId].canvas.makeAction(action, options)
-
-            break
-          case 'residueTime':
-            console.log(result)
-
-            break
-          case 'finishGame':
-            console.log(result)
-
-            break
-        }
-      }.bind(this))
+  GameAPI.on(function(result) {
+    gameHandlers[result.data.message].call(this, result)
+  }.bind(this))
 }
 
 function _offOpponentCanvas() {
@@ -222,6 +191,7 @@ var componentDidMount = suspend(function *() {
   try {
     _initGame.call(this, game)
   } catch(e) {
+    console.error(e)
     this.history.pushState(null, '/')
   }
 
@@ -242,7 +212,7 @@ function render() {
     this.state.gameUsers[this.state.myGameUser.id].canvas.setMode('opacity', this.state.brush.opacity / 100)
     this.state.gameUsers[this.state.myGameUser.id].canvas.setMode('color', this.state.brush.color)
   }
-
+  console.log(this)
   return Template.call(this)
 }
 
@@ -251,9 +221,13 @@ function render() {
 
 
 module.exports = React.createClass({
-  mixins: [History],
+  mixins: [
+    History,
+    Reflux.connect(gameUsersStore, 'gameUsers')
+  ],
   undo,
   redo,
+  voteFor,
   getInitialState,
   componentDidMount,
   componentWillUnmount,

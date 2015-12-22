@@ -10,7 +10,6 @@ var wsResponses = require('../services/wsResponses')
 */
 
 module.exports = {
-
   attributes: {
     game_actions: {
       collection: 'GameAction',
