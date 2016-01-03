@@ -10,8 +10,11 @@ module.exports = Reflux.createStore({
   onAddItems: function(items) {
     this.updateList(items.concat(this.list));
   },
+  onRemoveAll: function() {
+    this.updateList([]);
+  },
   updateList: function(list){
     this.list = list;
     this.trigger(list);
-  },
+  }
 })

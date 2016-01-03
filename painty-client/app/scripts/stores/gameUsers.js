@@ -19,6 +19,9 @@ module.exports = Reflux.createStore({
 
     this.trigger(this.list)
   },
+  onRemoveAll: function() {
+    this.updateList([]);
+  },
   updateList: function(list){
     this.list = list;
     this.trigger(list);

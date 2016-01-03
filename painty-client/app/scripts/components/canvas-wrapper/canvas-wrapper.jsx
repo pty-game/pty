@@ -103,7 +103,7 @@ function _initOpponent(gameUserId) {
 
 function _makeInitActions(gameActions) {
   gameActions.forEach(function(gameAction) {
-    if (gameAction.gameUser != this.props.gameUser.id)
+    if (gameAction.game_user != this.props.gameUser.id)
       return
 
     var action = gameAction.action
@@ -112,7 +112,7 @@ function _makeInitActions(gameActions) {
       initAction: true
     }
 
-    this.state.canvas.makeAction(action, options)
+    this.props.gameUser.canvas.makeAction(action, options)
   }.bind(this))
 }
 
@@ -142,7 +142,8 @@ function componentDidMount() {
   else
     _initOpponent.call(this, this.props.gameUser.id)
 
-  _makeInitActions(this.props.gameUsersActions)
+  //next tick(storage updated)
+  setTimeout(_makeInitActions.bind(this, this.props.gameUsersActions))
 }
 
 function componentWillUnmount() {

@@ -1,17 +1,12 @@
 import React from 'react'
 import Reflux from 'reflux'
-import Canvas from '../../api/canvasAPI'
-import Cursor from '../../api/cursorAPI'
-import Mouse from '../../api/mouseAPI'
 import GameAPI from '../../api/gameAPI.js'
 import Constants from '../../constants/constants'
 import Q from 'q'
 import suspend from 'suspend'
 import Template from './game.tpl.jsx'
 import History from 'react-router/lib/History.js'
-
 import gameHandlers from '../../utils/gameHandlers.js'
-
 import gameUsersStore from '../../stores/gameUsers.js'
 import gameUsersActions from '../../actions/gameUsers.js'
 import gameUsersActionsStore from '../../stores/gameUsersActions'
@@ -19,28 +14,6 @@ import gameUsersActionsActions from '../../actions/gameUsersActions'
 
 
 //============================================================
-
-
-function toggleDrawingMode(mode) {
-  this.state.gameUsers[this.state.myGameUser.id].canvas.setDrawingMode(mode)
-}
-
-function undo() {
-  return this.state.gameUsers[this.state.myGameUser.id].canvas.undo()
-}
-
-function redo() {
-  return this.state.gameUsers[this.state.myGameUser.id].canvas.redo()
-}
-
-function voteFor(playerId) {
-  var action = {
-    instrument: 'estimate',
-    playerId: playerId
-  }
-
-  GameAPI.addAction(this.props.params.gameId, action)
-}
 
 
 //============================================================
@@ -66,6 +39,9 @@ function _onOpponentCanvas() {
 function _offOpponentCanvas() {
   GameAPI.off()
   GameAPI.unsubscribe(this.props.params.gameId)
+
+  gameUsersActions.removeAll()
+  gameUsersActionsActions.removeAll()
 }
 
 
@@ -73,10 +49,7 @@ function _offOpponentCanvas() {
 
 
 function getInitialState() {
-  return {
-    gameUsers: gameUsersStore.list,
-    gameUsersActions: gameUsersActionsStore.list,
-  }
+  return {}
 }
 
 var componentDidMount = suspend(function *() {
@@ -87,7 +60,7 @@ var componentDidMount = suspend(function *() {
 })
 
 function componentWillUnmount() {
-  _offOpponentCanvas()
+  _offOpponentCanvas.call(this)
 }
 
 function render() {
@@ -104,12 +77,8 @@ module.exports = React.createClass({
     Reflux.connect(gameUsersStore, 'gameUsers'),
     Reflux.connect(gameUsersActionsStore, 'gameUsersActions'),
   ],
-  undo,
-  redo,
-  voteFor,
   getInitialState,
   componentDidMount,
   componentWillUnmount,
-  toggleDrawingMode,
   render
 })
