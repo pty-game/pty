@@ -1,8 +1,8 @@
 import Reflux from 'reflux'
-import GameUsersActions from '../actions/gameUsers.js'
+import GameUsersActionsActions from '../actions/gameUsersActions'
 
 module.exports = Reflux.createStore({
-  listenables: [GameUsersActions],
+  listenables: [GameUsersActionsActions],
   list: [],
   onAddItem: function(item) {
     this.updateList([item].concat(this.list));
@@ -10,17 +10,8 @@ module.exports = Reflux.createStore({
   onAddItems: function(items) {
     this.updateList(items.concat(this.list));
   },
-  onAssignItem: function(id, obj) {
-    var item = _.find(this.list, {id: id})
-
-    if (!item) throw 'item not found'
-
-    _.assign(item, obj)
-
-    this.trigger(this.list)
-  },
   updateList: function(list){
     this.list = list;
     this.trigger(list);
-  }
+  },
 })

@@ -1,6 +1,5 @@
 import React from 'react'
 import {Router, Route, IndexRoute} from 'react-router'
-import createBrowserHistory from 'react-router/node_modules/history/lib/createBrowserHistory'
 
 import Layout from './components/layout/layout.jsx'
 import Home from './components/home/home.jsx'
