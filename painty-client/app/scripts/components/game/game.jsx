@@ -9,7 +9,9 @@ import Q from 'q'
 import suspend from 'suspend'
 import Template from './game.tpl.jsx'
 import History from 'react-router/lib/History.js'
+
 import gameHandlers from '../../utils/gameHandlers.js'
+
 import gameUsersStore from '../../stores/gameUsers.js'
 import gameUsersActions from '../../actions/gameUsers.js'
 import gameUsersActionsStore from '../../stores/gameUsersActions'
@@ -81,7 +83,7 @@ var componentDidMount = suspend(function *() {
   var game = yield _getGame.call(this)
 
   _initGame(game)
-  _onOpponentCanvas()
+  _onOpponentCanvas.call(this)
 })
 
 function componentWillUnmount() {

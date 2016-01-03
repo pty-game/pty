@@ -2,9 +2,9 @@ import React from 'react'
 import {Button, Input} from 'react-bootstrap'
 
 module.exports = function() {
-  if (!this.state.myGameUser)
-    var tools
-  else if (!this.state.myGameUser.is_estimator)
+  if (!this.props.myGameUser)
+    var tools = <div></div>
+  else if (!this.props.myGameUser.is_estimator)
     tools = <div className="tools">
       <div>
         <a onClick={this.undo}>Undo</a>
@@ -29,4 +29,8 @@ module.exports = function() {
              value="1"
              onChange={this.voteFor.bind(this, 1)}/>
     </div>
+
+  return <div>
+    {tools}
+  </div>
 };

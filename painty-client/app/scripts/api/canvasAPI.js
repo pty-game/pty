@@ -102,6 +102,11 @@ function setMode(property, mode) {
   return this;
 };
 
+function getMode(property) {
+  return this._mode[property]
+};
+
+
 function undo(preventChangeEvent) {
   if (!this._stateObj.enabled.undo) {
     return;
@@ -389,6 +394,7 @@ module.exports = function(idUpper, idLower) {
     _makeAction: _makeAction,
     checkStatesActions: checkStatesActions,
     setMode: setMode,
+    getMode: getMode,
     makeAction: makeAction,
     startDraw: startDraw,
     drawing: drawing,

@@ -4,10 +4,10 @@ import {Button, Input} from 'react-bootstrap'
 module.exports = function() {
   var gameUser = this.props.gameUser
 
-  if (this.props.myGameUser && !this.props.gameUser.is_estimator)
+  if (this.props.isMyGameUser && !this.props.gameUser.is_estimator && this.props.gameUser.brush)
     var cursorStyle = {
-      width: this.state.brush.size,
-      height: this.state.brush.size
+      width: this.props.gameUser.brush.size,
+      height: this.props.gameUser.brush.size
     };
   
   if (this.props.myGameUser)
