@@ -4,12 +4,6 @@ import {Button, Input} from 'react-bootstrap'
 module.exports = function() {
   var gameUser = this.props.gameUser
 
-  if (this.props.isMyGameUser && !this.props.gameUser.is_estimator && this.props.gameUser.brush)
-    var cursorStyle = {
-      width: this.props.gameUser.brush.size,
-      height: this.props.gameUser.brush.size
-    };
-  
   if (this.props.myGameUser)
     return <div className={'canvas-wrapper ' + gameUser.id}>
       <canvas className="canvas upper"
@@ -28,7 +22,7 @@ module.exports = function() {
              alt=""/>
       </div>
       <div className="cursor" id={gameUser.id + '-cursor'}>
-        <i style={cursorStyle}></i>
+        <i></i>
       </div>
     </div>
   else
@@ -49,7 +43,7 @@ module.exports = function() {
              alt=""/>
       </div>
       <div className="cursor" id={gameUser.id + '-cursor'}>
-        <i style={cursorStyle}></i>
+        <i></i>
       </div>
     </div>
 };

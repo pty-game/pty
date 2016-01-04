@@ -12,13 +12,14 @@ import gameUsersActions from '../../actions/gameUsers'
 
 function _initMy(gameUserId) {
   var obj = {
-    canvas: Canvas(gameUserId + '-upper', gameUserId + '-lower').setMode('instrument', Constants.BRUSH),
-    brush: _.assign(Cursor(gameUserId + '-brush'), {
-      size: Constants.BRUSH_WIDTH_INIT,
-      opacity: Constants.BRUSH_OPACITY_INIT,
-      color: Constants.BRUSH_COLOR_INIT
-    }),
-    cursor: Cursor(gameUserId + '-cursor'),
+    canvas: Canvas(gameUserId + '-upper', gameUserId + '-lower')
+      .setMode('instrument', Constants.BRUSH)
+      .setMode('size', Constants.BRUSH_WIDTH_INIT)
+      .setMode('color', Constants.BRUSH_COLOR_INIT)
+      .setMode('opacity', Constants.BRUSH_OPACITY_INIT),
+    brush: Cursor(gameUserId + '-brush'),
+    cursor: Cursor(gameUserId + '-cursor')
+      .setSize(Constants.BRUSH_WIDTH_INIT),
     paintyArea: Mouse('.' + gameUserId + '.canvas-wrapper .painty-area')
   }
 
@@ -60,11 +61,8 @@ function _initMyTools() {
     value: Constants.BRUSH_WIDTH_INIT,
     step: Constants.BRUSH_WIDTH_STEP,
     slide: function(e, ui) {
-      var brush = _.cloneDeep(this.props.gameUser.brush)
-
-      brush.size = ui.value
-
-      gameUsersActions.assignItem(this.props.gameUser.id, {brush: brush})
+      this.props.gameUser.canvas.setMode('size', ui.value)
+      this.props.gameUser.cursor.setSize(ui.value)
     }.bind(this)
   })
 
@@ -74,22 +72,14 @@ function _initMyTools() {
     value: Constants.BRUSH_OPACITY_INIT,
     step: Constants.BRUSH_OPACITY_STEP,
     slide: function(e, ui) {
-      var brush = _.cloneDeep(this.props.gameUser.brush)
-
-      brush.opacity = ui.value
-
-      gameUsersActions.assignItem(this.props.gameUser.id, {brush: brush})
+      this.props.gameUser.canvas.setMode('opacity',  ui.value / 100)
     }.bind(this)
   })
 
   $('#brush-color').minicolors({
     defaultValue: Constants.BRUSH_COLOR_INIT,
     change: function(color) {
-      var brush = _.cloneDeep(this.props.gameUser.brush)
-
-      brush.color = color
-
-      gameUsersActions.assignItem(this.props.gameUser.id, {brush: brush})
+      this.props.gameUser.canvas.setMode('color', color)
     }.bind(this)
   })
 }
@@ -119,12 +109,6 @@ function _makeInitActions(gameActions) {
 //====================================================
 
 function render() {
-  if (this.props.isMyGameUser && !this.props.gameUser.is_estimator && this.props.gameUser.canvas) {
-    this.props.gameUser.canvas.setMode('size', this.props.gameUser.brush.size)
-    this.props.gameUser.canvas.setMode('opacity', this.props.gameUser.brush.opacity / 100)
-    this.props.gameUser.canvas.setMode('color', this.props.gameUser.brush.color)
-  }
-
   return Template.apply(this);
 }
 
