@@ -54,36 +54,6 @@ function _initMy(gameUserId) {
   gameUsersActions.assignItem(gameUserId, obj)
 }
 
-function _initMyTools() {
-  $('#brush-width').slider({
-    min: Constants.BRUSH_WIDTH_MIN,
-    max: Constants.BRUSH_WIDTH_MAX,
-    value: Constants.BRUSH_WIDTH_INIT,
-    step: Constants.BRUSH_WIDTH_STEP,
-    slide: function(e, ui) {
-      this.props.gameUser.canvas.setMode('size', ui.value)
-      this.props.gameUser.cursor.setSize(ui.value)
-    }.bind(this)
-  })
-
-  $('#brush-opacity').slider({
-    min: Constants.BRUSH_OPACITY_MIN,
-    max: Constants.BRUSH_OPACITY_MAX,
-    value: Constants.BRUSH_OPACITY_INIT,
-    step: Constants.BRUSH_OPACITY_STEP,
-    slide: function(e, ui) {
-      this.props.gameUser.canvas.setMode('opacity',  ui.value / 100)
-    }.bind(this)
-  })
-
-  $('#brush-color').minicolors({
-    defaultValue: Constants.BRUSH_COLOR_INIT,
-    change: function(color) {
-      this.props.gameUser.canvas.setMode('color', color)
-    }.bind(this)
-  })
-}
-
 function _initOpponent(gameUserId) {
   gameUsersActions.assignItem(gameUserId, {
     canvas: Canvas(gameUserId + '-upper', gameUserId + '-lower', false),
@@ -119,10 +89,8 @@ function getInitialState() {
 }
 
 function componentDidMount() {
-  if (this.props.isMyGameUser) {
+  if (this.props.isMyGameUser)
     _initMy.call(this, this.props.gameUser.id)
-    _initMyTools.call(this)
-  }
   else
     _initOpponent.call(this, this.props.gameUser.id)
 

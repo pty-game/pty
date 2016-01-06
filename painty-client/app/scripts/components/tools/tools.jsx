@@ -7,6 +7,39 @@ import Template from './tools.tpl.jsx'
 import History from 'react-router/lib/History.js'
 import GameAPI from '../../api/gameAPI.js'
 
+
+function _initMyTools() {
+  $('#brush-width').slider({
+    min: Constants.BRUSH_WIDTH_MIN,
+    max: Constants.BRUSH_WIDTH_MAX,
+    value: Constants.BRUSH_WIDTH_INIT,
+    step: Constants.BRUSH_WIDTH_STEP,
+    slide: function(e, ui) {
+      this.props.myGameUser.canvas.setMode('size', ui.value)
+      this.props.myGameUser.cursor.setSize(ui.value)
+    }.bind(this)
+  })
+
+  $('#brush-opacity').slider({
+    min: Constants.BRUSH_OPACITY_MIN,
+    max: Constants.BRUSH_OPACITY_MAX,
+    value: Constants.BRUSH_OPACITY_INIT,
+    step: Constants.BRUSH_OPACITY_STEP,
+    slide: function(e, ui) {
+      this.props.myGameUser.canvas.setMode('opacity',  ui.value / 100)
+    }.bind(this)
+  })
+
+  $('#brush-color').minicolors({
+    defaultValue: Constants.BRUSH_COLOR_INIT,
+    change: function(color) {
+      this.props.myGameUser.canvas.setMode('color', color)
+    }.bind(this)
+  })
+}
+
+//====================================================
+
 function toggleDrawingMode(mode) {
   var myGameUser = _.find(this.state.gameUsers, {user: parseInt(window.userId)})
   myGameUser.canvas.setDrawingMode(mode)
@@ -44,6 +77,8 @@ function getInitialState() {
 }
 
 function componentDidMount() {
+  if (!this.props.myGameUser.is_estimator)
+    _initMyTools.call(this)
 }
 
 function componentWillUnmount() {
