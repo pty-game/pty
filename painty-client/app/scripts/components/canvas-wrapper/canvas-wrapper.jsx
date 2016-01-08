@@ -10,6 +10,29 @@ import suspend from 'suspend'
 import Template from './canvas-wrapper.tpl.jsx'
 import gameUsersActions from '../../actions/gameUsers'
 
+function render() {
+  return Template.call(this);
+}
+
+function getInitialState() {
+  return {}
+}
+
+function componentDidMount() {
+  if (this.props.isMyGameUser)
+    this._initMy(this.props.gameUser.id)
+  else
+    this._initOpponent(this.props.gameUser.id)
+
+  //next tick(storage updated)
+  setTimeout(_makeInitActions.bind(this, this.props.gameUsersActions))
+}
+
+function componentWillUnmount() {
+}
+
+//====================================================
+
 function _initMy(gameUserId) {
   var obj = {
     canvas: Canvas(gameUserId + '-upper', gameUserId + '-lower')
@@ -78,35 +101,15 @@ function _makeInitActions(gameActions) {
 
 //====================================================
 
-function render() {
-  return Template.apply(this);
-}
-
-function getInitialState() {
-  var obj = {}
-
-  return obj
-}
-
-function componentDidMount() {
-  if (this.props.isMyGameUser)
-    _initMy.call(this, this.props.gameUser.id)
-  else
-    _initOpponent.call(this, this.props.gameUser.id)
-
-  //next tick(storage updated)
-  setTimeout(_makeInitActions.bind(this, this.props.gameUsersActions))
-}
-
-function componentWillUnmount() {
-}
-
-//====================================================
-
-module.exports = React.createClass({
+var obj = {
   mixins: [],
   render,
   getInitialState,
   componentDidMount,
   componentWillUnmount,
-});
+  _initMy,
+  _initOpponent,
+  _makeInitActions,
+}
+
+module.exports = React.createClass(obj)

@@ -5,7 +5,7 @@ import GameAPI from '../../api/gameAPI.js'
 import History from 'react-router/lib/History.js'
 
 function render() {
-  return Template.apply(this);
+  return Template.call(this);
 }
 
 function getInitialState() {
@@ -14,9 +14,9 @@ function getInitialState() {
 
 function componentDidMount() {
   GameApplicationAPI
-    .on(function (result) {
+    .on(function(result) {
       if (result.data.message == 'gameFound')
-      this.history.pushState(null, '/game/' + result.data.payload.gameId)
+        this.history.pushState(null, '/game/' + result.data.payload.gameId)
     }.bind(this))
 }
 
@@ -37,11 +37,12 @@ function createGameApplication() {
 
 //====================================================
 
-module.exports = React.createClass({
+var obj = {
   mixins: [History],
   render,
-  getInitialState,
   componentDidMount,
   componentWillUnmount,
-  createGameApplication
-});
+  createGameApplication,
+}
+
+module.exports = React.createClass(obj);

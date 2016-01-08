@@ -7,6 +7,51 @@ import Template from './tools.tpl.jsx'
 import History from 'react-router/lib/History.js'
 import GameAPI from '../../api/gameAPI.js'
 
+function render() {
+  return Template.apply(this);
+}
+
+function getInitialState() {
+  var obj = {}
+
+  return obj
+}
+
+function componentDidMount() {
+  if (!this.props.myGameUser.is_estimator)
+    this._initMyTools()
+}
+
+function componentWillUnmount() {
+}
+
+//====================================================
+
+function toggleDrawingMode(mode) {
+  var myGameUser = _.find(this.state.gameUsers, {user: parseInt(window.userId)})
+  myGameUser.canvas.setDrawingMode(mode)
+}
+
+function undo() {
+  var myGameUser = _.find(this.props.gameUsers, {user: parseInt(window.userId)})
+  myGameUser.canvas.undo()
+}
+
+function redo() {
+  var myGameUser = _.find(this.props.gameUsers, {user: parseInt(window.userId)})
+  myGameUser.canvas.redo()
+}
+
+function voteFor(playerId) {
+  var action = {
+    instrument: 'estimate',
+    playerId: playerId
+  }
+
+  GameAPI.addAction(this.props.params.gameId, action)
+}
+
+//====================================================
 
 function _initMyTools() {
   $('#brush-width').slider({
@@ -40,53 +85,7 @@ function _initMyTools() {
 
 //====================================================
 
-function toggleDrawingMode(mode) {
-  var myGameUser = _.find(this.state.gameUsers, {user: parseInt(window.userId)})
-  myGameUser.canvas.setDrawingMode(mode)
-}
-
-function undo() {
-  var myGameUser = _.find(this.props.gameUsers, {user: parseInt(window.userId)})
-  myGameUser.canvas.undo()
-}
-
-function redo() {
-  var myGameUser = _.find(this.props.gameUsers, {user: parseInt(window.userId)})
-  myGameUser.canvas.redo()
-}
-
-function voteFor(playerId) {
-  var action = {
-    instrument: 'estimate',
-    playerId: playerId
-  }
-
-  GameAPI.addAction(this.props.params.gameId, action)
-}
-
-//====================================================
-
-function render() {
-  return Template.apply(this);
-}
-
-function getInitialState() {
-  var obj = {}
-
-  return obj
-}
-
-function componentDidMount() {
-  if (!this.props.myGameUser.is_estimator)
-    _initMyTools.call(this)
-}
-
-function componentWillUnmount() {
-}
-
-//====================================================
-
-module.exports = React.createClass({
+var obj = {
   mixins: [History],
   render,
   getInitialState,
@@ -96,4 +95,7 @@ module.exports = React.createClass({
   undo,
   redo,
   voteFor,
-});
+  _initMyTools
+}
+
+module.exports = React.createClass(obj)

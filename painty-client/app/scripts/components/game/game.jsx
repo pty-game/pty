@@ -16,9 +16,6 @@ import gameUsersActionsActions from '../../actions/gameUsersActions'
 //============================================================
 
 
-//============================================================
-
-
 var _getGame = suspend.promise(function *() {
   var game = yield GameAPI.subscribe(this.props.params.gameId)
 
@@ -53,14 +50,14 @@ function getInitialState() {
 }
 
 var componentDidMount = suspend(function *() {
-  var game = yield _getGame.call(this)
+  var game = yield this._getGame()
 
-  _initGame(game)
-  _onOpponentCanvas.call(this)
+  this._initGame(game)
+  this._onOpponentCanvas()
 })
 
 function componentWillUnmount() {
-  _offOpponentCanvas.call(this)
+  this._offOpponentCanvas()
 }
 
 function render() {
@@ -71,7 +68,11 @@ function render() {
 //============================================================
 
 
-module.exports = React.createClass({
+var obj = {
+  _getGame,
+  _initGame,
+  _onOpponentCanvas,
+  _offOpponentCanvas,
   mixins: [
     History,
     Reflux.connect(gameUsersStore, 'gameUsers'),
@@ -81,4 +82,6 @@ module.exports = React.createClass({
   componentDidMount,
   componentWillUnmount,
   render
-})
+}
+
+module.exports = React.createClass(obj)
