@@ -24,8 +24,7 @@ function componentDidMount() {
   else
     this._initOpponent(this.props.gameUser.id)
 
-  //next tick(storage updated)
-  setTimeout(_makeInitActions.bind(this, this.props.gameUsersActions))
+  _makeInitActions.call(this, this.props.gameUsersActions)
 }
 
 function componentWillUnmount() {
@@ -74,11 +73,11 @@ function _initMy(gameUserId) {
     GameAPI.addAction(this.props.gameUser.game, action)
   }.bind(this))
 
-  gameUsersActions.assignItem(gameUserId, obj)
+  _.assign(this.props.gameUser, obj)
 }
 
 function _initOpponent(gameUserId) {
-  gameUsersActions.assignItem(gameUserId, {
+  _.assign(this.props.gameUser, {
     canvas: Canvas(gameUserId + '-upper', gameUserId + '-lower', false),
     brush: Cursor(gameUserId + '-brush')
   })

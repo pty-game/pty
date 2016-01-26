@@ -2,7 +2,7 @@ import Reflux from 'reflux'
 import GameUsersActionsActions from '../actions/gameUsersActions'
 
 module.exports = Reflux.createStore({
-  listenables: [GameUsersActionsActions],
+  listenables: GameUsersActionsActions,
   list: [],
   onAddItem: function(item) {
     this.updateList([item].concat(this.list));
