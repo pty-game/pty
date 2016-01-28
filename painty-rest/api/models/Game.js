@@ -19,10 +19,32 @@ module.exports = {
       collection: 'GameUser',
       via: 'game'
     },
-    residueTime: {
+    residue_time: {
       type: 'integer',
       defaultsTo: sails.config.constants.GAME_DURATION
-    }
+    },
+    getGameWinnerGameUserId: Q.async(function *() {
+      if (game.residue_time) throw 'This game does not finished yet'
+
+      var gameActions = yield GameActions
+        .find()
+        .populate('game_user')
+
+      var estimatorsGameActions = _.filter(gameActions, ['game_user.is_estimator', true])
+      estimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'game_user.id')
+
+      var result = _.groupBy(estimatorsGameActions, 'action.playerId')
+
+      result = _.map(result, function(group, playerId) {
+        return {playerId: group.length}
+      })
+
+      result = _.max(result, function(obj) {
+        return obj[_.keys(obj)[0]]
+      })
+
+      return result = _.keys(obj)[0]
+    })
   },
   findWithMinEstimators: Q.async(function *(finderId) {
     var games = yield Game.find().populate('game_users')
@@ -30,7 +52,7 @@ module.exports = {
     var filteredGames = _.filter(games, function(game) {
       return !(_.find(game.game_users, function(gameUser) {
         return gameUser.user == finderId
-      }) || game.residueTime <= sails.config.constants.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH)
+      }) || game.residue_time <= sails.config.constants.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH)
     })
 
     return _.sortBy(filteredGames, function(game) {
@@ -41,18 +63,20 @@ module.exports = {
     var game = yield Game.create()
 
     var gameTimeInterval = setInterval(Q.async(function *() {
-      game.residueTime--
+      game.residue_time--
 
-      game.save(function() {
-        if (game.residueTime <= 0) {
+      game.save(Q.async(function() {
+        if (game.residue_time <= 0) {
           clearInterval(gameTimeInterval)
 
-          var message = wsResponses.message('finishGame')
+          var gameWinnerGameUserId = yield game.getGameWinnerGameUserId()
+
+          var message = wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId})
         } else
-          message = wsResponses.message('residueTime', {residueTime: game.residueTime})
+          message = wsResponses.message('residueTime', {residue_time: game.residue_time})
 
         Game.message(game.id, message)
-      })
+      }))
     }), 1000)
 
     return game

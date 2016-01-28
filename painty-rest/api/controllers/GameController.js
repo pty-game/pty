@@ -35,7 +35,7 @@ module.exports = {
 
       if (!gameUser) throw 'This GameUser is not allowed for this game'
       if (!game) throw 'This Game is not found'
-      if (game.residueTime <= 0) throw 'This Game is finished'
+      if (game.residue_time <= 0) throw 'This Game is finished'
 
       var gameAction = yield GameAction.create({
         action: req.body,
