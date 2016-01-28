@@ -39,6 +39,7 @@ module.exports = {
     src: [
       src + '/scripts/libs/sails.io.js',
       'bower_components/*',
+      'bower_components/lodash/lodash.js',
       '!bower_components/bootstrap-sass',
     ],
     dest: dest + '/scripts'

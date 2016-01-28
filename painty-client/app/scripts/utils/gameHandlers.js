@@ -1,34 +1,43 @@
 import Q from 'q'
+import gameUsersActionsActions from '../actions/gameUsersActions.js'
 
 function actionAdded(result) {
+  console.log(result.data.payload)
+
   var action = result.data.payload.action
   var gameUserId = result.data.payload.game_user
   var gameUser = _.find(this.state.gameUsers, {id: gameUserId})
 
-  var options = {
-    pathRendered: function(path) {
-      gameUser.brush.setPosition(path.x, path.y)
-    }.bind(this),
-    before: function(action) {
-      if (action.instrument === 'undo' || action.instrument === 'redo') {
-        return;
-      }
+  gameUsersActionsActions.addItem(result.data.payload)
 
-      var defer = Q.defer()
-      var path = action.coordsArr[0];
+  if (action.instrument != 'estimate') {
+    var options = {
+      pathRendered: function(path) {
+        gameUser.brush.setPosition(path.x, path.y)
+      }.bind(this),
+      before: function(action) {
+        if (action.instrument === 'undo' || action.instrument === 'redo') {
+          return;
+        }
 
-      gameUser.brush.animate({
-        left: path.x,
-        top: path.y
-      }, function() {
-        defer.resolve()
-      })
+        var defer = Q.defer()
+        var path = action.coordsArr[0];
 
-      return defer.promise
-    }.bind(this)
+        gameUser.brush.animate({
+          left: path.x,
+          top: path.y
+        }, function() {
+          defer.resolve()
+        })
+
+        return defer.promise
+      }.bind(this)
+    }
+
+    gameUser.canvas.makeAction(action, options)
+  } else {
+
   }
-
-  gameUser.canvas.makeAction(action, options)
 }
 
 function residueTime(result) {

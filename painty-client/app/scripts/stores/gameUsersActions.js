@@ -1,19 +1,26 @@
 import Reflux from 'reflux'
 import GameUsersActionsActions from '../actions/gameUsersActions'
+import GameAPI from '../api/gameAPI.js'
 
 module.exports = Reflux.createStore({
   listenables: GameUsersActionsActions,
   list: [],
-  onAddItem: function(item) {
-    this.updateList([item].concat(this.list));
+  onAddAction(gameId, action) {
+    GameAPI.addAction(gameId, action)
+      .then(function(response) {
+        this.onAddItem(response)
+      }.bind(this))
   },
-  onAddItems: function(items) {
-    this.updateList(items.concat(this.list));
+  onAddItem(item) {
+    this.updateList(this.list.concat([item]));
   },
-  onRemoveAll: function() {
+  onAddItems(items) {
+    this.updateList(this.list.concat(items));
+  },
+  onRemoveAll() {
     this.updateList([]);
   },
-  updateList: function(list){
+  updateList(list){
     this.list = list;
     this.trigger(list);
   }

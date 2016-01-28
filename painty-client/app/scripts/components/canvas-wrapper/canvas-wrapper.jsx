@@ -3,12 +3,12 @@ import Reflux from 'reflux'
 import Canvas from '../../api/canvasAPI'
 import Cursor from '../../api/cursorAPI'
 import Mouse from '../../api/mouseAPI'
-import GameAPI from '../../api/gameAPI.js'
 import Constants from '../../constants/constants'
 import Q from 'q'
 import suspend from 'suspend'
 import Template from './canvas-wrapper.tpl.jsx'
-import gameUsersActions from '../../actions/gameUsers'
+import gameUsersActions from '../../actions/gameUsersActions.js'
+import gameUsersActionsActions from '../../actions/gameUsersActions.js'
 
 function render() {
   return Template.call(this);
@@ -24,7 +24,7 @@ function componentDidMount() {
   else
     this._initOpponent(this.props.gameUser.id)
 
-  _makeInitActions.call(this, this.props.gameUsersActions)
+  this._makeInitActions(this.props.gameUsersActions)
 }
 
 function componentWillUnmount() {
@@ -70,7 +70,7 @@ function _initMy(gameUserId) {
   }.bind(this))
 
   obj.canvas.onChange(function(action) {
-    GameAPI.addAction(this.props.gameUser.game, action)
+    gameUsersActionsActions.addAction(this.props.gameUser.game, action)
   }.bind(this))
 
   _.assign(this.props.gameUser, obj)

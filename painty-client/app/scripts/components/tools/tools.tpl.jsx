@@ -15,7 +15,9 @@ module.exports = function() {
       <input class="" id="brush-color"/>
     </div>
   else if (this.props.myGameUser.is_estimator)
-    tools = _.map(this.props.gameUsers, function(gameUser) {
+    var players = _.filter(this.props.gameUsers, {is_estimator: false})
+
+    tools = _.map(players, function(gameUser) {
       return <Input name="voteFor"
                type="radio"
                label={'Vote to player ' + gameUser.id}

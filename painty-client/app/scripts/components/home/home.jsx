@@ -1,7 +1,6 @@
 import React from 'react'
 import Template from './home.tpl.jsx'
 import GameApplicationAPI from '../../api/gameApplicationAPI.js'
-import GameAPI from '../../api/gameAPI.js'
 import History from 'react-router/lib/History.js'
 
 function render() {

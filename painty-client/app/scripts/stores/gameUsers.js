@@ -5,10 +5,10 @@ module.exports = Reflux.createStore({
   listenables: [GameUsersActions],
   list: [],
   onAddItem: function(item) {
-    this.updateList([item].concat(this.list));
+    this.updateList(this.list.concat([item]));
   },
   onAddItems: function(items) {
-    this.updateList(items.concat(this.list));
+    this.updateList(this.list.concat(items));
   },
   onAssignItem: function(id, obj) {
     var item = _.find(this.list, {id: id})

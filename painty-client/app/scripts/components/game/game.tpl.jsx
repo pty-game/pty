@@ -28,7 +28,8 @@ module.exports = function() {
     </div>
     <Tools gameUsers={this.state.gameUsers}
            myGameUser={myGameUser}
-           params={this.props.params}></Tools>
+           params={this.props.params}>
+    </Tools>
   </div>
 };
 

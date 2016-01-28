@@ -5,7 +5,7 @@ import Q from 'q'
 import suspend from 'suspend'
 import Template from './tools.tpl.jsx'
 import History from 'react-router/lib/History.js'
-import GameAPI from '../../api/gameAPI.js'
+import gameUsersActionsActions from '../../actions/gameUsersActions.js'
 
 function render() {
   return Template.apply(this);
@@ -48,7 +48,7 @@ function voteFor(playerId) {
     playerId: playerId
   }
 
-  GameAPI.addAction(this.props.params.gameId, action)
+  gameUsersActionsActions.addAction(this.props.params.gameId, action)
 }
 
 //====================================================
