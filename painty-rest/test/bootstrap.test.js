@@ -1,7 +1,9 @@
+import 'babel-polyfill'
+
 var Sails = require('sails'), sails;
 
 before(function(done) {
-  this.timeout(20000)
+  this.timeout(30000)
   Sails.lift({
     // configuration for testing purposes
     environment: 'test'

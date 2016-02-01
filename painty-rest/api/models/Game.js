@@ -24,26 +24,39 @@ module.exports = {
       defaultsTo: sails.config.constants.GAME_DURATION
     },
     getGameWinnerGameUserId: Q.async(function *() {
-      if (game.residue_time) throw 'This game does not finished yet'
+      if (this.residue_time) throw 'This game does not finished yet'
 
-      var gameActions = yield GameActions
-        .find()
+      var gameActions = yield GameAction
+        .find({game: this.id})
         .populate('game_user')
 
-      var estimatorsGameActions = _.filter(gameActions, ['game_user.is_estimator', true])
+      var estimatorsGameActions = _.filter(gameActions, function(estimatorsGameAction) {
+        return estimatorsGameAction.game_user.is_estimator
+      })
+
       estimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'game_user.id')
 
       var result = _.groupBy(estimatorsGameActions, 'action.playerId')
 
       result = _.map(result, function(group, playerId) {
-        return {playerId: group.length}
+        var obj = {}
+
+        obj[playerId] = group.length
+
+        return obj
       })
+
+      var checkNonWinner = _.uniqBy(result, function(obj) {
+        return obj[_.keys(obj)[0]]
+      }).length == 1 && result.length != 1
+
+      if (checkNonWinner) return null
 
       result = _.max(result, function(obj) {
         return obj[_.keys(obj)[0]]
       })
 
-      return result = _.keys(obj)[0]
+      return parseInt(_.keys(result)[0])
     })
   },
   findWithMinEstimators: Q.async(function *(finderId) {
@@ -69,13 +82,15 @@ module.exports = {
         if (game.residue_time <= 0) {
           clearInterval(gameTimeInterval)
 
-          var gameWinnerGameUserId = yield game.getGameWinnerGameUserId()
-
-          var message = wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId})
-        } else
+          game.getGameWinnerGameUserId().then(function(gameWinnerGameUserId) {
+            var message = wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId})
+            Game.message(game.id, message)
+          })
+        } else {
           message = wsResponses.message('residueTime', {residue_time: game.residue_time})
 
-        Game.message(game.id, message)
+          Game.message(game.id, message)
+        }
       }))
     }), 1000)
 

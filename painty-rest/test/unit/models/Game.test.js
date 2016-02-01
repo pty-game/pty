@@ -4,6 +4,7 @@ var assert = require('chai').assert
 describe('GameModle', function() {
   this.timeout(20000)
 
+/*
   var testIteration = Q.async(function *(testObj, message) {
     var games = yield Game
       .find()
@@ -139,7 +140,115 @@ describe('GameModle', function() {
       assert.equal(gameApplications[0].user, 6)
     }));
   });
+*/
 
+  describe('#getGameWinnerGameUserId()', function() {
+    var game
+
+    before(Q.async(function *() {
+      var gameObj = {
+        id: 3,
+        residue_time: 0,
+      }
+
+      var gameUsersArr = [
+        {
+          id: 1,
+          user: 1,
+          is_estimator: false,
+          game: 3
+        },
+        {
+          id: 2,
+          user: 2,
+          is_estimator: false,
+          game: 3
+        },
+        {
+          id: 3,
+          user: 3,
+          is_estimator: true,
+          game: 3
+        },
+        {
+          id: 4,
+          user: 4,
+          is_estimator: true,
+          game: 3
+        }
+      ]
+
+      game = yield Game.create(gameObj)
+
+      yield GameUser.create(gameUsersArr)
+    }))
+
+    it('should return winner 1', Q.async(function *() {
+      var gameActionsArr = [
+        {
+          id: 1,
+          game_user: 3,
+          action: {
+            instrument: 'estimate',
+            playerId: 1
+          },
+          game: 3
+        }
+      ]
+
+      var gameActions = yield GameAction.create(gameActionsArr)
+
+      var gameWinnerGameUserId = yield game.getGameWinnerGameUserId()
+
+      assert.equal(gameWinnerGameUserId, 1)
+    }))
+
+    it('should return winner null', Q.async(function *() {
+      var gameActionsArr = [
+        {
+          id: 2,
+          game_user: 1,
+          action: {
+            instrument: 'brush',
+            ololo: 'awdwad'
+          },
+          game: 3
+        },
+        {
+          id: 3,
+          game_user: 4,
+          action: {
+            instrument: 'estimate',
+            playerId: 2
+          },
+          game: 3
+        },
+        {
+          id: 4,
+          game_user: 4,
+          action: {
+            instrument: 'estimate',
+            playerId: 2
+          },
+          game: 3
+        },
+        {
+          id: 5,
+          game_user: 2,
+          action: {
+            instrument: 'brush',
+            ololo: 'awdwad'
+          },
+          game: 3
+        },
+      ]
+
+      var gameActions = yield GameAction.create(gameActionsArr)
+      var gameWinnerGameUserId = yield game.getGameWinnerGameUserId()
+
+      assert.equal(gameWinnerGameUserId, null)
+    }))
+  })
 
 
   after(Q.async(function *() {
