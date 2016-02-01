@@ -28,17 +28,17 @@ function componentWillUnmount() {
 //====================================================
 
 function toggleDrawingMode(mode) {
-  var myGameUser = _.find(this.state.gameUsers, {user: parseInt(window.userId)})
+  var myGameUser = _.find(this.state.gameUsers, {user: parseInt($.cookie('userId'))})
   myGameUser.canvas.setDrawingMode(mode)
 }
 
 function undo() {
-  var myGameUser = _.find(this.props.gameUsers, {user: parseInt(window.userId)})
+  var myGameUser = _.find(this.props.gameUsers, {user: parseInt($.cookie('userId'))})
   myGameUser.canvas.undo()
 }
 
 function redo() {
-  var myGameUser = _.find(this.props.gameUsers, {user: parseInt(window.userId)})
+  var myGameUser = _.find(this.props.gameUsers, {user: parseInt($.cookie('userId'))})
   myGameUser.canvas.redo()
 }
 

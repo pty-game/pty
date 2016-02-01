@@ -1,7 +1,6 @@
 function _getDefaultHeaders() {
   return {
-    //userId: $.cookie('userId')
-    userId: window.userId
+    userId: $.cookie('userId')
   }
 }
 

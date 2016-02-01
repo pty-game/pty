@@ -26,8 +26,7 @@ function componentWillUnmount() {
 //====================================================
 
 function createGameApplication() {
-  //$.cookie('userId', this.refs.userId.getValue())
-  window.userId = this.refs.userId.getValue()
+  $.cookie('userId', this.refs.userId.getValue())
 
   GameApplicationAPI.create({
     is_estimator: this.refs.isEstimator.getChecked()

@@ -6,11 +6,10 @@ import {Input} from 'react-bootstrap'
 module.exports = function() {
   if (!this.state.gameUsers || !this.state.gameUsersActions) return <div></div>
 
-  var myGameUser = _.find(this.state.gameUsers, {user: parseInt(window.userId)})
-  //this.state.myGameUser = _.find(game.game_users, {user: parseInt(window.userId)})
+  var myGameUser = _.find(this.state.gameUsers, {user: parseInt($.cookie('userId'))})
 
   var canvases = _.map(this.state.gameUsers, function(gameUserObj) {
-    var isMyGameUser = gameUserObj.user == parseInt(window.userId)
+    var isMyGameUser = gameUserObj.user == parseInt($.cookie('userId'))
 
     if (gameUserObj.is_estimator) return
 
