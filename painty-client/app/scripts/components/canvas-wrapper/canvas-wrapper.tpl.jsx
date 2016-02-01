@@ -14,7 +14,7 @@ module.exports = function() {
   var estimatorsActions = getEstimatorsActions(this.props.gameUsersActions)
 
   var votes = _.filter(estimatorsActions, function(gameUserAction) {
-    return gameUserAction.action.playerId == gameUser.id
+    return gameUserAction.action.gameUserId == gameUser.id
   })
 
   return <div>

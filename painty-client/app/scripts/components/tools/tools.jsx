@@ -42,10 +42,10 @@ function redo() {
   myGameUser.canvas.redo()
 }
 
-function voteFor(playerId) {
+function voteFor(gameUserId) {
   var action = {
     instrument: 'estimate',
-    playerId: playerId
+    gameUserId: gameUserId
   }
 
   gameUsersActionsActions.addAction(this.props.params.gameId, action)
