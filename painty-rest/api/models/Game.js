@@ -36,12 +36,12 @@ module.exports = {
 
       estimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'game_user.id')
 
-      var result = _.groupBy(estimatorsGameActions, 'action.playerId')
+      var result = _.groupBy(estimatorsGameActions, 'action.gameUserId')
 
-      result = _.map(result, function(group, playerId) {
+      result = _.map(result, function(group, gameUserId) {
         var obj = {}
 
-        obj[playerId] = group.length
+        obj[gameUserId] = group.length
 
         return obj
       })

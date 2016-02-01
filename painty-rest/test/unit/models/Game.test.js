@@ -190,7 +190,7 @@ describe('GameModle', function() {
           game_user: 3,
           action: {
             instrument: 'estimate',
-            playerId: 1
+            gameUserId: 1
           },
           game: 3
         }
@@ -219,7 +219,7 @@ describe('GameModle', function() {
           game_user: 4,
           action: {
             instrument: 'estimate',
-            playerId: 2
+            gameUserId: 2
           },
           game: 3
         },
@@ -228,7 +228,7 @@ describe('GameModle', function() {
           game_user: 4,
           action: {
             instrument: 'estimate',
-            playerId: 2
+            gameUserId: 2
           },
           game: 3
         },
