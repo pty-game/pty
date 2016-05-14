@@ -1,4 +1,4 @@
-/**
+  /**
  * Connections
  * (sails.config.connections)
  *
