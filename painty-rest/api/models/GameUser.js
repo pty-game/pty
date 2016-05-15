@@ -16,7 +16,7 @@ module.exports = {
     game: {
       model: 'Game',
       required: true
-    },
+    }
   }
 };
 

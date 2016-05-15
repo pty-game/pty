@@ -17,14 +17,14 @@ import gameUsersActionsActions from '../../actions/gameUsersActions'
 
 
 var _getGame = suspend.promise(function *() {
-  var game = yield GameAPI.subscribe(this.props.params.gameId)
+  var game = yield GameAPI.subscribe(this.props.params.gameId);
 
   return game
-})
+});
 
 function _initGame(game) {
-  gameUsersActions.addItems(game.game_users)
-  gameUsersActionsActions.addItems(game.game_actions)
+  gameUsersActions.addItems(game.game_users);
+  gameUsersActionsActions.addItems(game.game_actions);
 }
 
 function _onOpponentCanvas() {
@@ -34,11 +34,11 @@ function _onOpponentCanvas() {
 }
 
 function _offOpponentCanvas() {
-  GameAPI.off()
-  GameAPI.unsubscribe(this.props.params.gameId)
+  GameAPI.off();
+  GameAPI.unsubscribe(this.props.params.gameId);
 
-  gameUsersActions.removeAll()
-  gameUsersActionsActions.removeAll()
+  gameUsersActions.removeAll();
+  gameUsersActionsActions.removeAll();
 }
 
 
@@ -52,8 +52,8 @@ function getInitialState() {
 var componentDidMount = suspend(function *() {
   var game = yield this._getGame()
 
-  this._initGame(game)
-  this._onOpponentCanvas()
+  this._initGame(game);
+  this._onOpponentCanvas();
 })
 
 function componentWillUnmount() {

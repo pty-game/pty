@@ -46,10 +46,25 @@ function residueTime(result) {
 
 function finishGame(result) {
   console.log(result.data.payload)
+
+  if (result.data.payload.gameWinnerGameUserId === null)
+    var message = 'No one is won.';
+  else if (!this.myGameUser.is_estimator) {
+    if (result.data.payload.gameWinnerGameUserId == this.myGameUser.id)
+      message = 'You won!';
+    else
+      message = 'You lose!';
+  } else {
+    //TODO
+  }
+
+  alert(message);
+
+  this.history.pushState(null, '/');
 }
 
 module.exports = {
   actionAdded,
   residueTime,
-  finishGame,
+  finishGame
 }
