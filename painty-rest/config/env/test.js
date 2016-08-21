@@ -16,7 +16,7 @@ module.exports = {
    * Set the port in the test environment to 80                        *
    ***************************************************************************/
 
-  port: 1338,
+  port: 1339,
 
   /***************************************************************************
    * Set the log level in test environment to "silent"                 *

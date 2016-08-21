@@ -57,6 +57,24 @@ module.exports = {
       })
 
       return parseInt(_.keys(result)[0])
+    }),
+    isEstimatorsPresent: Q.async(function *() {
+      var game = yield Game.findOne({id: this.id}).populate('game_users');
+
+      return !!_.filter(game.game_users, {is_estimator: true}).length;
+    }),
+    addAction: Q.async(function *(gameUserId, action, req) {
+      if (this.residue_time <= 0) throw 'This Game is finished'
+
+      var gameAction = yield GameAction.create({
+        action: action,
+        game: this.id,
+        game_user: gameUserId
+      })
+
+      Game.message(this.id, wsResponses.message('actionAdded', gameAction), req)
+
+      return gameAction
     })
   },
   findWithMinEstimators: Q.async(function *(finderId) {
@@ -78,7 +96,7 @@ module.exports = {
     var gameTimeInterval = setInterval(Q.async(function *() {
       game.residue_time--
 
-      game.save(Q.async(function() {
+      game.save(Q.async(function *() {
         if (game.residue_time <= 0) {
           clearInterval(gameTimeInterval)
 
@@ -87,6 +105,11 @@ module.exports = {
             Game.message(game.id, message)
           })
         } else {
+          var isEstimatorsPresent = yield game.isEstimatorsPresent();
+
+          if (game.residue_time == sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS && !isEstimatorsPresent)
+            GameUser.createBotForGame(game.id, true);
+
           message = wsResponses.message('residueTime', {residue_time: game.residue_time})
 
           Game.message(game.id, message)

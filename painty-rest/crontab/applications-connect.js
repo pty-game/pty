@@ -38,7 +38,7 @@ module.exports = Q.async(function *() {
           is_estimator: false
         }
       ])
-
+      
       var message = wsResponses.message('gameFound', {gameId: game.id})
 
       GameApplication.message(gameApplication.id, message)

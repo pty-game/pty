@@ -35,8 +35,8 @@
     "vow": "^0.4.11"
   },
   "scripts": {
-    "start": "sails lift --prod",
-    "test": "mocha --compilers js:babel-core/register test/bootstrap.test.js test/unit/**/*.test.js"
+    "start": "./node_modules//sails/bin/sails.js lift --prod",
+    "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register test/bootstrap.test.js test/unit/**/*.test.js"
   },
   "main": "app.js",
   "repository": {

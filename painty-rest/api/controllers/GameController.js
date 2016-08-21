@@ -25,29 +25,24 @@ module.exports = {
     Game.unsubscribe(req, game)
     res.ok()
   }),
-  addAction: function(req, res) {
+  addAction: Q.async(function *(req, res) {
     var userId = req.headers.userId
     var gameId = req.params.gameId
 
-    Q.async(function *() {
-      var gameUser = yield GameUser.findOne({user: userId, game: gameId})
-      var game = yield Game.findOne({id: gameId})
+    var game = yield Game.findOne({id: gameId});
+    var gameUser = yield GameUser.findOne({user: userId, game: gameId});
 
-      if (!gameUser) throw 'This GameUser is not allowed for this game'
-      if (!game) throw 'This Game is not found'
-      if (game.residue_time <= 0) throw 'This Game is finished'
+    if (!gameUser) {
+      throw 'This GameUser is not allowed for this game';
+    }
 
-      var gameAction = yield GameAction.create({
-        action: req.body,
-        game: gameId,
-        game_user: gameUser.id
-      })
-
-      return gameAction
-    })().then(function(gameAction) {
-      Game.message(gameId, wsResponses.message('actionAdded', gameAction), req)
-
-      res.ok(gameAction)
-    }, res.serverError)
-  }
+    if (!game) {
+      throw 'This Game is not found';
+    }
+    
+    game.addAction(gameUser.id, req.body, req)
+      .then(function(gameAction) {
+        res.ok(gameAction)
+      }, res.serverError)
+  })
 };

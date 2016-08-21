@@ -248,6 +248,84 @@ describe('GameModle', function() {
 
       assert.equal(gameWinnerGameUserId, null)
     }))
+
+    describe('#isEstimatorsPresent()', function() {
+      var gameWithEstimators
+      var gameWithoutEstimators
+
+      before(Q.async(function *() {
+        var gameObj1 = {
+          id: 4,
+          residue_time: 3,
+        }
+
+        var gameObj2 = {
+          id: 5,
+          residue_time: 3,
+        }
+
+        var gameUsersArr1 = [
+          {
+            id: 5,
+            user: 1,
+            is_estimator: false,
+            game: gameObj1.id
+          },
+          {
+            id: 6,
+            user: 2,
+            is_estimator: false,
+            game: gameObj1.id
+          },
+          {
+            id: 7,
+            user: 3,
+            is_estimator: true,
+            game: gameObj1.id
+          },
+          {
+            id: 8,
+            user: 4,
+            is_estimator: true,
+            game: gameObj1.id
+          }
+        ]
+
+        var gameUsersArr2 = [
+          {
+            id: 9,
+            user: 1,
+            is_estimator: false,
+            game: gameObj2.id
+          },
+          {
+            id: 10,
+            user: 2,
+            is_estimator: false,
+            game: gameObj2.id
+          }
+        ]
+
+
+        gameWithEstimators = yield Game.create(gameObj1)
+        gameWithoutEstimators = yield Game.create(gameObj2)
+
+        yield GameUser.create(gameUsersArr1)
+        yield GameUser.create(gameUsersArr2)
+      }))
+
+      it('should return true', Q.async(function *() {
+        var isEstimatorsPresent = yield gameWithEstimators.isEstimatorsPresent()
+        
+        assert.equal(isEstimatorsPresent, true)
+      }))
+
+      it('should return false', Q.async(function *() {
+        var isEstimatorsPresent = yield gameWithoutEstimators.isEstimatorsPresent()
+
+        assert.equal(isEstimatorsPresent, false)
+      }))
+    })
   })
 
 
