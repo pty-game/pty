@@ -46,12 +46,16 @@ function _offOpponentCanvas() {
 
 
 function getInitialState() {
-  return {}
+  return {
+    game: null
+  }
 }
 
 var componentDidMount = suspend(function *() {
   var game = yield this._getGame()
 
+  this.setState({game});
+  
   this._initGame(game);
   this._onOpponentCanvas();
 })

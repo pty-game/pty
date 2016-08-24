@@ -23,6 +23,9 @@ module.exports = function() {
 
   return <div>
     <div>
+      {this.state.game.task.name}
+    </div>
+    <div>
       {canvases}
     </div>
     <Tools gameUsers={this.state.gameUsers}
