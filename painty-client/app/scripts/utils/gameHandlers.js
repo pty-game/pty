@@ -2,7 +2,7 @@ import Q from 'q'
 import gameUsersActionsActions from '../actions/gameUsersActions.js'
 
 function actionAdded(result) {
-  console.log(result.data.payload)
+  console.log('actionAdded', result.data.payload)
 
   var action = result.data.payload.action
   var gameUserId = result.data.payload.game_user

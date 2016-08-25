@@ -1,17 +1,19 @@
 import React from 'react'
 import {Button, Input} from 'react-bootstrap'
 
-function getEstimatorsActions(gameUsersActions) {console.log(gameUsersActions)
-  var estimatorsActions = _.cloneDeep(gameUsersActions).reverse()
+function getEstimatorsActions(gameUsersActions) {
+  var gameUserActions = _.cloneDeep(gameUsersActions).reverse()
 
-  estimatorsActions = _.uniqBy(estimatorsActions, 'game_user')
+  var estimatorsActions = _.filter(gameUserActions, function(gameUserAction) {
+    return gameUserAction.action.instrument = 'estimate';
+  })
 
   return estimatorsActions
 }
 
 module.exports = function() {
-  var gameUser = this.props.gameUser
-  var estimatorsActions = getEstimatorsActions(this.props.gameUsersActions)
+  var gameUser = this.props.gameUser;
+  var estimatorsActions = getEstimatorsActions(this.props.gameUsersActions);
 
   var votes = _.filter(estimatorsActions, function(gameUserAction) {
     return gameUserAction.action.gameUserId == gameUser.id

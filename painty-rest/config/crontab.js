@@ -8,9 +8,11 @@
 var applicationsConnect = require('../crontab/applications-connect.js')
 
 module.exports.crontab = [
-  {
-    cronTime: '*/3 * * * * *',
-    onTick: applicationsConnect,
-    start: true
+  function(sails) {
+    return {
+      cronTime: '*/' + sails.config.constants.GAME_APPLICATION_CRONTAB_TIMEOUT + ' * * * * *',
+      onTick: applicationsConnect.bind(this, sails),
+      start: true
+    }
   }
 ];

@@ -14,6 +14,7 @@ module.exports = {
       .findOne({id: req.params.gameId})
       .populate('game_actions')
       .populate('game_users')
+      .populate('task');
 
     Game.subscribe(req, game)
     res.ok(game)
@@ -26,8 +27,8 @@ module.exports = {
     res.ok()
   }),
   addAction: Q.async(function *(req, res) {
-    var userId = req.headers.userId
-    var gameId = req.params.gameId
+    var userId = req.headers.userId;
+    var gameId = req.params.gameId;
 
     var game = yield Game.findOne({id: gameId});
     var gameUser = yield GameUser.findOne({user: userId, game: gameId});

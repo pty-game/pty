@@ -12,10 +12,12 @@ function getRandomIntInRange(min, max) {
 }
 
 module.exports = {
-
   attributes: {
     is_estimator: 'boolean',
-    is_bot: 'boolean',
+    is_bot: {
+      type: 'boolean',
+      defaultsTo: false
+    },
     user: {
       model: 'User',
     },
@@ -23,18 +25,37 @@ module.exports = {
       model: 'Game',
       required: true
     },
-    is_bot: 'boolean'
+    game_actions: {
+      collection: 'GameAction',
+      via: 'game_user'
+    },
+    gameActionsEmulator: Q.async(function *(game, gameActions) {
+      var date;
+
+      gameActions.forEach(function(gameAction) {
+        var timeout = date ?
+          new Date(gameAction.createdAt).getTime() - new Date(date).getTime() :
+          0;
+
+        setTimeout(function() {
+          game.addAction(this.id, gameAction.action)
+        }.bind(this), timeout)
+
+        date = gameAction.createdAt;
+      }.bind(this))
+    })
   },
   createBotForGame: Q.async(function *(gameId, isEstimator) {
-    var game = yield Game.findOne({id: gameId}).populate('game_users');
-
-    var bot = yield GameUser.create({
-      is_estimator: isEstimator,
-      is_bot: true,
-      game: game.id
-    });
+    var game = yield Game.findOne({id: gameId})
+      .populate('game_users');
 
     if (isEstimator) {
+      var bot = yield GameUser.create({
+        is_estimator: true,
+        is_bot: true,
+        game: game.id
+      });
+
       var playersGameUsers = _.filter(game.game_users, {is_estimator: false});
 
       var index = getRandomIntInRange(0, playersGameUsers.length);
@@ -43,8 +64,37 @@ module.exports = {
         instrument: 'estimate',
         gameUserId: playersGameUsers[index].id
       })
+    } else {
+      var gamesWithSameTask = yield Game.find({
+        task: game.task,
+        id: {
+          '!': game.id
+        }
+      }).populate('game_users');
+
+      if (!gamesWithSameTask.length) return null;
+
+      var gameWithSameTask = _.sample(gamesWithSameTask);
+
+      var gameUsersWithSameTask = _.filter(gameWithSameTask.game_users, {
+        is_estimator: false,
+        is_bot: false
+      });
+
+      if (!gameUsersWithSameTask.length) return null;
+
+      var gameUserWithSameTask = _.sample(gameUsersWithSameTask);
+
+      var gameUserWithSameTask = yield GameUser.findOne({id: gameUserWithSameTask.id}).populate('game_actions');
+
+      var bot = yield GameUser.create({
+        is_estimator: false,
+        is_bot: true,
+        game: game.id
+      });
+      
+      bot.gameActionsEmulator(game, gameUserWithSameTask.game_actions)
     }
-    
     return bot;
   })
 };

@@ -17,9 +17,9 @@ module.exports.bootstrap = function(cb) {
 
   sails.config.crontab.forEach(function(crontab) {
     try {
-      new CronJob(crontab);
+      new CronJob(crontab(sails));
     } catch(error) {
-      console.log(error)
+      throw error
     }
   });
   // add the lines until here
@@ -55,11 +55,29 @@ module.exports.bootstrap = function(cb) {
       login: 6755,
       level: 10
     }
-  ]
+  ];
 
-  User.create(users).then(function(users) {
-    cb();
-  }, function() {
+  var tasks = [
+    {
+      id: 1,
+      name: 'house'
+    },
+    // {
+    //   id: 2,
+    //   name: 'universe'
+    // },
+    // {
+    //   id: 3,
+    //   name: 'beard'
+    // }
+  ];
+
+  Promise.all([
+    Task.create(tasks),
+    User.create(users)
+  ]).then(function() {
     cb()
+  }, function(err) {
+    cb();
   })
 };

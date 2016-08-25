@@ -11,6 +11,9 @@ var wsResponses = require('../services/wsResponses')
 
 module.exports = {
   attributes: {
+    task: {
+      model: 'Task',
+    },
     game_actions: {
       collection: 'GameAction',
       via: 'game'
@@ -24,7 +27,7 @@ module.exports = {
       defaultsTo: sails.config.constants.GAME_DURATION
     },
     getGameWinnerGameUserId: Q.async(function *() {
-      if (this.residue_time) throw 'This game does not finished yet'
+      if (this.residue_time) throw 'This game does not finished yet';
 
       var gameActions = yield GameAction
         .find({game: this.id})
@@ -61,7 +64,7 @@ module.exports = {
     isEstimatorsPresent: Q.async(function *() {
       var game = yield Game.findOne({id: this.id}).populate('game_users');
 
-      return !!_.filter(game.game_users, {is_estimator: true}).length;
+      return !!_.filter(game.game_users, {is_estimator: true, is_bot: false}).length;
     }),
     addAction: Q.async(function *(gameUserId, action, req) {
       if (this.residue_time <= 0) throw 'This Game is finished'
@@ -72,7 +75,7 @@ module.exports = {
         game_user: gameUserId
       })
 
-      Game.message(this.id, wsResponses.message('actionAdded', gameAction), req)
+      Game.message(this.id, wsResponses.message('actionAdded', gameAction), req || null)
 
       return gameAction
     })
@@ -91,28 +94,36 @@ module.exports = {
     })[0]
   }),
   createNew: Q.async(function *() {
-    var game = yield Game.create()
+    var tasks = yield Task.find();
+
+    var task = _.sample(tasks);
+
+    var game = yield Game.create({
+      task: task.id
+    });
 
     var gameTimeInterval = setInterval(Q.async(function *() {
       game.residue_time--
 
       game.save(Q.async(function *() {
         if (game.residue_time <= 0) {
-          clearInterval(gameTimeInterval)
+          clearInterval(gameTimeInterval);
 
           game.getGameWinnerGameUserId().then(function(gameWinnerGameUserId) {
-            var message = wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId})
-            Game.message(game.id, message)
+            var message = wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId});
+            Game.message(game.id, message);
           })
         } else {
           var isEstimatorsPresent = yield game.isEstimatorsPresent();
 
-          if (game.residue_time == sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS && !isEstimatorsPresent)
+          if (game.residue_time <= sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
+            game.residue_time >= 1 &&
+            !isEstimatorsPresent) {
             GameUser.createBotForGame(game.id, true);
+          }
+          message = wsResponses.message('residueTime', {residue_time: game.residue_time});
 
-          message = wsResponses.message('residueTime', {residue_time: game.residue_time})
-
-          Game.message(game.id, message)
+          Game.message(game.id, message);
         }
       }))
     }), 1000)

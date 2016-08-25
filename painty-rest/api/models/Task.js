@@ -6,19 +6,13 @@
 */
 
 module.exports = {
-
   attributes: {
-    game_user: {
-      model: 'GameUser',
+    name: {
+      type: 'string',
       required: true
     },
-    game: {
-      model: 'Game',
-      required: true
-    },
-    action: {
-      type: 'json',
-      required: true
+    description: {
+      type: 'string'
     }
   }
 };

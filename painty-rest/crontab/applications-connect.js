@@ -13,46 +13,82 @@ function _findOpponentForPlayer(gameApplication, gameApplications) {
   })
 }
 
-module.exports = Q.async(function *() {
+module.exports = Q.async(function *(sails) {
   var gameApplications = yield GameApplication.find()
 
   for (var index = 0; index < gameApplications.length; index++) {
-    var gameApplication = gameApplications[index]
+
+    var gameApplication = gameApplications[index];
+
+    gameApplication.residue_time = gameApplication.residue_time - sails.config.constants.GAME_APPLICATION_CRONTAB_TIMEOUT;
+
+    if (gameApplication.residue_time < 0) {
+      gameApplication.destroy();
+
+      gameApplications.splice(index, 1);
+      index--;
+
+      GameApplication.message(gameApplication.id, wsResponses.message('gameApplicationExpired'));
+
+      continue;
+    } else {
+      yield gameApplication.save();
+    }
 
     if (!gameApplication.is_estimator) {
       var gameApplicationSub = _findOpponentForPlayer(gameApplication, gameApplications)
 
-      if (!gameApplicationSub) continue
+      if (!gameApplicationSub && gameApplication.residue_time > sails.config.constants.RESIDUE_TIME_FOR_PAINTER_BOTS) {
+        continue;
+      }
 
-      var game = yield Game.createNew()
+      var game = yield Game.createNew();
+      
+      if (!gameApplicationSub && gameApplication.residue_time <= sails.config.constants.RESIDUE_TIME_FOR_PAINTER_BOTS) {
+        var bot = yield GameUser.createBotForGame(game.id, false);
 
-      yield GameUser.create([
+        if (!bot) {
+          game.destroy();
+
+          continue;
+        }
+      }
+
+      var gameUsers = [
         {
           user: gameApplication.user,
           game: game.id,
           is_estimator: false
-        },
-        {
+        }
+      ];
+
+      if (gameApplicationSub)
+        gameUsers.push({
           user: gameApplicationSub.user,
           game: game.id,
           is_estimator: false
-        }
-      ])
+        })
+
+      yield GameUser.create(gameUsers);
       
-      var message = wsResponses.message('gameFound', {gameId: game.id})
+      var message = wsResponses.message('gameFound', {gameId: game.id});
 
       GameApplication.message(gameApplication.id, message)
-      GameApplication.message(gameApplicationSub.id, message)
+      if (gameApplicationSub) GameApplication.message(gameApplicationSub.id, message)
 
       gameApplication.destroy()
-      gameApplicationSub.destroy()
 
-      var subIndex = _.findIndex(gameApplications, {id: gameApplicationSub.id})
+      gameApplications.splice(index, 1);
 
-      gameApplications.splice(index, 1)
-      gameApplications.splice(subIndex - 1, 1)
+      index--;
 
-      index--
+      if (gameApplicationSub) {
+        gameApplicationSub.destroy()
+
+        var subIndex = _.findIndex(gameApplications, {id: gameApplicationSub.id})
+
+        gameApplications.splice(subIndex, 1)
+      }
     } else {
       var game = yield Game.findWithMinEstimators(gameApplication.user)
 
@@ -66,7 +102,7 @@ module.exports = Q.async(function *() {
 
       GameApplication.message(gameApplication.id, wsResponses.message('gameFound', {gameId: game.id}))
 
-      gameApplication.destroy()
+      gameApplication.destroy();
     }
   }
 })

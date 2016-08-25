@@ -18,7 +18,11 @@ module.exports = {
     is_estimator: {
       type: 'boolean',
       defaultsTo: false
-    }
+    },
+    residue_time: {
+      type: 'integer',
+      defaultsTo: sails.config.constants.GAME_APPLICATION_DURATION
+    },
   },
   createNew: Q.async(function *(userId, data) {
     var user = yield User.findOne({id: userId})
