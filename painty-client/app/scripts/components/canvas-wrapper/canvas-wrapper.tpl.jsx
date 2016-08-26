@@ -5,7 +5,7 @@ function getEstimatorsActions(gameUsersActions) {
   var gameUserActions = _.cloneDeep(gameUsersActions).reverse()
 
   var estimatorsActions = _.filter(gameUserActions, function(gameUserAction) {
-    return gameUserAction.action.instrument = 'estimate';
+    return gameUserAction.action.instrument == 'estimate';
   })
 
   return estimatorsActions
