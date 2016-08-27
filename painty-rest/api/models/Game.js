@@ -67,27 +67,27 @@ module.exports = {
       return !!_.filter(game.game_users, {is_estimator: true, is_bot: false}).length;
     }),
     addAction: Q.async(function *(gameUserId, action, req) {
-      if (this.residue_time <= 0) throw 'This Game is finished'
+      if (this.residue_time <= 0) throw 'This Game is finished';
 
       var gameAction = yield GameAction.create({
         action: action,
         game: this.id,
         game_user: gameUserId
-      })
+      });
 
-      Game.message(this.id, wsResponses.message('actionAdded', gameAction), req || null)
+      Game.message(this.id, wsResponses.message('actionAdded', gameAction), req || null);
 
       return gameAction
     })
   },
   findWithMinEstimators: Q.async(function *(finderId) {
-    var games = yield Game.find().populate('game_users')
+    var games = yield Game.find().populate('game_users');
 
     var filteredGames = _.filter(games, function(game) {
       return !(_.find(game.game_users, function(gameUser) {
         return gameUser.user == finderId
       }) || game.residue_time <= sails.config.constants.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH)
-    })
+    });
 
     return _.sortBy(filteredGames, function(game) {
       return game.game_users.length
@@ -103,7 +103,7 @@ module.exports = {
     });
 
     var gameTimeInterval = setInterval(Q.async(function *() {
-      game.residue_time--
+      game.residue_time--;
 
       game.save(Q.async(function *() {
         if (game.residue_time <= 0) {
@@ -126,7 +126,7 @@ module.exports = {
           Game.message(game.id, message);
         }
       }))
-    }), 1000)
+    }), 1000);
 
     return game
   })

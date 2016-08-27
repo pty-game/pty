@@ -9,7 +9,7 @@ module.exports = {
 
 var prefix = ''
 
-function create(data) {console.log(data)
+function create(data) {
   //var url = prefix + '/gameapplication/user/' + $.cookie('userId')
   var url = prefix + '/gameapplication'
 

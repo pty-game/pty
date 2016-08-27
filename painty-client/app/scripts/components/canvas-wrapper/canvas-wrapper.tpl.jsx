@@ -2,8 +2,8 @@ import React from 'react'
 import {Button, Input} from 'react-bootstrap'
 
 function getEstimatorsActions(gameUsersActions) {
-  var gameUserActions = _.cloneDeep(gameUsersActions).reverse()
-
+  var gameUserActions = _.cloneDeep(gameUsersActions).reverse();
+  
   var estimatorsActions = _.filter(gameUserActions, function(gameUserAction) {
     return gameUserAction.action.instrument == 'estimate';
   })

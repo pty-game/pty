@@ -6,6 +6,7 @@ module.exports = Reflux.createStore({
   listenables: GameUsersActionsActions,
   list: [],
   onAddAction(gameId, action) {
+
     GameAPI.addAction(gameId, action)
       .then(function(response) {
         this.onAddItem(response)

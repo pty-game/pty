@@ -43,7 +43,13 @@ function addAction(gameId, data) {
     method: 'put',
     url,
     data
-  }, defer.resolve, defer.reject)
+  }, function(data, jwres) {
+    if (jwres.error) {
+      defer.reject(jwres.error);
+    }
+
+    defer.resolve(data);
+  })
 
   return defer.promise
 }

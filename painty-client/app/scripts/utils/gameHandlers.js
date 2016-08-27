@@ -2,8 +2,6 @@ import Q from 'q'
 import gameUsersActionsActions from '../actions/gameUsersActions.js'
 
 function actionAdded(result) {
-  console.log('actionAdded', result.data.payload)
-
   var action = result.data.payload.action
   var gameUserId = result.data.payload.game_user
   var gameUser = _.find(this.state.gameUsers, {id: gameUserId})
@@ -41,12 +39,9 @@ function actionAdded(result) {
 }
 
 function residueTime(result) {
-  console.log(result.data.payload)
 }
 
 function finishGame(result) {
-  console.log(result.data.payload)
-
   if (result.data.payload.gameWinnerGameUserId === null)
     var message = 'No one is won.';
   else if (!this.myGameUser.is_estimator) {
