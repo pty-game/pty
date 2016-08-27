@@ -2,6 +2,7 @@ import React from 'react'
 import Template from './home.tpl.jsx'
 import GameApplicationAPI from '../../api/gameApplicationAPI.js'
 import History from 'react-router/lib/History.js'
+import UserAPI from '../../api/userAPI'
 
 function render() {
   return Template.call(this);

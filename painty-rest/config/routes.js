@@ -36,6 +36,16 @@ module.exports.routes = {
     view: 'homepage'
   },
 
+  'get /user/subscribe': {
+    controller: 'User',
+    action: 'subscribe'
+  },
+
+  'get /user/unsubscribe': {
+    controller: 'User',
+    action: 'unsubscribe'
+  },
+
   'post /gameapplication': {
     controller: 'GameApplication',
     action: 'create'

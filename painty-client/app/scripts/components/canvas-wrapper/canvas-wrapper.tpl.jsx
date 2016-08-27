@@ -8,6 +8,8 @@ function getEstimatorsActions(gameUsersActions) {
     return gameUserAction.action.instrument == 'estimate';
   })
 
+  estimatorsActions = _.uniqBy(estimatorsActions, 'game_user');
+
   return estimatorsActions
 }
 

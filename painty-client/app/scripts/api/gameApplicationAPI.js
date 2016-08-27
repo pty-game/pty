@@ -18,7 +18,13 @@ function create(data) {
     method: 'post',
     url,
     data
-  }, defer.resolve, defer.reject)
+  }, function(data, jwres) {
+    if (jwres.error) {
+      defer.reject(jwres.error);
+    }
+
+    defer.resolve(data);
+  })
 
   return defer.promise
 }

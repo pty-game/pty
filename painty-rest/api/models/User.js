@@ -7,7 +7,25 @@
 
 module.exports = {
   attributes: {
-    login: 'string'
+    login: 'string',
+    experience: {
+      type: 'integer',
+      defaultsTo: 0
+    },
+    nextLevelExperience: {
+      type: 'integer',
+      defaultsTo: sails.config.constants.NEW_LEVEL_EXPERIENCE_STEP_VALUE
+    },
+    level: {
+      type: 'integer',
+      defaultsTo: 0
+    }
+  },
+  generateNextLevelExperience: function(level) {
+    return sails.config.constants.NEW_LEVEL_EXPERIENCE_STEP_VALUE * (level + 1) * 1.5;
+  },
+  generateGameWonExperience: function(level) {
+    return sails.config.constants.GAME_WON_EXPERIENCE_VALUE;
   }
 };
 

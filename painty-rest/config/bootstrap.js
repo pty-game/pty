@@ -27,33 +27,27 @@ module.exports.bootstrap = function(cb) {
   var users = [
     {
       id: 1,
-      login: 34363467,
-      level: 1
+      login: 34363467
     },
     {
       id: 2,
-      login: 2123123,
-      level: 3
+      login: 2123123
     },
     {
       id: 3,
-      login: 211323,
-      level: 4
+      login: 211323
     },
     {
       id: 4,
-      login: 12123,
-      level: 0
+      login: 12123
     },
     {
       id: 5,
-      login: 675675,
-      level: 10
+      login: 675675
     },
     {
       id: 6,
-      login: 6755,
-      level: 10
+      login: 6755
     }
   ];
 

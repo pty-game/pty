@@ -37,9 +37,9 @@ module.exports = {
         return estimatorsGameAction.game_user.is_estimator
       })
 
-      estimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'game_user.id')
+      var uniqEstimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'game_user.id')
 
-      var result = _.groupBy(estimatorsGameActions, 'action.gameUserId')
+      var result = _.groupBy(uniqEstimatorsGameActions, 'action.gameUserId')
 
       result = _.map(result, function(group, gameUserId) {
         var obj = {}
@@ -49,13 +49,13 @@ module.exports = {
         return obj
       })
 
-      var checkNonWinner = _.uniqBy(result, function(obj) {
+      var checkNonWinner = (_.uniqBy(result, function(obj) {
         return obj[_.keys(obj)[0]]
-      }).length == 1 && result.length != 1
+      }).length == 1 && result.length != 1) || !result.length;
 
       if (checkNonWinner) return null
 
-      result = _.max(result, function(obj) {
+      result = _.maxBy(result, function(obj) {
         return obj[_.keys(obj)[0]]
       })
 
@@ -103,27 +103,53 @@ module.exports = {
     });
 
     var gameTimeInterval = setInterval(Q.async(function *() {
+      var _game = yield Game.findOne({
+        id: game.id
+      });
+
+      if (!_game) return clearInterval(gameTimeInterval);
+
       game.residue_time--;
 
       game.save(Q.async(function *() {
-        if (game.residue_time <= 0) {
-          clearInterval(gameTimeInterval);
+        try {
+          if (game.residue_time <= 0) {
+            clearInterval(gameTimeInterval);
 
-          game.getGameWinnerGameUserId().then(function(gameWinnerGameUserId) {
-            var message = wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId});
+            var gameWinnerGameUserId = yield game.getGameWinnerGameUserId();
+
+            var gameWinnerGameUser = yield GameUser.findOne({id: gameWinnerGameUserId}).populate('user');
+            
+            if (gameWinnerGameUser && gameWinnerGameUser.user && !gameWinnerGameUser.user.is_bot) {
+              var gameWinnerUser = gameWinnerGameUser.user;
+
+              gameWinnerUser.experience += User.generateGameWonExperience(gameWinnerUser.level);
+
+              if (gameWinnerUser.experience >= gameWinnerUser.nextLevelExperience) {
+                gameWinnerUser.level++;
+
+                gameWinnerUser.nextLevelExperience = User.generateNextLevelExperience(gameWinnerUser.level);
+
+                yield gameWinnerUser.save();
+                User.message(gameWinnerUser.id, wsResponses.message('levelUp', {user: gameWinnerUser}));
+              } else
+                yield gameWinnerUser.save();
+            }
+            Game.message(game.id, wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId}));
+            User.message(gameWinnerUser.id, wsResponses.message('data', {user: gameWinnerUser}));
+          } else {
+            var isEstimatorsPresent = yield game.isEstimatorsPresent();
+
+            if (game.residue_time <= sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
+              game.residue_time >= 1 &&
+              !isEstimatorsPresent) {
+              GameUser.createBotForGame(game.id, true);
+            }
+            message = wsResponses.message('residueTime', {residue_time: game.residue_time});
             Game.message(game.id, message);
-          })
-        } else {
-          var isEstimatorsPresent = yield game.isEstimatorsPresent();
-
-          if (game.residue_time <= sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
-            game.residue_time >= 1 &&
-            !isEstimatorsPresent) {
-            GameUser.createBotForGame(game.id, true);
           }
-          message = wsResponses.message('residueTime', {residue_time: game.residue_time});
-
-          Game.message(game.id, message);
+        } catch(e) {
+          throw e;
         }
       }))
     }), 1000);

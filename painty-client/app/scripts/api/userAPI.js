@@ -5,14 +5,13 @@ module.exports = {
   subscribe,
   unsubscribe,
   on,
-  off,
-  addAction
+  off
 };
 
 var prefix = ''
 
-function subscribe(gameId) {
-  var url = prefix + '/game/' + gameId + '/subscribe'
+function subscribe() {
+  var url = prefix + '/user/subscribe'
 
   var defer = Q.defer()
   socket.request({
@@ -29,32 +28,13 @@ function subscribe(gameId) {
   return defer.promise
 }
 
-function unsubscribe(gameId) {
-  var url = prefix + '/game/' + gameId + '/unsubscribe'
+function unsubscribe() {
+  var url = prefix + '/user/unsubscribe'
 
   var defer = Q.defer()
   socket.request({
     method: 'get',
     url,
-  }, function(data, jwres) {
-    if (jwres.error) {
-      defer.reject(jwres.error);
-    }
-
-    defer.resolve(data);
-  })
-
-  return defer.promise
-}
-
-function addAction(gameId, data) {
-  var url = prefix + '/game/' + gameId
-
-  var defer = Q.defer()
-  socket.request({
-    method: 'put',
-    url,
-    data
   }, function(data, jwres) {
     if (jwres.error) {
       defer.reject(jwres.error);
@@ -67,9 +47,9 @@ function addAction(gameId, data) {
 }
 
 function on(callback) {
-  return socket.on('game', callback)
+  return socket.on('user', callback)
 }
 
 function off() {
-  return socket.off('game')
+  return socket.off('user')
 }
