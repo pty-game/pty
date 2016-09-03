@@ -31,35 +31,35 @@ module.exports = {
 
       var gameActions = yield GameAction
         .find({game: this.id})
-        .populate('game_user')
+        .populate('game_user');
 
       var estimatorsGameActions = _.filter(gameActions, function(estimatorsGameAction) {
         return estimatorsGameAction.game_user.is_estimator
-      })
+      });
 
-      var uniqEstimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'game_user.id')
+      var uniqEstimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'game_user.id');
 
-      var result = _.groupBy(uniqEstimatorsGameActions, 'action.gameUserId')
+      var result = _.groupBy(uniqEstimatorsGameActions, 'action.gameUserId');
 
       result = _.map(result, function(group, gameUserId) {
-        var obj = {}
+        var obj = {};
 
-        obj[gameUserId] = group.length
+        obj[gameUserId] = group.length;
 
-        return obj
-      })
+        return obj;
+      });
 
       var checkNonWinner = (_.uniqBy(result, function(obj) {
-        return obj[_.keys(obj)[0]]
+        return obj[_.keys(obj)[0]];
       }).length == 1 && result.length != 1) || !result.length;
 
-      if (checkNonWinner) return null
+      if (checkNonWinner) return null;
 
       result = _.maxBy(result, function(obj) {
-        return obj[_.keys(obj)[0]]
-      })
+        return obj[_.keys(obj)[0]];
+      });
 
-      return parseInt(_.keys(result)[0])
+      return parseInt(_.keys(result)[0]);
     }),
     isEstimatorsPresent: Q.async(function *() {
       var game = yield Game.findOne({id: this.id}).populate('game_users');
@@ -85,7 +85,7 @@ module.exports = {
 
     var filteredGames = _.filter(games, function(game) {
       return !(_.find(game.game_users, function(gameUser) {
-        return gameUser.user == finderId
+        return !gameUser.is_bot && gameUser.user == finderId
       }) || game.residue_time <= sails.config.constants.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH)
     });
 
@@ -105,9 +105,12 @@ module.exports = {
     var gameTimeInterval = setInterval(Q.async(function *() {
       var _game = yield Game.findOne({
         id: game.id
-      });
+      }).populate('game_users');
 
-      if (!_game) return clearInterval(gameTimeInterval);
+      if (!_game)
+        return clearInterval(gameTimeInterval);
+      else
+        game = _game;
 
       game.residue_time--;
 
@@ -118,25 +121,54 @@ module.exports = {
 
             var gameWinnerGameUserId = yield game.getGameWinnerGameUserId();
 
-            var gameWinnerGameUser = yield GameUser.findOne({id: gameWinnerGameUserId}).populate('user');
-            
-            if (gameWinnerGameUser && gameWinnerGameUser.user && !gameWinnerGameUser.user.is_bot) {
-              var gameWinnerUser = gameWinnerGameUser.user;
+            var gameUsersPlayers = _.filter(game.game_users, {'is_bot': false, 'is_estimator': false})
 
-              gameWinnerUser.experience += User.generateGameWonExperience(gameWinnerUser.level);
+            var promises = game.game_users.map(function(game_user) {
+              return User.findOne({id: game_user.user});
+            })
 
-              if (gameWinnerUser.experience >= gameWinnerUser.nextLevelExperience) {
-                gameWinnerUser.level++;
+            var users = yield Promise.all(promises);
 
-                gameWinnerUser.nextLevelExperience = User.generateNextLevelExperience(gameWinnerUser.level);
-
-                yield gameWinnerUser.save();
-                User.message(gameWinnerUser.id, wsResponses.message('levelUp', {user: gameWinnerUser}));
-              } else
-                yield gameWinnerUser.save();
+            if (gameWinnerGameUserId) {
+              var gameWinnerGameUserIndex = _.findIndex(gameUsersPlayers, function (gameUsersPlayer) {
+                return gameUsersPlayer.id == gameWinnerGameUserId;
+              });
+              
+              var gameWinnerUser = users[gameWinnerGameUserIndex];
             }
+
+            users.forEach(Q.async(function *(user, index) {
+              user.games_total++;
+
+              if (gameWinnerUser) {
+                if (gameWinnerUser.id == user.id) {
+                  user.experience += User.generateGameWonExperience(user.level);
+                  user.games_won++;
+
+                  if (user.experience >= user.nextLevelExperience) {
+                    user.level++;
+
+                    user.nextLevelExperience = User.generateNextLevelExperience(user.level);
+
+                    yield user.save();
+                    var userSaved = true;
+
+                    User.message(user.id, wsResponses.message('levelUp', {user: user}));
+                  }
+                } else {
+                  user.games_loose++;
+                }
+              } else {
+                user.games_draw++;
+              }
+
+              if (!userSaved) yield user.save();
+
+              User.message(user.id, wsResponses.message('data', {user: user}));
+            }));
+
             Game.message(game.id, wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId}));
-            User.message(gameWinnerUser.id, wsResponses.message('data', {user: gameWinnerUser}));
+
           } else {
             var isEstimatorsPresent = yield game.isEstimatorsPresent();
 
@@ -151,7 +183,7 @@ module.exports = {
         } catch(e) {
           throw e;
         }
-      }))
+      }.bind(this)))
     }), 1000);
 
     return game

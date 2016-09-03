@@ -22,6 +22,12 @@ module.exports = function() {
   })
 
   return <div>
+    <p>
+      User login: {gameUser.user.login}
+    </p>
+    <p>
+      Game user id: {gameUser.id}
+    </p>
     <div className={'canvas-wrapper ' + gameUser.id}>
       <canvas className="canvas upper"
               width="300"

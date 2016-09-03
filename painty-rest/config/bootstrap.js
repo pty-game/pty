@@ -12,9 +12,6 @@ var CronJob = require('cron').CronJob;
  */
 
 module.exports.bootstrap = function(cb) {
-
-  // add the lines from here
-
   sails.config.crontab.forEach(function(crontab) {
     try {
       new CronJob(crontab(sails));
@@ -22,7 +19,6 @@ module.exports.bootstrap = function(cb) {
       throw error
     }
   });
-  // add the lines until here
 
   var users = [
     {
@@ -56,14 +52,14 @@ module.exports.bootstrap = function(cb) {
       id: 1,
       name: 'house'
     },
-    // {
-    //   id: 2,
-    //   name: 'universe'
-    // },
-    // {
-    //   id: 3,
-    //   name: 'beard'
-    // }
+    {
+      id: 2,
+      name: 'universe'
+    },
+    {
+      id: 3,
+      name: 'beard'
+    }
   ];
 
   Promise.all([

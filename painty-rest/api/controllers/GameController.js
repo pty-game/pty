@@ -16,7 +16,17 @@ module.exports = {
       .populate('game_users')
       .populate('task');
 
-    Game.subscribe(req, game)
+    var promises = game.game_users.map(function(game_user) {
+      return User.findOne({id: game_user.user});
+    });
+
+    var users = yield Promise.all(promises);
+
+    game.game_users.forEach(function(game_user, index) {
+      game_user.user = users[index];
+    });
+
+    Game.subscribe(req, game);
     res.ok(game)
   }),
   unsubscribe: Q.async(function *(req, res) {
@@ -31,7 +41,7 @@ module.exports = {
     var gameId = req.params.gameId;
 
     var game = yield Game.findOne({id: gameId});
-    var gameUser = yield GameUser.findOne({user: userId, game: gameId});
+    var gameUser = yield GameUser.findOne({user: userId, game: gameId, is_bot: false});
 
     if (!gameUser) {
       throw 'This GameUser is not allowed for this game';

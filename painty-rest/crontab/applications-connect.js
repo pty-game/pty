@@ -14,7 +14,7 @@ function _findOpponentForPlayer(gameApplication, gameApplications) {
 }
 
 module.exports = Q.async(function *(sails) {
-  var gameApplications = yield GameApplication.find()
+  var gameApplications = yield GameApplication.find();
 
   for (var index = 0; index < gameApplications.length; index++) {
 
@@ -36,16 +36,16 @@ module.exports = Q.async(function *(sails) {
     }
 
     if (!gameApplication.is_estimator) {
-      var gameApplicationSub = _findOpponentForPlayer(gameApplication, gameApplications)
+      var gameApplicationSub = _findOpponentForPlayer(gameApplication, gameApplications);
 
       if (!gameApplicationSub && gameApplication.residue_time > sails.config.constants.RESIDUE_TIME_FOR_PAINTER_BOTS) {
         continue;
       }
 
       var game = yield Game.createNew();
-      
+
       if (!gameApplicationSub && gameApplication.residue_time <= sails.config.constants.RESIDUE_TIME_FOR_PAINTER_BOTS) {
-        var bot = yield GameUser.createBotForGame(game.id, false);
+        var bot = yield GameUser.createBotForGame(game.id, false, gameApplication.user);
 
         if (!bot) {
           game.destroy();
@@ -70,7 +70,7 @@ module.exports = Q.async(function *(sails) {
         })
 
       yield GameUser.create(gameUsers);
-      
+
       var message = wsResponses.message('gameFound', {gameId: game.id});
 
       GameApplication.message(gameApplication.id, message)
@@ -105,4 +105,4 @@ module.exports = Q.async(function *(sails) {
       gameApplication.destroy();
     }
   }
-})
+});

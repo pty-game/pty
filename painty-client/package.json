@@ -57,7 +57,7 @@
   },
   "scripts": {
     "postinstall": "bower install",
-    "start": "./node_modules/gulp/bin/gulp.js serve",
+    "start": "./node_modules/gulp/bin/gulp.js default",
     "build": "./node_modules/gulp/bin/gulp.js build"
   }
 }

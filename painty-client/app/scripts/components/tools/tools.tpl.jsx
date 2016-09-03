@@ -20,7 +20,7 @@ module.exports = function() {
     tools = _.map(players, function(gameUser) {
       return <Input name="voteFor"
                type="radio"
-               label={'Vote to player ' + gameUser.id}
+               label={'Vote to player ' + gameUser.user.login}
                onChange={this.voteFor.bind(this, gameUser.id)}/>
     }.bind(this))
   }

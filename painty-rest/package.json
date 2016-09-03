@@ -36,6 +36,7 @@
   },
   "scripts": {
     "start": "./node_modules//sails/bin/sails.js lift --prod",
+    "start-dev": "nodemon app.js",
     "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register test/bootstrap.test.js test/unit/**/*.test.js"
   },
   "main": "app.js",

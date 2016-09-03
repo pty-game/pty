@@ -45,7 +45,7 @@ module.exports = {
       }.bind(this))
     })
   },
-  createBotForGame: Q.async(function *(gameId, isEstimator) {
+  createBotForGame: Q.async(function *(gameId, isEstimator, gameApplicationUserId) {
     var game = yield Game.findOne({id: gameId})
       .populate('game_users');
 
@@ -72,6 +72,10 @@ module.exports = {
         }
       }).populate('game_users');
 
+      var gamesWithSameTask = gamesWithSameTask.filter(function(game) {
+        return !_.find(game.game_users, {user: gameApplicationUserId, is_bot: false});
+      });
+
       if (!gamesWithSameTask.length) return null;
 
       var gameWithSameTask = _.sample(gamesWithSameTask);
@@ -85,12 +89,14 @@ module.exports = {
 
       var gameUserWithSameTask = _.sample(gameUsersWithSameTask);
 
-      var gameUserWithSameTask = yield GameUser.findOne({id: gameUserWithSameTask.id}).populate('game_actions');
+      var gameUserWithSameTask = yield GameUser.findOne({id: gameUserWithSameTask.id})
+        .populate('game_actions');
 
       var bot = yield GameUser.create({
         is_estimator: false,
         is_bot: true,
-        game: game.id
+        game: game.id,
+        user: gameUserWithSameTask.user
       });
       
       bot.gameActionsEmulator(game, gameUserWithSameTask.game_actions)

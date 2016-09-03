@@ -19,6 +19,22 @@ module.exports = {
     level: {
       type: 'integer',
       defaultsTo: 0
+    },
+    games_total: {
+      type: 'integer',
+      defaultsTo: 0
+    },
+    games_won: {
+      type: 'integer',
+      defaultsTo: 0
+    },
+    games_loose: {
+      type: 'integer',
+      defaultsTo: 0
+    },
+    games_draw: {
+      type: 'integer',
+      defaultsTo: 0
     }
   },
   generateNextLevelExperience: function(level) {
