@@ -1,3 +1,5 @@
+var Q = require('q')
+
 /**
 * User.js
 *
@@ -35,6 +37,18 @@ module.exports = {
     games_draw: {
       type: 'integer',
       defaultsTo: 0
+    },
+    saveWithPromise: function() {
+      var def = Q.defer();
+
+      this.save(function(err, result) {
+        if (err)
+          def.reject(err);
+        else
+          def.resolve(result);
+      })
+
+      return def.promise;
     }
   },
   generateNextLevelExperience: function(level) {

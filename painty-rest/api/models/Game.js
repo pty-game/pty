@@ -78,7 +78,19 @@ module.exports = {
       Game.message(this.id, wsResponses.message('actionAdded', gameAction), req || null);
 
       return gameAction
-    })
+    }),
+    saveWithPromise: function() {
+      var def = Q.defer();
+
+      this.save(function(err, result) {
+        if (err)
+          def.reject(err);
+        else
+          def.resolve(result);
+      })
+
+      return def.promise;
+    }
   },
   findWithMinEstimators: Q.async(function *(finderId) {
     var games = yield Game.find().populate('game_users');
@@ -102,89 +114,90 @@ module.exports = {
       task: task.id
     });
 
-    var gameTimeInterval = setInterval(Q.async(function *() {
-      var _game = yield Game.findOne({
-        id: game.id
-      }).populate('game_users');
+    var gameTimeInterval = setInterval(function() {
+      Q.async(function *() {
+        var _game = yield Game.findOne({
+          id: game.id
+        }).populate('game_users');
 
-      if (!_game)
-        return clearInterval(gameTimeInterval);
-      else
-        game = _game;
+        if (!_game)
+          return clearInterval(gameTimeInterval);
+        else
+          game = _game;
 
-      game.residue_time--;
+        game.residue_time--;
 
-      game.save(Q.async(function *() {
-        try {
-          if (game.residue_time <= 0) {
-            clearInterval(gameTimeInterval);
+        yield game.saveWithPromise();
 
-            var gameWinnerGameUserId = yield game.getGameWinnerGameUserId();
+        if (game.residue_time <= 0) {
+          clearInterval(gameTimeInterval);
 
-            var gameUsersPlayers = _.filter(game.game_users, {'is_bot': false, 'is_estimator': false})
+          var gameWinnerGameUserId = yield game.getGameWinnerGameUserId();
 
-            var promises = game.game_users.map(function(game_user) {
-              return User.findOne({id: game_user.user});
-            })
+          var gameUsersPlayers = _.filter(game.game_users, {'is_bot': false, 'is_estimator': false})
 
-            var users = yield Promise.all(promises);
+          var promises = game.game_users.map(function(game_user) {
+            return User.findOne({id: game_user.user});
+          })
 
-            if (gameWinnerGameUserId) {
-              var gameWinnerGameUserIndex = _.findIndex(gameUsersPlayers, function (gameUsersPlayer) {
-                return gameUsersPlayer.id == gameWinnerGameUserId;
-              });
-              
-              var gameWinnerUser = users[gameWinnerGameUserIndex];
-            }
+          var users = yield Promise.all(promises);
 
-            users.forEach(Q.async(function *(user, index) {
-              user.games_total++;
+          if (gameWinnerGameUserId) {
+            var gameWinnerGameUserIndex = _.findIndex(gameUsersPlayers, function (gameUsersPlayer) {
+              return gameUsersPlayer.id == gameWinnerGameUserId;
+            });
 
-              if (gameWinnerUser) {
-                if (gameWinnerUser.id == user.id) {
-                  user.experience += User.generateGameWonExperience(user.level);
-                  user.games_won++;
+            var gameWinnerUser = users[gameWinnerGameUserIndex];
+          }
 
-                  if (user.experience >= user.nextLevelExperience) {
-                    user.level++;
+          users.forEach(Q.async(function *(user, index) {
+            user.games_total++;
 
-                    user.nextLevelExperience = User.generateNextLevelExperience(user.level);
+            if (gameWinnerUser) {
+              if (gameWinnerUser.id == user.id) {
+                user.experience += User.generateGameWonExperience(user.level);
+                user.games_won++;
 
-                    yield user.save();
-                    var userSaved = true;
+                if (user.experience >= user.nextLevelExperience) {
+                  user.level++;
 
-                    User.message(user.id, wsResponses.message('levelUp', {user: user}));
-                  }
-                } else {
-                  user.games_loose++;
+                  user.nextLevelExperience = User.generateNextLevelExperience(user.level);
+
+                  yield user.saveWithPromise();
+                  var userSaved = true;
+
+                  User.message(user.id, wsResponses.message('levelUp', {user: user}));
                 }
               } else {
-                user.games_draw++;
+                user.games_loose++;
               }
-
-              if (!userSaved) yield user.save();
-
-              User.message(user.id, wsResponses.message('data', {user: user}));
-            }));
-
-            Game.message(game.id, wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId}));
-
-          } else {
-            var isEstimatorsPresent = yield game.isEstimatorsPresent();
-
-            if (game.residue_time <= sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
-              game.residue_time >= 1 &&
-              !isEstimatorsPresent) {
-              GameUser.createBotForGame(game.id, true);
+            } else {
+              user.games_draw++;
             }
-            message = wsResponses.message('residueTime', {residue_time: game.residue_time});
-            Game.message(game.id, message);
+
+            if (!userSaved) yield user.save();
+
+            User.message(user.id, wsResponses.message('data', {user: user}));
+          }));
+
+          Game.message(game.id, wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId}));
+
+        } else {
+          var isEstimatorsPresent = yield game.isEstimatorsPresent();
+
+          if (game.residue_time <= sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
+            game.residue_time >= 1 &&
+            !isEstimatorsPresent) {
+            GameUser.createBotForGame(game.id, true);
           }
-        } catch(e) {
-          throw e;
+          message = wsResponses.message('residueTime', {residue_time: game.residue_time});
+          Game.message(game.id, message);
         }
-      }.bind(this)))
-    }), 1000);
+
+      })().catch(function(e) {
+        console.log(new Error(e).stack)
+      })
+    }, 1000);
 
     return game
   })

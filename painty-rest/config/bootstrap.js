@@ -13,11 +13,7 @@ var CronJob = require('cron').CronJob;
 
 module.exports.bootstrap = function(cb) {
   sails.config.crontab.forEach(function(crontab) {
-    try {
-      new CronJob(crontab(sails));
-    } catch(error) {
-      throw error
-    }
+    new CronJob(crontab(sails));
   });
 
   var users = [
