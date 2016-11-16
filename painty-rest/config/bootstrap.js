@@ -1,5 +1,6 @@
 var CronJob = require('cron').CronJob;
-
+var passport = require('passport');
+var FacebookTokenStrategy = require('passport-facebook-token');
 /**
  * Bootstrap
  * (sails.config.bootstrap)
@@ -12,36 +13,20 @@ var CronJob = require('cron').CronJob;
  */
 
 module.exports.bootstrap = function(cb) {
+  passport.use(new FacebookTokenStrategy({
+      clientID: '936254193109591',
+      clientSecret: '259b9ae40c5ae04d5e3d88b02ddf59f5',
+    },
+    function(accessToken, refreshToken, profile, done) {
+      User.findOrCreate({login: profile.id}, {login: profile.id}, function(err, user) {
+        done(err, user);
+      });
+    }
+  ));
+
   sails.config.crontab.forEach(function(crontab) {
     new CronJob(crontab(sails));
   });
-
-  var users = [
-    {
-      id: 1,
-      login: 34363467
-    },
-    {
-      id: 2,
-      login: 2123123
-    },
-    {
-      id: 3,
-      login: 211323
-    },
-    {
-      id: 4,
-      login: 12123
-    },
-    {
-      id: 5,
-      login: 675675
-    },
-    {
-      id: 6,
-      login: 6755
-    }
-  ];
 
   var tasks = [
     {
@@ -60,7 +45,6 @@ module.exports.bootstrap = function(cb) {
 
   Promise.all([
     Task.create(tasks),
-    User.create(users)
   ]).then(function() {
     cb()
   }, function(err) {

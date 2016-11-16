@@ -19,6 +19,7 @@
 <div id="content"></div>
 
 <script src="scripts/vendor.js"></script>
+
 <script type="text/javascript">
   io.sails.autoConnect = false;
   io.sails.transports = ['websocket', 'pooling'];
@@ -27,6 +28,64 @@
   // but sockets2's `url` option will be overridden as specified:
   window.ws = io.sails.connect(location.protocol + '//' + location.hostname + ':1338');
 </script>
+
+<!-- Fix for facebook bug with _=_ -->
+<script type="text/javascript">
+    if (window.location.hash && window.location.hash == '#_=_') {
+        if (window.history && history.pushState) {
+            window.history.pushState("", document.title, window.location.pathname + window.location.search);
+        } else {
+            // Prevent scrolling by storing the page's current scroll offset
+            var scroll = {
+                top: document.body.scrollTop,
+                left: document.body.scrollLeft
+            };
+            window.location.hash = '';
+            // Restore the scroll offset, should be flicker free
+            document.body.scrollTop = scroll.top;
+            document.body.scrollLeft = scroll.left;
+        }
+    }
+</script>
+
+<script>
+  var setCookieUserIdAndRefresh = function functionName() {
+    $.cookie('userId', FB.getAuthResponse().accessToken);
+
+    location.reload();
+  };
+
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '936254193109591',
+      xfbml      : true,
+      version    : 'v2.8'
+    });
+
+    FB.AppEvents.logPageView();
+
+    FB.getLoginStatus(function(response) {
+      $.cookie('strategy', 'facebook-token');
+
+      if (response.status !== 'connected') {
+        return FB.login(function() {
+          setCookieUserIdAndRefresh();
+        });
+      } else if (!$.cookie('userId')) {
+        setCookieUserIdAndRefresh();
+      }
+    });
+  };
+
+  (function(d, s, id){
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {return;}
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/uk_UK/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
 <script src="scripts/app.js"></script>
 </body>
 </html>

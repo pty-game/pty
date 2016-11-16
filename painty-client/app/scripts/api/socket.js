@@ -1,6 +1,6 @@
 function _getDefaultHeaders() {
   return {
-    userId: $.cookie('userId')
+    'Authorization': 'Bearer ' + $.cookie('userId')
   }
 }
 

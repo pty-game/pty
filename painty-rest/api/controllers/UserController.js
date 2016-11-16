@@ -1,4 +1,5 @@
 var Q = require('q')
+var passport = require('passport');
 
 /**
  * UserController
@@ -9,10 +10,12 @@ var Q = require('q')
 
 module.exports = {
   subscribe: Q.async(function *(req, res) {
-    var user = yield User.findOne({id: req.headers.userId});
-    console.log(user)
-    User.subscribe(req, user)
-    res.ok(user)
+    passport.authenticate(req.cookies.strategy, Q.async(function *(error, user, info) {
+      var user = yield User.findOne({id: user.id});
+
+      User.subscribe(req, user);
+      res.ok(user);
+    })).apply(this, arguments);
   }),
   unsubscribe: Q.async(function *(req, res) {
     var user = yield User.findOne({id: req.headers.userId});
@@ -21,4 +24,3 @@ module.exports = {
     res.ok()
   })
 };
-

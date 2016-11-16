@@ -36,6 +36,16 @@ module.exports.routes = {
     view: 'homepage'
   },
 
+  'get /auth/:strategy': {
+    controller: 'Auth',
+    action: 'auth',
+  },
+
+  'get /auth/callback/:strategy': {
+    controller: 'Auth',
+    action: 'callback',
+  },
+
   'get /user/subscribe': {
     controller: 'User',
     action: 'subscribe'

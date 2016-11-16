@@ -18,4 +18,3 @@ module.exports = {
     })().then(res.created, res.badRequest)
   }
 };
-
