@@ -16,7 +16,7 @@ module.exports = {
     },
     nextLevelExperience: {
       type: 'integer',
-      defaultsTo: sails.config.constants.NEW_LEVEL_EXPERIENCE_STEP_VALUE
+      defaultsTo: sails.config.constants.GAME_WON_EXPERIENCE_VALUE
     },
     level: {
       type: 'integer',
@@ -52,10 +52,9 @@ module.exports = {
     }
   },
   generateNextLevelExperience: function(level) {
-    return sails.config.constants.NEW_LEVEL_EXPERIENCE_STEP_VALUE * (level + 1) * 1.5;
+    return sails.config.constants.GAME_WON_EXPERIENCE_VALUE * ((level + 1) * (level + 1)) * (level + 1);
   },
   generateGameWonExperience: function(level) {
-    return sails.config.constants.GAME_WON_EXPERIENCE_VALUE;
+    return sails.config.constants.GAME_WON_EXPERIENCE_VALUE * (level + 1);
   }
 };
-
