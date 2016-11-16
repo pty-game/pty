@@ -1,3 +1,5 @@
+nginx config:
+
 server { 
        listen 80; 
 
