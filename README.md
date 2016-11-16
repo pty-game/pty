@@ -1,6 +1,6 @@
 # pty
 
-nginx config:
+nginx config
 
 server { 
        listen 80; 
