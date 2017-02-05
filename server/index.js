@@ -10,8 +10,9 @@ const sequelize = new Sequelize('painty', 'painty', 'painty', {
   dialect: 'postgres',
 });
 
-models(sequelize);
-routes(app);
+const db = models(sequelize);
+
+routes(app, db);
 
 sequelize.sync().then(() => {
   console.log('sunc success');
