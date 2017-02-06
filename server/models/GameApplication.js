@@ -11,6 +11,10 @@ export default (sequelize) => {
       defaultValue: false,
     },
   }, {
+    name: {
+      singular: 'gameApplication',
+      plural: 'gameApplications',
+    },
     classMethods: {
       associate(models) {
         models.GameApplication.belongsTo(models.User, { foreignKey: 'userId' });

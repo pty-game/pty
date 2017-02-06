@@ -47,19 +47,19 @@ module.exports = {
   },
   createBotForGame: Q.async(function *(gameId, isEstimator, gameApplicationUserId) {
     var game = yield Game.findOne({id: gameId})
-      .populate('game_users');
+      .populate('gameUsers');
 
     if (isEstimator) {
       var bot = yield GameUser.create({
-        is_estimator: true,
-        is_bot: true,
+        isEstimator: true,
+        isBot: true,
         game: game.id
       });
 
-      var playersGameUsers = _.filter(game.game_users, {is_estimator: false});
+      var playersGameUsers = _.filter(game.gameUsers, {isEstimator: false});
 
       var index = getRandomIntInRange(0, playersGameUsers.length);
-      
+
       game.addAction(bot.id, {
         instrument: 'estimate',
         gameUserId: playersGameUsers[index].id
@@ -70,19 +70,19 @@ module.exports = {
         id: {
           '!': game.id
         }
-      }).populate('game_users');
+      }).populate('gameUsers');
 
       var gamesWithSameTask = gamesWithSameTask.filter(function(game) {
-        return !_.find(game.game_users, {user: gameApplicationUserId, is_bot: false});
+        return !_.find(game.gameUsers, {user: gameApplicationUserId, isBot: false});
       });
 
       if (!gamesWithSameTask.length) return null;
 
       var gameWithSameTask = _.sample(gamesWithSameTask);
 
-      var gameUsersWithSameTask = _.filter(gameWithSameTask.game_users, {
-        is_estimator: false,
-        is_bot: false
+      var gameUsersWithSameTask = _.filter(gameWithSameTask.gameUsers, {
+        isEstimator: false,
+        isBot: false
       });
 
       if (!gameUsersWithSameTask.length) return null;
@@ -90,18 +90,17 @@ module.exports = {
       var gameUserWithSameTask = _.sample(gameUsersWithSameTask);
 
       var gameUserWithSameTask = yield GameUser.findOne({id: gameUserWithSameTask.id})
-        .populate('game_actions');
+        .populate('gameActions');
 
       var bot = yield GameUser.create({
-        is_estimator: false,
-        is_bot: true,
+        isEstimator: false,
+        isBot: true,
         game: game.id,
         user: gameUserWithSameTask.user
       });
-      
-      bot.gameActionsEmulator(game, gameUserWithSameTask.game_actions)
+
+      bot.gameActionsEmulator(game, gameUserWithSameTask.gameActions)
     }
     return bot;
   })
 };
-

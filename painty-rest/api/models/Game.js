@@ -27,17 +27,17 @@ module.exports = {
       defaultsTo: sails.config.constants.GAME_DURATION
     },
     getGameWinnerGameUserId: Q.async(function *() {
-      if (this.residue_time) throw 'This game does not finished yet';
+      if (this.residueTime) throw 'This game does not finished yet';
 
       var gameActions = yield GameAction
         .find({game: this.id})
         .populate('game_user');
 
       var estimatorsGameActions = _.filter(gameActions, function(estimatorsGameAction) {
-        return estimatorsGameAction.game_user.is_estimator
+        return estimatorsGameAction.gameUser.isEstimator
       });
 
-      var uniqEstimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'game_user.id');
+      var uniqEstimatorsGameActions = _.uniqBy(estimatorsGameActions.reverse(), 'gameUser.id');
 
       var result = _.groupBy(uniqEstimatorsGameActions, 'action.gameUserId');
 
@@ -62,17 +62,17 @@ module.exports = {
       return parseInt(_.keys(result)[0]);
     }),
     isEstimatorsPresent: Q.async(function *() {
-      var game = yield Game.findOne({id: this.id}).populate('game_users');
+      var game = yield Game.findOne({id: this.id}).populate('gameUsers');
 
-      return !!_.filter(game.game_users, {is_estimator: true, is_bot: false}).length;
+      return !!_.filter(game.gameUsers, {isEstimator: true, isBot: false}).length;
     }),
     addAction: Q.async(function *(gameUserId, action, req) {
-      if (this.residue_time <= 0) throw 'This Game is finished';
+      if (this.residueTime <= 0) throw 'This Game is finished';
 
       var gameAction = yield GameAction.create({
         action: action,
         game: this.id,
-        game_user: gameUserId
+        gameUser: gameUserId
       });
 
       Game.message(this.id, wsResponses.message('actionAdded', gameAction), req || null);
@@ -93,16 +93,16 @@ module.exports = {
     }
   },
   findWithMinEstimators: Q.async(function *(finderId) {
-    var games = yield Game.find().populate('game_users');
+    var games = yield Game.find().populate('gameUsers');
 
     var filteredGames = _.filter(games, function(game) {
       return !(_.find(game.game_users, function(gameUser) {
-        return !gameUser.is_bot && gameUser.user == finderId
-      }) || game.residue_time <= sails.config.constants.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH)
+        return !gameUser.isBot && gameUser.user == finderId
+      }) || game.residueTime <= sails.config.constants.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH)
     });
 
     return _.sortBy(filteredGames, function(game) {
-      return game.game_users.length
+      return game.gameUsers.length
     })[0]
   }),
   createNew: Q.async(function *() {
@@ -118,26 +118,26 @@ module.exports = {
       Q.async(function *() {
         var _game = yield Game.findOne({
           id: game.id
-        }).populate('game_users');
+        }).populate('gameUsers');
 
         if (!_game)
           return clearInterval(gameTimeInterval);
         else
           game = _game;
 
-        game.residue_time--;
+        game.residueTime--;
 
         yield game.saveWithPromise();
 
-        if (game.residue_time <= 0) {
+        if (game.residueTime <= 0) {
           clearInterval(gameTimeInterval);
 
           var gameWinnerGameUserId = yield game.getGameWinnerGameUserId();
 
-          var gameUsersPlayers = _.filter(game.game_users, {'is_bot': false, 'is_estimator': false})
+          var gameUsersPlayers = _.filter(game.game_users, {'isBot': false, 'isEstimator': false})
 
-          var promises = game.game_users.map(function(game_user) {
-            return User.findOne({id: game_user.user});
+          var promises = game.gameUsers.map(function(gameUser) {
+            return User.findOne({id: gameUser.user});
           })
 
           var users = yield Promise.all(promises);
@@ -151,12 +151,12 @@ module.exports = {
           }
 
           users.forEach(Q.async(function *(user, index) {
-            user.games_total++;
+            user.gamesTotal++;
 
             if (gameWinnerUser) {
               if (gameWinnerUser.id == user.id) {
                 user.experience += User.generateGameWonExperience(user.level);
-                user.games_won++;
+                user.gamesWon++;
 
                 if (user.experience >= user.nextLevelExperience) {
                   user.level++;
@@ -169,10 +169,10 @@ module.exports = {
                   User.message(user.id, wsResponses.message('levelUp', {user: user}));
                 }
               } else {
-                user.games_loose++;
+                user.gamesLoose++;
               }
             } else {
-              user.games_draw++;
+              user.gamesDraw++;
             }
 
             if (!userSaved) yield user.save();
@@ -185,12 +185,12 @@ module.exports = {
         } else {
           var isEstimatorsPresent = yield game.isEstimatorsPresent();
 
-          if (game.residue_time <= sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
-            game.residue_time >= 1 &&
+          if (game.residueTime <= sails.config.constants.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
+            game.residueTime >= 1 &&
             !isEstimatorsPresent) {
             GameUser.createBotForGame(game.id, true);
           }
-          message = wsResponses.message('residueTime', {residue_time: game.residue_time});
+          message = wsResponses.message('residueTime', {residueTime: game.residueTime});
           Game.message(game.id, message);
         }
 

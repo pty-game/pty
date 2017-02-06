@@ -7,6 +7,10 @@ export default (sequelize) => {
       allowNull: false,
     },
   }, {
+    name: {
+      singular: 'gameAction',
+      plural: 'gameActions',
+    },
     classMethods: {
       associate(models) {
         models.GameAction.belongsTo(models.GameUser, { foreignKey: 'gameUserId' });

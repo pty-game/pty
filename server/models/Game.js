@@ -8,6 +8,10 @@ export default (sequelize) => {
       defaultValue: gameConfig.GAME_DURATION,
     },
   }, {
+    name: {
+      singular: 'game',
+      plural: 'games',
+    },
     classMethods: {
       associate(models) {
         models.Game.belongsTo(models.Task, { foreignKey: 'taskId' });

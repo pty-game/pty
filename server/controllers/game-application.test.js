@@ -24,10 +24,14 @@ afterAll(async () => {
 
 describe('game application', () => {
   it('create', async () => {
-    gameApplication = await gameApplicationCreate({ userId: user.id }, db);
+    try {
+      gameApplication = await gameApplicationCreate({ userId: user.id }, db);
 
-    expect(gameApplication.userId).toBe(user.id);
-    expect(gameApplication.isBot).toBe(false);
-    expect(gameApplication.isEstimator).toBe(false);
+      expect(gameApplication.userId).toBe(user.id);
+      expect(gameApplication.isBot).toBe(false);
+      expect(gameApplication.isEstimator).toBe(false);
+    } catch (err) {
+      throw new Error(err);
+    }
   });
 });

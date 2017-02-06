@@ -32,5 +32,10 @@ export default (sequelize) => {
       type: Sequelize.INTEGER,
       defaultValue: 0,
     },
+  }, {
+    name: {
+      singular: 'user',
+      plural: 'users',
+    },
   });
 };

@@ -12,6 +12,10 @@ export default (sequelize) => {
       defaultValue: gameConfig.GAME_APPLICATION_DURATION,
     },
   }, {
+    name: {
+      singular: 'gameUser',
+      plural: 'gameUsers',
+    },
     classMethods: {
       associate(models) {
         models.GameUser.belongsTo(models.User, { foreignKey: 'userId' });

@@ -9,5 +9,10 @@ export default (sequelize) => {
     description: {
       type: Sequelize.STRING,
     },
+  }, {
+    name: {
+      singular: 'task',
+      plural: 'tasks',
+    },
   });
 };

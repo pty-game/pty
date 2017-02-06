@@ -24,6 +24,18 @@ export const mockUser = (experience = chance.integer({ min: 0, max: 1000000 })) 
   };
 };
 
+export const mockGameUser = (userId, gameId) => {
+  return {
+    userId,
+    gameId,
+  };
+};
+
+export const mockGame = () => {
+  return {
+  };
+};
+
 export const mockUsersFactory = (count) => {
   const users = [];
 
