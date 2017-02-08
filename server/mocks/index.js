@@ -45,3 +45,9 @@ export const mockUsersFactory = (count) => {
 
   return users;
 };
+
+export const mockTask = () => {
+  return {
+    name: chance.word(),
+  };
+};

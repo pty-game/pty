@@ -8,14 +8,6 @@ export default (sequelize) => {
       type: Sequelize.INTEGER,
       defaultValue: 0,
     },
-    nextLevelExperience: {
-      type: Sequelize.INTEGER,
-      defaultValue: gameConfig.GAME_WON_EXPERIENCE_VALUE,
-    },
-    level: {
-      type: Sequelize.INTEGER,
-      defaultValue: 0,
-    },
     gamesTotal: {
       type: Sequelize.INTEGER,
       defaultValue: 0,

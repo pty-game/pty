@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize';
 import models from '../models';
-import { subscribe, unsubscribe, addAction } from './game';
-import { mockUser, mockGameUser, mockGame } from '../mocks';
+import { subscribe, unsubscribe, addAction, create } from './game';
+import { mockUser, mockGameUser, mockGame, mockTask } from '../mocks';
 
 const sequelize = new Sequelize('painty', 'painty', 'painty', {
   host: 'localhost',
@@ -12,7 +12,9 @@ const db = models(sequelize);
 
 let users = [];
 let gameUsers = [];
-let game = {};
+const gameActions = [];
+const games = [];
+let tasks = [];
 
 beforeAll(async () => {
   users = [
@@ -20,11 +22,16 @@ beforeAll(async () => {
     await db.User.create(mockUser()),
   ];
 
-  game = await db.Game.create(mockGame());
+  games.push(await db.Game.create(mockGame()));
 
   gameUsers = [
-    await db.GameUser.create(mockGameUser(users[0].id, game.id)),
-    await db.GameUser.create(mockGameUser(users[1].id, game.id)),
+    await db.GameUser.create(mockGameUser(users[0].id, games[0].id)),
+    await db.GameUser.create(mockGameUser(users[1].id, games[0].id)),
+  ];
+
+  tasks = [
+    await db.Task.create(mockTask()),
+    await db.GameUser.create(mockTask()),
   ];
 });
 
@@ -37,14 +44,22 @@ afterAll(async () => {
     return gameUser.destroy();
   });
 
-  await game.destroy();
+  await games.map((game) => {
+    return game.destroy();
+  });
+
+  await tasks.map((task) => {
+    return task.destroy();
+  });
 });
 
 describe('game', () => {
   it('subscribe', async () => {
     try {
-      const result = await subscribe({ userId: users[0].id, gameId: game.id }, db);
-      expect(result.id).toBe(game.id);
+      const gameId = games[0].id;
+
+      const result = await subscribe({ userId: users[0].id, gameId }, db);
+      expect(result.id).toBe(gameId);
     } catch (err) {
       throw new Error(err.stack);
     }
@@ -52,8 +67,10 @@ describe('game', () => {
 
   it('unsubscribe', async () => {
     try {
-      const result = await unsubscribe({ userId: users[0].id, gameId: game.id }, db);
-      expect(result.id).toBe(game.id);
+      const gameId = games[0].id;
+
+      const result = await unsubscribe({ userId: users[0].id, gameId }, db);
+      expect(result.id).toBe(gameId);
     } catch (err) {
       throw new Error(err.stack);
     }
@@ -63,7 +80,7 @@ describe('game', () => {
     try {
       const userId = users[0].id;
       const gameUserId = gameUsers[0].id;
-      const gameId = game.id;
+      const gameId = games[0].id;
 
       const result = await addAction({
         userId,
@@ -71,9 +88,23 @@ describe('game', () => {
         action: { someAction: 'someAction' },
       }, db);
 
+      gameActions.push(result);
+
       expect(result.gameId).toBe(gameId);
       expect(result.gameUserId).toBe(gameUserId);
       expect(result.action.someAction).toBe('someAction');
+    } catch (err) {
+      throw new Error(err.stack);
+    }
+  });
+
+  it('create', async () => {
+    try {
+      const result = await create({}, db);
+      games.push(result);
+
+      expect(typeof result.id).toBe('number');
+      expect(typeof result.taskId).toBe('number');
     } catch (err) {
       throw new Error(err.stack);
     }

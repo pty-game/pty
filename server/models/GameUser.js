@@ -3,6 +3,10 @@ import gameConfig from '../game-config';
 
 export default (sequelize) => {
   return sequelize.define('GameUser', {
+    isBot: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
     isEstimator: {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
