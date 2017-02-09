@@ -5,6 +5,7 @@
     "node": true
   },
   "rules": {
-    "arrow-body-style": ["error", "always"]
+    "arrow-body-style": ["error", "always"],
+    "class-methods-use-this": 0,
   }
 }

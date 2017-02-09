@@ -1,5 +1,4 @@
 import Sequelize from 'sequelize';
-import gameConfig from '../game-config';
 
 export default (sequelize) => {
   return sequelize.define('User', {

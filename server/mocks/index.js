@@ -24,10 +24,19 @@ export const mockUser = (experience = chance.integer({ min: 0, max: 1000000 })) 
   };
 };
 
-export const mockGameUser = (userId, gameId) => {
+export const mockGameUser = (userId, gameId, isEstimator = false) => {
   return {
     userId,
     gameId,
+    isEstimator,
+  };
+};
+
+export const mockGameAction = (gameUserId, gameId, action = {}) => {
+  return {
+    gameUserId,
+    gameId,
+    action,
   };
 };
 
