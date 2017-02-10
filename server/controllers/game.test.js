@@ -25,8 +25,11 @@ beforeAll(async () => {
     await db.User.create(mockUser()),
     await db.User.create(mockUser()),
     await db.User.create(mockUser()),
+    await db.User.create(mockUser()),
+    await db.User.create(mockUser()),
   ];
 
+  games.push(await db.Game.create(mockGame()));
   games.push(await db.Game.create(mockGame()));
 
   gameUsers = [
@@ -35,6 +38,10 @@ beforeAll(async () => {
     await db.GameUser.create(mockGameUser(users[2].id, games[0].id, true)),
     await db.GameUser.create(mockGameUser(users[3].id, games[0].id, true)),
     await db.GameUser.create(mockGameUser(users[4].id, games[0].id, true)),
+
+    // game without estimators
+    await db.GameUser.create(mockGameUser(users[5].id, games[1].id)),
+    await db.GameUser.create(mockGameUser(users[6].id, games[1].id)),
   ];
 
   gameActions = [
@@ -148,6 +155,15 @@ describe('game', () => {
       const result = await gameCtrl.getGameWinnerGameUserId({ game: games[0], db });
 
       expect(result).toBe(gameUsers[1].id);
+    } catch (err) {
+      throw new Error(err.stack);
+    }
+  });
+
+  it('getGameWinnerGameUserId', async () => {
+    try {
+      expect(await gameCtrl.isEstimatorsPresent(games[0])).toBe(true);
+      expect(await gameCtrl.isEstimatorsPresent(games[1])).toBe(false);
     } catch (err) {
       throw new Error(err.stack);
     }

@@ -178,7 +178,7 @@ export default class GameCtrl {
 
       await this.finishGame({ game }, db);
     } else {
-      const isEstimatorsPresent = await game.isEstimatorsPresent();
+      const isEstimatorsPresent = await game.isEstimatorsPresent(game);
 
       if (
         game.residueTime <= gameConfig.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
@@ -196,6 +196,20 @@ export default class GameCtrl {
     }
 
     return true;
+  }
+
+  async isEstimatorsPresent(game) {
+    let gameUsers;
+
+    if (!game.gameUsers) {
+      gameUsers = await game.getGameUsers();
+    } else {
+      gameUsers = game.gameUsers;
+    }
+
+    return !!gameUsers.find((gameUser) => {
+      return gameUser.isEstimator && !gameUser.isBot;
+    });
   }
 
   async create(req, { db }) {
