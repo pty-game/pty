@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import { generateGameWonExperienceFromLevel } from '../helpers';
 import * as gameConfig from '../game-config';
+import { estimatorAction } from '../../common/actions';
 
 export default class GameCtrl {
-  async subscribe(req, { userId, gameId, db }) {
+  async subscribe({ userId, gameId, db }) {
     const game = await db.Game.find({
       where: { id: gameId },
       include: [db.GameUser],
@@ -22,7 +23,7 @@ export default class GameCtrl {
     return game;
   }
 
-  async unsubscribe(req, { gameId, db }) {
+  async unsubscribe({ gameId, db }) {
     const game = await db.Game.findOne({ where: { id: gameId } });
     // TODO socket
     // db.Game.unsubscribe(req, game);
@@ -30,24 +31,34 @@ export default class GameCtrl {
     return game;
   }
 
-  async addAction(req, { userId, gameId, action, db }) {
-    const game = await db.Game.find({ where: { id: gameId } });
+  async addUserAction({ userId, gameId, action, db }) {
     const gameUser = await db.GameUser.find({ where: { userId, gameId, isBot: false } });
 
     if (!gameUser) {
       throw new Error('This GameUser is not allowed for this game');
     }
 
-    if (!game) {
-      throw new Error('This Game is not found');
-    }
-
-    if (game.residueTime <= 0) throw new Error('This Game is finished');
-
-    const gameAction = await db.GameAction.create({
+    const gameAction = await this.addAction({
       action,
       gameId,
       gameUserId: gameUser.id,
+      db,
+    });
+
+    return gameAction;
+  }
+
+  async addAction({ gameId, gameUserId, action, db }) {
+    const game = db.Game.find({ where: { id: gameId } });
+
+    if (game.residueTime <= 0) {
+      throw new Error('This Game is finished');
+    }
+
+    const gameAction = await db.GameAction.create({
+      action,
+      game: gameId,
+      gameUserId,
     });
 
     // TODO socket
@@ -176,7 +187,7 @@ export default class GameCtrl {
     if (game.residueTime <= 0) {
       clearInterval(intervalId);
 
-      await this.finishGame({ game }, db);
+      await this.finishGame({ game, db });
     } else {
       const isEstimatorsPresent = await game.isEstimatorsPresent(game);
 
@@ -185,7 +196,7 @@ export default class GameCtrl {
         game.residueTime >= 1 &&
         !isEstimatorsPresent
       ) {
-        db.GameUser.createBotForGame(game.id, true);
+        db.GameUser.createBotForGame({ game, isEstimator: true, db });
       }
 
       // TODO
@@ -196,6 +207,77 @@ export default class GameCtrl {
     }
 
     return true;
+  }
+
+  async createBotForGame({ game, isEstimator, gameApplicationUserId, db }) {
+    let bot;
+
+    if (isEstimator) {
+      bot = await db.GameUser.create({
+        isEstimator: true,
+        isBot: true,
+        game: game.id,
+      });
+
+      const playersGameUsers = game.gameUsers.filter(() => {
+        return isEstimator === false;
+      });
+
+      const randomPlayerIndex = this.getRandomIntInRange(0, playersGameUsers.length);
+
+      this.addAction({
+        gameUserId: bot.id,
+        gameId: game.id,
+        action: estimatorAction(randomPlayerIndex),
+        db,
+      });
+    } else {
+      const gamesWithSameTask = await db.Game.find({
+        where: {
+          task: game.task,
+          id: {
+            $not: game.id,
+          },
+        },
+        include: [db.GameUser],
+      });
+
+      const gamesWithSameTaskWithoutCurrentUsers = gamesWithSameTask.filter((gameWithSameTask) => {
+        return !gameWithSameTask.gameUsers.find((gameUser) => {
+          return gameUser.userId === gameApplicationUserId && gameUser.isBot === false;
+        });
+      });
+
+      if (!gamesWithSameTaskWithoutCurrentUsers.length) {
+        throw new Error('Game without this users is not found');
+      }
+
+      const gameWithSameTaskWithoutCurrentUsers = _.sample(gamesWithSameTask);
+
+      const gameUsersWithSameTask = gameWithSameTaskWithoutCurrentUsers.gameUsers
+      .find((gameUser) => {
+        return gameUser.isEstimator === false && gameUser.isBot === false;
+      });
+
+      if (!gameUsersWithSameTask.length) {
+        throw new Error('GameUser with the same task is not found');
+      }
+
+      const gameUserWithSameTask = _.sample(gameUsersWithSameTask);
+
+      const gameUserWithSameTaskActions = await gameUserWithSameTask.getGameActions();
+
+      bot = await db.GameUser.create({
+        isEstimator: false,
+        isBot: true,
+        gameId: game.id,
+        userId: gameUserWithSameTask.userId,
+      });
+
+      bot.gameActionsEmulator(game, gameUserWithSameTaskActions);
+    }
+
+    return bot;
   }
 
   async isEstimatorsPresent(game) {
@@ -212,7 +294,7 @@ export default class GameCtrl {
     });
   }
 
-  async create(req, { db }) {
+  async create({ db }) {
     const tasks = await db.Task.findAll();
 
     const taskId = tasks[Math.floor(Math.random() * tasks.length)].id;
