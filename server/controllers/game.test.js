@@ -97,7 +97,7 @@ describe('game', () => {
     try {
       const gameId = games[0].id;
 
-      const result = await gameCtrl.subscribe({}, { userId: users[0].id, gameId, db });
+      const result = await gameCtrl.subscribe({ userId: users[0].id, gameId, db });
       expect(result.id).toBe(gameId);
     } catch (err) {
       throw new Error(err.stack);
@@ -108,20 +108,20 @@ describe('game', () => {
     try {
       const gameId = games[0].id;
 
-      const result = await gameCtrl.unsubscribe({}, { userId: users[0].id, gameId, db });
+      const result = await gameCtrl.unsubscribe({ userId: users[0].id, gameId, db });
       expect(result.id).toBe(gameId);
     } catch (err) {
       throw new Error(err.stack);
     }
   });
 
-  it('addAction', async () => {
+  it('addUserAction', async () => {
     try {
       const userId = users[0].id;
       const gameUserId = gameUsers[0].id;
       const gameId = games[0].id;
 
-      const result = await gameCtrl.addAction({}, {
+      const result = await gameCtrl.addUserAction({
         userId,
         gameId,
         action: { someAction: 'someAction' },
@@ -140,7 +140,7 @@ describe('game', () => {
 
   it('create', async () => {
     try {
-      const result = await gameCtrl.create({}, { db });
+      const result = await gameCtrl.create({ db });
       games.push(result);
 
       expect(typeof result.id).toBe('number');
@@ -160,10 +160,31 @@ describe('game', () => {
     }
   });
 
-  it('getGameWinnerGameUserId', async () => {
+  it('isEstimatorsPresent', async () => {
     try {
       expect(await gameCtrl.isEstimatorsPresent(games[0])).toBe(true);
       expect(await gameCtrl.isEstimatorsPresent(games[1])).toBe(false);
+    } catch (err) {
+      throw new Error(err.stack);
+    }
+  });
+
+  it('gameActionsEmulator', async () => {
+    try {
+      const gameActionsPart = gameActions.slice(0, 2);
+
+      const result = await gameCtrl.gameActionsEmulator({
+        gameId: games[1].id,
+        gameActions: gameActionsPart,
+        db,
+      });
+
+      gameActions = gameActions.concat(result);
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(gameActionsPart.length);
+      expect(JSON.stringify(result[0].action)).toBe(JSON.stringify(gameActionsPart[0].action));
+      expect(result[0].gameId).not.toBe(gameActionsPart[0].gameId);
     } catch (err) {
       throw new Error(err.stack);
     }

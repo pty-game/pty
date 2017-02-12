@@ -47,16 +47,16 @@ module.exports = {
   },
   createBotForGame: Q.async(function *(gameId, isEstimator, gameApplicationUserId) {
     var game = yield Game.findOne({id: gameId})
-      .populate('gameUsers');
+      .populate('game_users');
 
     if (isEstimator) {
       var bot = yield GameUser.create({
-        isEstimator: true,
-        isBot: true,
+        is_estimator: true,
+        is_bot: true,
         game: game.id
       });
 
-      var playersGameUsers = _.filter(game.gameUsers, {isEstimator: false});
+      var playersGameUsers = _.filter(game.game_users, {is_estimator: false});
 
       var index = getRandomIntInRange(0, playersGameUsers.length);
 
@@ -70,19 +70,19 @@ module.exports = {
         id: {
           '!': game.id
         }
-      }).populate('gameUsers');
+      }).populate('game_users');
 
       var gamesWithSameTask = gamesWithSameTask.filter(function(game) {
-        return !_.find(game.gameUsers, {user: gameApplicationUserId, isBot: false});
+        return !_.find(game.game_users, {user: gameApplicationUserId, is_bot: false});
       });
 
       if (!gamesWithSameTask.length) return null;
 
       var gameWithSameTask = _.sample(gamesWithSameTask);
 
-      var gameUsersWithSameTask = _.filter(gameWithSameTask.gameUsers, {
-        isEstimator: false,
-        isBot: false
+      var gameUsersWithSameTask = _.filter(gameWithSameTask.game_users, {
+        is_estimator: false,
+        is_bot: false
       });
 
       if (!gameUsersWithSameTask.length) return null;
@@ -90,16 +90,16 @@ module.exports = {
       var gameUserWithSameTask = _.sample(gameUsersWithSameTask);
 
       var gameUserWithSameTask = yield GameUser.findOne({id: gameUserWithSameTask.id})
-        .populate('gameActions');
+        .populate('game_actions');
 
       var bot = yield GameUser.create({
-        isEstimator: false,
-        isBot: true,
+        is_estimator: false,
+        is_bot: true,
         game: game.id,
         user: gameUserWithSameTask.user
       });
 
-      bot.gameActionsEmulator(game, gameUserWithSameTask.gameActions)
+      bot.gameActionsEmulator(game, gameUserWithSameTask.game_actions)
     }
     return bot;
   })

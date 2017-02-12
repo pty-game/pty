@@ -57,7 +57,7 @@ export default class GameCtrl {
 
     const gameAction = await db.GameAction.create({
       action,
-      game: gameId,
+      gameId,
       gameUserId,
     });
 
@@ -105,7 +105,6 @@ export default class GameCtrl {
     const estimatorsGameActions = gameActions.filter((estimatorsGameAction) => {
       return estimatorsGameAction.gameUser.isEstimator;
     });
-
 
     const uniqEstimatorsGameActions = _.uniqBy(estimatorsGameActions, 'gameUserId');
 
@@ -265,7 +264,7 @@ export default class GameCtrl {
 
       const gameUserWithSameTask = _.sample(gameUsersWithSameTask);
 
-      const gameUserWithSameTaskActions = await gameUserWithSameTask.getGameActions();
+      const gameUserActionsWithSameTask = await gameUserWithSameTask.getGameActions();
 
       bot = await db.GameUser.create({
         isEstimator: false,
@@ -274,10 +273,57 @@ export default class GameCtrl {
         userId: gameUserWithSameTask.userId,
       });
 
-      bot.gameActionsEmulator(game, gameUserWithSameTaskActions);
+      this.gameActionsEmulator({ gameId: game.id, gameActions: gameUserActionsWithSameTask, db });
     }
 
     return bot;
+  }
+
+  async gameActionsEmulator({
+    gameId,
+    gameActions,
+    date,
+    index = 0,
+    db,
+    newActions = [],
+  }) {
+    const gameAction = gameActions[index];
+    const timeout = date ?
+      new Date(gameAction.createdAt).getTime() - new Date(date).getTime() :
+      0;
+
+    let resolve;
+    const promise = new Promise((_resolve) => {
+      resolve = _resolve;
+    });
+
+    setTimeout(async () => {
+      const actionPromise = await this.addAction({
+        gameUserId: gameAction.gameUserId,
+        gameId,
+        action: gameAction.action,
+        db,
+      });
+
+      resolve.call(promise, actionPromise);
+    }, timeout);
+
+    const action = await promise;
+
+    newActions.push(action);
+
+    if (index + 1 < gameActions.length) {
+      return this.gameActionsEmulator({
+        gameId,
+        gameActions,
+        date,
+        index: index + 1,
+        db,
+        newActions,
+      });
+    }
+
+    return newActions;
   }
 
   async isEstimatorsPresent(game) {

@@ -1,6 +1,6 @@
-export function estimatorAction(gameUserId) => {
+const estimatorAction = (gameUserId) => {
   return {
     instrument: 'estimate',
     gameUserId,
   }
-}
+};
