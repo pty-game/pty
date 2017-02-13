@@ -189,4 +189,22 @@ describe('game', () => {
       throw new Error(err.stack);
     }
   });
+
+  it('updateUsersStatistic', async () => {
+    try {
+      const initWonUserGamesWon = users[0].gamesWon;
+      const initLoseUserGamesLose = users[1].gamesLose;
+
+      const result = await gameCtrl.updateUsersStatistic({
+        users,
+        gameWinnerUser: users[0],
+      });
+
+      expect(result[0].id).toBe(users[0].id);
+      expect(result[0].gamesWon).toBe(initWonUserGamesWon + 1);
+      expect(result[1].gamesLose).toBe(initLoseUserGamesLose + 1);
+    } catch (err) {
+      throw new Error(err.stack);
+    }
+  });
 });

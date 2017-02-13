@@ -67,9 +67,9 @@ export default class GameCtrl {
     return gameAction;
   }
 
-  async updateUsersStatistic(users, gameWinnerUser) {
+  async updateUsersStatistic({ users, gameWinnerUser }) {
     /* eslint-disable no-param-reassign */
-    users.forEach(async (user) => {
+    const promises = users.map((user) => {
       user.gamesTotal += 1;
 
       if (gameWinnerUser) {
@@ -77,20 +77,21 @@ export default class GameCtrl {
           user.experience += generateGameWonExperienceFromLevel(user.level);
           user.gamesWon += 1;
         } else {
-          user.gamesLoose += 1;
+          user.gamesLose += 1;
         }
       } else {
         user.gamesDraw += 1;
       }
-
-      await user.save();
       // TODO socket
       // User.message(user.id, wsResponses.message('data', {user: user}));
+
+      return user.save();
     });
 
-    return users;
-
+    const updatedUsers = await Promise.all(promises);
     /* eslint-enable no-param-reassign */
+
+    return updatedUsers;
   }
 
   async getGameWinnerGameUserId({ game, db }) {
@@ -155,12 +156,14 @@ export default class GameCtrl {
       gameWinnerUser = users[gameWinnerGameUserIndex];
     }
 
-    await this.updateUsersStatistic(users, gameWinnerUser);
+    await this.updateUsersStatistic({ users, gameWinnerUser });
 
     // TODO socket
     // db.Game.message(
     //  game.id,
     //  wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId}));
+
+    return game;
   }
 
   async timeIntervalIteration(

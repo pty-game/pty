@@ -15,7 +15,7 @@ export default (sequelize) => {
       type: Sequelize.INTEGER,
       defaultValue: 0,
     },
-    gamesLoose: {
+    gamesLose: {
       type: Sequelize.INTEGER,
       defaultValue: 0,
     },
