@@ -67,33 +67,6 @@ export default class GameCtrl {
     return gameAction;
   }
 
-  async updateUsersStatistic({ users, gameWinnerUser }) {
-    /* eslint-disable no-param-reassign */
-    const promises = users.map((user) => {
-      user.gamesTotal += 1;
-
-      if (gameWinnerUser) {
-        if (gameWinnerUser.id === user.id) {
-          user.experience += generateGameWonExperienceFromLevel(user.level);
-          user.gamesWon += 1;
-        } else {
-          user.gamesLose += 1;
-        }
-      } else {
-        user.gamesDraw += 1;
-      }
-      // TODO socket
-      // User.message(user.id, wsResponses.message('data', {user: user}));
-
-      return user.save();
-    });
-
-    const updatedUsers = await Promise.all(promises);
-    /* eslint-enable no-param-reassign */
-
-    return updatedUsers;
-  }
-
   async getGameWinnerGameUserId({ game, db }) {
     if (this.residueTime) throw new Error('This game does not finished yet');
 
@@ -136,16 +109,19 @@ export default class GameCtrl {
   }
 
   async finishGame({ game, db }) {
-    const gameWinnerGameUserId = await this.getGameWinnerGameUserId(game);
+    const gameWinnerGameUserId = await this.getGameWinnerGameUserId({ game, db });
 
-    const gameUsersPlayers = game.gameUsers.filter((gameUser) => {
+    const gameUsers = game.gameUsers || await game.getGameUsers();
+
+    const gameUsersPlayers = gameUsers.filter((gameUser) => {
       return gameUser.isBot === false && gameUser.isEstimator === false;
     });
 
-    const users = await game.gameUsers.map((gameUser) => {
+    const usersPromises = await gameUsers.map((gameUser) => {
       return db.User.find({ where: { id: gameUser.userId } });
     });
 
+    const users = await Promise.all(usersPromises);
     let gameWinnerUser = null;
 
     if (gameWinnerGameUserId) {
@@ -156,14 +132,35 @@ export default class GameCtrl {
       gameWinnerUser = users[gameWinnerGameUserIndex];
     }
 
-    await this.updateUsersStatistic({ users, gameWinnerUser });
+    /* eslint-disable no-param-reassign */
+    const updatedUsersPromises = users.map((user) => {
+      user.gamesTotal += 1;
+
+      if (gameWinnerUser) {
+        if (gameWinnerUser.id === user.id) {
+          user.experience += generateGameWonExperienceFromLevel(user.level);
+          user.gamesWon += 1;
+        } else {
+          user.gamesLose += 1;
+        }
+      } else {
+        user.gamesDraw += 1;
+      }
+      // TODO socket
+      // User.message(user.id, wsResponses.message('data', {user: user}));
+
+      return user.save();
+    });
+
+    const updatedUsers = await Promise.all(updatedUsersPromises);
+    /* eslint-enable no-param-reassign */
 
     // TODO socket
     // db.Game.message(
     //  game.id,
     //  wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId}));
 
-    return game;
+    return { game, users: updatedUsers };
   }
 
   async timeIntervalIteration(

@@ -190,19 +190,16 @@ describe('game', () => {
     }
   });
 
-  it('updateUsersStatistic', async () => {
+  it('finishGame', async () => {
     try {
-      const initWonUserGamesWon = users[0].gamesWon;
-      const initLoseUserGamesLose = users[1].gamesLose;
+      const initWonUserGamesWon = users[1].gamesWon;
+      const game = games[0];
 
-      const result = await gameCtrl.updateUsersStatistic({
-        users,
-        gameWinnerUser: users[0],
-      });
+      const result = await gameCtrl.finishGame({ game, db });
 
-      expect(result[0].id).toBe(users[0].id);
-      expect(result[0].gamesWon).toBe(initWonUserGamesWon + 1);
-      expect(result[1].gamesLose).toBe(initLoseUserGamesLose + 1);
+      expect(result.game.id).toBe(game.id);
+      expect(result.users[0].id).toBe(users[0].id);
+      expect(result.users[1].gamesWon).toBe(initWonUserGamesWon + 1);
     } catch (err) {
       throw new Error(err.stack);
     }
