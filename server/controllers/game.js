@@ -163,20 +163,20 @@ export default class GameCtrl {
     return { game, users: updatedUsers };
   }
 
-  async timeIntervalIteration(
-    {
-      gameTimeIntervalObj: { intervalId },
-      gameId,
-      db,
-    },
-  ) {
+  async timeIntervalIteration({
+    intervalId,
+    gameId,
+    db,
+  }) {
     const game = await db.Game.find({
       where: { id: gameId },
       include: [db.GameUser],
     });
 
     if (!game) {
-      return clearInterval(intervalId);
+      clearInterval(intervalId);
+
+      throw new Error('This Game is not exist');
     }
 
     game.residueTime -= 1;
@@ -188,7 +188,7 @@ export default class GameCtrl {
 
       await this.finishGame({ game, db });
     } else {
-      const isEstimatorsPresent = await game.isEstimatorsPresent(game);
+      const isEstimatorsPresent = await this.isEstimatorsPresent(game);
 
       if (
         game.residueTime <= gameConfig.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
@@ -343,17 +343,17 @@ export default class GameCtrl {
   async create({ db }) {
     const tasks = await db.Task.findAll();
 
-    const taskId = tasks[Math.floor(Math.random() * tasks.length)].id;
+    const taskId = _.sample(tasks).id;
 
     const game = await db.Game.create({ taskId });
 
-    // Object for provide interval id by link
-    const gameTimeIntervalObj = {};
-
-    gameTimeIntervalObj.itervalId = setInterval(
-      this.timeIntervalIteration.bind(this, { gameTimeIntervalObj }, db),
-      1000,
-    );
+    const itervalId = setInterval(() => {
+      this.timeIntervalIteration({
+        itervalId,
+        gameId: game.id,
+        db,
+      });
+    }, 1000);
 
     return game;
   }

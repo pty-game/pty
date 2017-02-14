@@ -204,4 +204,18 @@ describe('game', () => {
       throw new Error(err.stack);
     }
   });
+
+  it('timeIntervalIteration', async () => {
+    try {
+      const gameId = games[0].id;
+
+      const intervalId = setInterval(() => {});
+
+      const result = await gameCtrl.timeIntervalIteration({ gameId, intervalId, db });
+
+      expect(result).toBe(true);
+    } catch (err) {
+      throw new Error(err.stack);
+    }
+  });
 });
