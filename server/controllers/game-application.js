@@ -1,5 +1,5 @@
 export default class GameApplicationCtrl {
-  async gameApplicationCreate(req, { userId, isEstimator, db }) {
+  async create({ userId, isEstimator, db }) {
     const user = await db.User.findOne({ where: { id: userId } });
 
     if (!user) {

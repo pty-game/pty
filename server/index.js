@@ -3,13 +3,14 @@ import Sequelize from 'sequelize';
 import socketIO from 'socket.io';
 import models from './models';
 import routes from './routes';
+import socketEvents from './socket-events';
 
 const app = express();
 
 const io = socketIO(3001);
 
 io.on('connection', (socket) => {
-  socket.emit('connected', { hello: 'world' });
+  socketEvents(socket);
 });
 
 const sequelize = new Sequelize('painty', 'painty', 'painty', {

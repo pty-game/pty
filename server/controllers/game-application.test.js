@@ -29,7 +29,7 @@ describe('game application', () => {
     try {
       const userId = user.id;
 
-      gameApplication = await gameApplicationCtrl.gameApplicationCreate({}, { userId, db });
+      gameApplication = await gameApplicationCtrl.create({ userId, db });
 
       expect(gameApplication.userId).toBe(userId);
       expect(gameApplication.isBot).toBe(false);
