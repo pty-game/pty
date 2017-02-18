@@ -357,4 +357,21 @@ export default class GameCtrl {
 
     return game;
   }
+
+  async findWithMinEstimators({ finderUserId, db }) {
+    const games = await db.Game.findAll({ include: [db.GameUser] });
+
+    const filteredGames = games.filter((game) => {
+      return !(
+        game.gameUsers.find((gameUser) => {
+          return !gameUser.isBot && gameUser.userId === finderUserId;
+        }) ||
+        game.residueTime <= gameConfig.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH
+      );
+    });
+
+    return filteredGames.sort((a, b) => {
+      return a.gameUsers.length - b.gameUsers.length;
+    });
+  }
 }
