@@ -10,7 +10,7 @@ describe('socket', () => {
         expect(data.hello).toBe('world');
       });
     } catch (err) {
-      throw new Error(err);
+      throw new Error(err.stack);
     }
   });
 });

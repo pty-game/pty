@@ -60,3 +60,10 @@ export const mockTask = () => {
     name: chance.word(),
   };
 };
+
+export const mockGameApplication = ({ userId, isEstimator = false }) => {
+  return {
+    userId,
+    isEstimator,
+  };
+};

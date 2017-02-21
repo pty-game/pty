@@ -6,7 +6,7 @@ const gameCtrl = new GameCtrl();
 export default class ApplicationConnect {
   async findOpponentForPlayer({ gameApplication, gameApplications }) {
     return gameApplications.find((gameApplicationSub) => {
-      return !gameApplicationSub.is_estimator &&
+      return !gameApplicationSub.isEstimator &&
         gameApplication.id !== gameApplicationSub.id;
     });
   }
@@ -40,16 +40,19 @@ export default class ApplicationConnect {
 
   async iterationForPlayer({ gameApplication, gameApplications, index, db }) {
     /* eslint-disable no-param-reassign */
-    const gameApplicationSub = this.findOpponentForPlayer({ gameApplication, gameApplications });
+    const gameApplicationSub = await this.findOpponentForPlayer({
+      gameApplication,
+      gameApplications,
+    });
 
     if (
       !gameApplicationSub &&
       gameApplication.residueTime > gameConfig.RESIDUE_TIME_FOR_PAINTER_BOTS
     ) {
-      return this.gameApplicationIteration({ gameApplications, index: index + 1, db });
+      return false;
     }
 
-    const game = await gameCtrl.create();
+    const game = await gameCtrl.create({ db });
     const gameId = game.id;
 
     if (

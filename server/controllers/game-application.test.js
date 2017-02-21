@@ -35,7 +35,7 @@ describe('game application', () => {
       expect(gameApplication.isBot).toBe(false);
       expect(gameApplication.isEstimator).toBe(false);
     } catch (err) {
-      throw new Error(err);
+      throw new Error(err.stack);
     }
   });
 });
