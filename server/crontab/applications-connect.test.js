@@ -129,3 +129,14 @@ describe('applications connect', () => {
     }
   });
 });
+
+describe('applications connect', () => {
+  it('interval', async () => {
+    try {
+      const result = await applicationsConnect.interval({ db });
+      expect(result).toBe(true);
+    } catch (err) {
+      throw new Error(err.stack);
+    }
+  });
+});

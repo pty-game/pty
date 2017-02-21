@@ -149,7 +149,7 @@ export default class ApplicationConnect {
       this.iterationForPlayer :
       this.iterationForEstimator;
 
-      await specialIterationFn({ gameApplication, gameApplications, index, db });
+      await specialIterationFn.call(this, { gameApplication, gameApplications, index, db });
     }
 
     return this.gameApplicationIteration({ gameApplications, index: index + 1, db });
@@ -159,6 +159,8 @@ export default class ApplicationConnect {
   async interval({ db }) {
     const gameApplications = await db.GameApplication.findAll();
 
-    await this.gameApplicationIteration({ gameApplications, db });
+    const result = await this.gameApplicationIteration({ gameApplications, db });
+
+    return result;
   }
 }
