@@ -66,7 +66,7 @@ beforeAll(async () => {
 
   tasks = [
     await db.Task.create(mockTask()),
-    await db.GameUser.create(mockTask()),
+    await db.Task.create(mockTask()),
   ];
 });
 

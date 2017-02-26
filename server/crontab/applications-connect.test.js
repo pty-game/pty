@@ -1,7 +1,8 @@
 import Sequelize from 'sequelize';
 import models from '../models';
+import gameConfig from '../game-config';
 import ApplicationsConnect from './applications-connect';
-import { mockUser, mockGameApplication, mockGameUser, mockGame } from '../mocks';
+import { mockUser, mockGameApplication, mockGameUser, mockGame, mockTask } from '../mocks';
 
 const applicationsConnect = new ApplicationsConnect();
 
@@ -16,8 +17,13 @@ let users = [];
 let gameApplications = [];
 let games = [];
 let gameUsers = [];
+let tasks = [];
 
 beforeAll(async () => {
+  tasks = [
+    await db.Task.create(mockTask()),
+    await db.Task.create(mockTask()),
+  ];
   users = [
     await db.User.create(mockUser()),
     await db.User.create(mockUser()),
@@ -78,7 +84,16 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await tasks.map((item) => {
+    return item.destroy();
+  });
+  await games.map((item) => {
+    return item.destroy();
+  });
   await users.map((item) => {
+    return item.destroy();
+  });
+  await gameUsers.map((item) => {
     return item.destroy();
   });
   await gameApplications.map((item) => {
@@ -107,14 +122,15 @@ describe('applications connect', () => {
         gameApplication: gameApplications[4],
         db,
       });
-      expect(result).toBe(true);
+      expect(
+        result.gameUsers.filter((gameUser) => {
+          return gameUser.isEstimator;
+        }).length,
+      ).toBe(0);
     } catch (err) {
       throw new Error(err.stack);
     }
   });
-});
-
-describe('applications connect', () => {
   it('iterationForPlayer', async () => {
     try {
       const result = await applicationsConnect.iterationForPlayer({
@@ -123,14 +139,11 @@ describe('applications connect', () => {
         index: 0,
         db,
       });
-      expect(result).toBe(true);
+      expect(result.residueTime).toBe(gameConfig.GAME_DURATION);
     } catch (err) {
       throw new Error(err.stack);
     }
   });
-});
-
-describe('applications connect', () => {
   it('interval', async () => {
     try {
       const result = await applicationsConnect.interval({ db });

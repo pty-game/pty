@@ -372,6 +372,6 @@ export default class GameCtrl {
 
     return filteredGames.sort((a, b) => {
       return a.gameUsers.length - b.gameUsers.length;
-    });
+    })[0];
   }
 }

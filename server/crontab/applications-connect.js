@@ -18,7 +18,7 @@ export default class ApplicationConnect {
     });
 
     if (!gameWithMinEstimators) {
-      return false;
+      return null;
     }
 
     await db.GameUser.create({
@@ -27,15 +27,9 @@ export default class ApplicationConnect {
       is_estimator: true,
     });
 
-    // TODO websocket
-    // GameApplication.message(
-    //   gameApplication.id,
-    //   wsResponses.message('gameFound', {gameId: game.id})
-    // )
-
     await gameApplication.destroy();
 
-    return true;
+    return gameWithMinEstimators;
   }
 
   async iterationForPlayer({ gameApplication, gameApplications, index, db }) {
@@ -49,7 +43,7 @@ export default class ApplicationConnect {
       !gameApplicationSub &&
       gameApplication.residueTime > gameConfig.RESIDUE_TIME_FOR_PAINTER_BOTS
     ) {
-      return false;
+      return null;
     }
 
     const game = await gameCtrl.create({ db });
@@ -69,7 +63,7 @@ export default class ApplicationConnect {
       if (!bot) {
         await game.destroy();
 
-        return false;
+        return null;
       }
     }
 
@@ -91,11 +85,6 @@ export default class ApplicationConnect {
 
     await db.GameUser.bulkCreate(gameUsers);
 
-    // TODO websocket
-    // var message = wsResponses.message('gameFound', {gameId: game.id});
-    // GameApplication.message(gameApplication.id, message)
-    // if (gameApplicationSub) GameApplication.message(gameApplicationSub.id, message)
-
     await gameApplication.destroy();
 
     gameApplications.splice(index, 1);
@@ -112,7 +101,7 @@ export default class ApplicationConnect {
       gameApplications.splice(subIndex, 1);
     }
 
-    return true;
+    return game;
     /* eslint-enable no-param-reassign */
   }
 
@@ -141,7 +130,7 @@ export default class ApplicationConnect {
     gameApplication.residueTime -= gameConfig.GAME_APPLICATION_CRONTAB_TIMEOUT;
 
     if (gameApplication.residueTime < 0) {
-      this.gameApplicationExpired({ gameApplication, gameApplications, index });
+      await this.gameApplicationExpired({ gameApplication, gameApplications, index });
     } else {
       await gameApplication.save();
 
@@ -149,7 +138,20 @@ export default class ApplicationConnect {
       this.iterationForPlayer :
       this.iterationForEstimator;
 
-      await specialIterationFn.call(this, { gameApplication, gameApplications, index, db });
+      const game = await specialIterationFn.call(this, {
+        gameApplication,
+        gameApplications,
+        index,
+        db,
+      });
+
+      if (game) {
+        // TODO websocket
+        // GameApplication.message(
+        //   gameApplication.id,
+        //   wsResponses.message('gameFound', {gameId: game.id})
+        // )
+      }
     }
 
     return this.gameApplicationIteration({ gameApplications, index: index + 1, db });
