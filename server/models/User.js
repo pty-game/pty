@@ -3,6 +3,10 @@ import Sequelize from 'sequelize';
 export default (sequelize) => {
   return sequelize.define('User', {
     login: Sequelize.STRING,
+    password: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
     experience: {
       type: Sequelize.INTEGER,
       defaultValue: 0,

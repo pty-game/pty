@@ -2,19 +2,14 @@ import { CronJob } from 'cron';
 import express from 'express';
 import Sequelize from 'sequelize';
 import socketIO from 'socket.io';
+import socketioJwt from 'socketio-jwt';
 import models from './models';
 import routes from './routes';
 import socketEvents from './socket-events';
-import ApplicationConnect from './crontab/applications-connect';
 import gameConfig from './game-config';
-
-const applicationConnect = new ApplicationConnect();
-const app = express();
-const io = socketIO(3001);
-
-io.on('connection', (socket) => {
-  socketEvents(socket);
-});
+import config from './config';
+import GameCtrl from './controllers/game';
+import ApplicationConnect from './controllers/applications-connect';
 
 const sequelize = new Sequelize('painty', 'painty', 'painty', {
   host: 'localhost',
@@ -22,6 +17,20 @@ const sequelize = new Sequelize('painty', 'painty', 'painty', {
 });
 
 const db = models(sequelize);
+
+const applicationConnect = new ApplicationConnect(db, new GameCtrl(db), gameConfig);
+const app = express();
+const io = socketIO(3001);
+
+io.use(socketioJwt.authorize({
+  secret: config.JWT_SECRET,
+  handshake: true,
+}));
+
+io.on('connection', (socket) => {
+  console.log('Client connected!!!!!');
+  socketEvents(socket);
+});
 
 routes(app, db);
 

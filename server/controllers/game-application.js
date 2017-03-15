@@ -1,19 +1,22 @@
 export default class GameApplicationCtrl {
-  async create({ userId, isEstimator, db }) {
-    const user = await db.User.findOne({ where: { id: userId } });
+  constructor(db) {
+    this.db = db;
+  }
+  async create({ userId, isEstimator }) {
+    const user = await this.db.User.findOne({ where: { id: userId } });
 
     if (!user) {
       throw new Error('User is not exist');
     }
 
-    const gameApplications = await db.GameApplication.findAll({
+    const gameApplications = await this.db.GameApplication.findAll({
       where: { userId },
     });
 
     const promises = [];
 
     promises.push(
-      db.GameApplication.create({
+      this.db.GameApplication.create({
         isEstimator,
         userId,
       }),
@@ -26,9 +29,6 @@ export default class GameApplicationCtrl {
     const result = await Promise.all(promises);
 
     const gameApplication = result[0];
-
-    // TODO socket
-    // db.GameApplication.subscribe(req, gameApplication);
 
     return gameApplication;
   }

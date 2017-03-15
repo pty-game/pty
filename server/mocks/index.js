@@ -3,7 +3,10 @@ import { getLevelFromExperience, getNextLevelExperienceFromLevel } from '../help
 
 const chance = new Chance();
 
-export const mockUser = (experience = chance.integer({ min: 0, max: 1000000 })) => {
+export const mockUser = ({
+  login = chance.name(),
+  experience = chance.integer({ min: 0, max: 1000000 }),
+} = {}) => {
   const gamesTotal = chance.integer({ min: 50, max: 100 });
   const gamesWon = gamesTotal - 10;
   const gamesLoose = 5;
@@ -13,7 +16,8 @@ export const mockUser = (experience = chance.integer({ min: 0, max: 1000000 })) 
   const nextLevelExperience = getNextLevelExperienceFromLevel(level);
 
   return {
-    login: chance.name(),
+    login,
+    password: '123456',
     experience,
     nextLevelExperience,
     level,
