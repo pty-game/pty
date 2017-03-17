@@ -1,13 +1,11 @@
 import { CronJob } from 'cron';
 import express from 'express';
+import WebSocket from 'ws';
 import Sequelize from 'sequelize';
-import socketIO from 'socket.io';
-import socketioJwt from 'socketio-jwt';
 import models from './models';
 import routes from './routes';
 import socketEvents from './socket-events';
 import gameConfig from './game-config';
-import config from './config';
 import GameCtrl from './controllers/game';
 import ApplicationConnect from './controllers/applications-connect';
 
@@ -20,18 +18,14 @@ const db = models(sequelize);
 
 const applicationConnect = new ApplicationConnect(db, new GameCtrl(db), gameConfig);
 const app = express();
-const io = socketIO(3001);
 
-io.use(socketioJwt.authorize({
-  secret: config.JWT_SECRET,
-  handshake: true,
-}));
+const wsServer = new WebSocket.Server({
+  perMessageDeflate: false,
+  port: 3001,
+});
 
-io.on('connection', (socket) => {
-  console.log('Client connected!!!!!');
+wsServer.on('connection', (socket) => {
   socketEvents(socket);
-
-  socket.emit('subscribed', socket.decoded_token)
 });
 
 routes(app, db);

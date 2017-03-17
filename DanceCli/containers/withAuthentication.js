@@ -1,12 +1,13 @@
 import { connect } from 'react-redux';
-import { signIn, subscribe } from '../redux/modules/user';
+import { signIn, subscribe } from '../redux/modules/authentication';
 
 export default (WrappedComponent) => {
   return connect(
-    ({ user: { token, userData } }) => {
+    ({ authentication: { token, userData, error } }) => {
       return {
         token,
         userData,
+        error,
       };
     },
     (dispatch) => {

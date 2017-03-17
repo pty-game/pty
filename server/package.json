@@ -32,6 +32,8 @@
     "sequelize": "^3.30.1",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
-    "socketio-jwt": "^4.5.0"
+    "socketio-jwt": "^4.5.0",
+    "ws": "^2.2.1",
+    "pty-common": "git+ssh://git@github.com/Danxil/pty-common.git"
   }
 }

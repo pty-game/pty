@@ -1,13 +1,13 @@
 import { combineReducers } from 'redux';
 import { fork } from 'redux-saga/effects';
-import { userReducer, userSaga } from './user';
+import { authenticationReducer, authenticationSaga } from './authentication';
 
 export const rootReducer = combineReducers({
-  user: userReducer,
+  authentication: authenticationReducer,
 });
 
 export const rootSaga = function* () {
   yield [
-    fork(userSaga),
+    fork(authenticationSaga),
   ];
 };

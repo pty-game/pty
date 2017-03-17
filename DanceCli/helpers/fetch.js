@@ -1,10 +1,14 @@
+import { baseUrlRest } from '../config';
+
 /* eslint no-param-reassign: 0 */
 /* global fetch */
 
 const prepareFormData = (values) => {
   const body = new FormData();
   Object.keys(values).forEach((key) => {
-    if (values[key] instanceof FileList) {
+    if (false) {
+    // TODO FileList
+    // if (values[key] instanceof FileList) {
       for (let i = 0; i < values[key].length; i += 1) {
         body.append(key, values[key][i]);
       }
@@ -24,7 +28,7 @@ export default (url, options) => {
       prepareFormData(values);
   }
   options.credentials = 'same-origin';
-  return fetch(url, options)
+  return fetch(`${baseUrlRest}/${url}`, options)
     .then((response) => {
       return response.json().then(
         (body) => {

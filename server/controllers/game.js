@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { estimatorAction } from '../../common/actions';
+import { estimatorAction } from 'pty-common/actions';
 
 export default class GameCtrl {
   constructor(db, gameConfig, generateGameWonExperienceFromLevel) {

@@ -23,3 +23,7 @@ export const getLevelFromExperience = (experience) => {
 export const generateGameWonExperienceFromLevel = () => {
   return gameConfig.GAME_WON_EXPERIENCE_VALUE;
 };
+
+export const errorResponse = (error) => {
+  return { error };
+};

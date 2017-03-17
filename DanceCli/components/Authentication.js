@@ -1,7 +1,7 @@
 import React, { PropTypes, Component } from 'react';
-import { AsyncStorage, View } from 'react-native';
+import { AsyncStorage } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import withUserData from '../containers/withUserData';
+import withAuthentication from '../containers/withAuthentication';
 import SignIn from '../components/SignIn';
 
 class Authentication extends Component {
@@ -24,7 +24,7 @@ class Authentication extends Component {
   }
 
   render() {
-    return !this.props.token ? <SignIn /> : <View />;
+    return <SignIn />;
   }
 }
 
@@ -39,4 +39,4 @@ Authentication.propTypes = {
   userData: PropTypes.object,
 };
 
-export default withUserData(Authentication);
+export default withAuthentication(Authentication);

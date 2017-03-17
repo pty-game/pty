@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { errorResponse } from '../helpers';
 
 export default class SignInHandler {
   constructor(db, userCtrl, config) {
@@ -19,7 +20,7 @@ export default class SignInHandler {
       res.json({ token, user });
     } catch (err) {
       console.error(err);
-      res.send(500, err);
+      res.status(500).send(errorResponse(err.message));
     }
   }
 }
