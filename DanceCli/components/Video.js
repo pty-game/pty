@@ -3,7 +3,7 @@ import {
  View,
 } from 'react-native';
 import Sound from 'react-native-sound';
-import Video from 'react-native-video';
+import VideoRun from 'react-native-video';
 
 const styles = {
   container: {
@@ -24,7 +24,7 @@ const styles = {
   },
 };
 
-export default class Home extends Component {
+export default class Video extends Component {
   constructor() {
     super();
     this.playPlayback();
@@ -54,7 +54,7 @@ export default class Home extends Component {
 
   render() {
     return (<View style={styles.container}>
-      <Video
+      <VideoRun
         ref={(ref) => {
           this.player = ref;
         }}
@@ -65,11 +65,21 @@ export default class Home extends Component {
         paused={false}
         resizeMode="cover"
         repeat
-        onLoadStart={() => console.log(1)}
-        onLoad={() => console.log(2)}
-        onProgress={() => console.log(3)}
-        onEnd={() => console.log(4)}
-        onError={err => console.log(5, err)}
+        onLoadStart={() => {
+          console.log(1);
+        }}
+        onLoad={() => {
+          console.log(2);
+        }}
+        onProgress={() => {
+          console.log(3);
+        }}
+        onEnd={() => {
+          console.log(4);
+        }}
+        onError={(err) => {
+          console.log(5, err);
+        }}
         style={styles.backgroundVideo}
       />
     </View>);

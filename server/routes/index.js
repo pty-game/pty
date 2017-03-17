@@ -1,25 +1,16 @@
-import jwt from 'jsonwebtoken';
+import multer from 'multer';
 import UserCtrl from '../controllers/user';
 import config from '../config';
+import SignInHandler from '../handlers/sign-in';
 
-const userCtrl = new UserCtrl();
+const upload = multer();
 
-export default (app) => {
+export default (app, db) => {
+  const signInHandler = new SignInHandler(db, new UserCtrl(db), config);
+
   app.get('/', (req, res) => {
     res.send('Home');
   });
 
-  app.get('/signIn', async (req, res) => {
-    try {
-      const user = await userCtrl.signIn(req.body);
-
-      delete user.password;
-
-      const token = jwt.sign(user, config.JWT_SECRET, { expiresInMinutes: 60 * 24 });
-
-      res.json({ token });
-    } catch (err) {
-      res.send(500, err);
-    }
-  });
+  app.post('/sign-in', upload.none(), signInHandler.run.bind(signInHandler));
 };

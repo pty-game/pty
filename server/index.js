@@ -30,6 +30,8 @@ io.use(socketioJwt.authorize({
 io.on('connection', (socket) => {
   console.log('Client connected!!!!!');
   socketEvents(socket);
+
+  socket.emit('subscribed', socket.decoded_token)
 });
 
 routes(app, db);
