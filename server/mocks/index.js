@@ -1,5 +1,5 @@
 import Chance from 'chance';
-import { getLevelFromExperience, getNextLevelExperienceFromLevel } from '../helpers';
+import { getLevelFromExperience, getNextLevelExperienceFromLevel } from '../helpers/experience';
 
 const chance = new Chance();
 

@@ -1,8 +1,9 @@
+import gameConfig from '../game-config';
+
 export default class ApplicationsConnect {
-  constructor(db, gameCtrl, gameConfig) {
+  constructor(db, gameCtrl) {
     this.db = db;
     this.gameCtrl = gameCtrl;
-    this.gameConfig = gameConfig;
   }
   async findOpponentForPlayer({ gameApplication, gameApplications }) {
     return gameApplications.find((gameApplicationSub) => {
@@ -40,7 +41,7 @@ export default class ApplicationsConnect {
 
     if (
       !gameApplicationSub &&
-      gameApplication.residueTime > this.gameConfig.RESIDUE_TIME_FOR_PAINTER_BOTS
+      gameApplication.residueTime > gameConfig.RESIDUE_TIME_FOR_PAINTER_BOTS
     ) {
       return null;
     }
@@ -50,7 +51,7 @@ export default class ApplicationsConnect {
 
     if (
       !gameApplicationSub &&
-      gameApplication.residueTime <= this.gameConfig.RESIDUE_TIME_FOR_PAINTER_BOTS
+      gameApplication.residueTime <= gameConfig.RESIDUE_TIME_FOR_PAINTER_BOTS
     ) {
       const bot = await this.gameCtrl.createBotForGame({
         game,
@@ -125,7 +126,7 @@ export default class ApplicationsConnect {
       return true;
     }
 
-    gameApplication.residueTime -= this.gameConfig.GAME_APPLICATION_CRONTAB_TIMEOUT;
+    gameApplication.residueTime -= gameConfig.GAME_APPLICATION_CRONTAB_TIMEOUT;
 
     if (gameApplication.residueTime < 0) {
       await this.gameApplicationExpired({ gameApplication, gameApplications, index });

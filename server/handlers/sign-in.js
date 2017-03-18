@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken';
-import { errorResponse } from '../helpers';
+import { errorResponse } from '../helpers/responses';
+import { JWT_SECRET } from '../config';
 
 export default class SignInHandler {
-  constructor(db, userCtrl, config) {
+  constructor(db, userCtrl) {
     this.db = db;
     this.userCtrl = userCtrl;
-    this.config = config;
   }
 
   async run(req, res) {
@@ -15,7 +15,7 @@ export default class SignInHandler {
 
       delete user.password;
 
-      const token = jwt.sign(user, this.config.JWT_SECRET);
+      const token = jwt.sign(user, JWT_SECRET);
 
       res.json({ token, user });
     } catch (err) {

@@ -3,9 +3,6 @@ import { AsyncStorage } from 'react-native';
 import fetch from '../../helpers/fetch';
 import WS from '../../helpers/ws';
 import { baseUrlSocket } from '../../config';
-import { wsGenerateMessage, wsParseMessage } from 'pty-common/wsMessage';
-
-AsyncStorage.clear();
 
 export const subscribe = (token) => {
   return {
@@ -44,13 +41,15 @@ export const signInCb = function* ({ login, password }) {
 };
 
 const socketConnect = (token) => {
-  const ws = WS.init({ baseUrlSocket, token, wsGenerateMessage, wsParseMessage });
+  const ws = WS.init({ baseUrlSocket, token });
 
   ws.connect();
 
   return new Promise((resolve) => {
-    ws.on('subscribed', (userData) => {
+    ws.on('SUBSCRIBED', (userData) => {
       resolve(userData);
+      console.log('GAME_APPLICATION_CREATE');
+      ws.send('GAME_APPLICATION_CREATE', { isEstimator: false });
     });
   });
 };

@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import { estimatorAction } from 'pty-common/actions';
+import gameConfig from '../game-config';
+import { generateGameWonExperienceFromLevel } from '../helpers/experience';
 
 export default class GameCtrl {
-  constructor(db, gameConfig, generateGameWonExperienceFromLevel) {
+  constructor(db) {
     this.db = db;
-    this.gameConfig = gameConfig;
-    this.generateGameWonExperienceFromLevel = generateGameWonExperienceFromLevel;
   }
 
   async subscribe({ userId, gameId }) {
@@ -142,7 +142,7 @@ export default class GameCtrl {
 
       if (gameWinnerUser) {
         if (gameWinnerUser.id === user.id) {
-          user.experience += this.generateGameWonExperienceFromLevel(user.level);
+          user.experience += generateGameWonExperienceFromLevel(user.level);
           user.gamesWon += 1;
         } else {
           user.gamesLose += 1;
@@ -194,7 +194,7 @@ export default class GameCtrl {
       const isEstimatorsPresent = await this.isEstimatorsPresent(game);
 
       if (
-        game.residueTime <= this.gameConfig.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
+        game.residueTime <= gameConfig.RESIDUE_TIME_FOR_ESTIMATOR_BOTS &&
         game.residueTime >= 1 &&
         !isEstimatorsPresent
       ) {
@@ -365,7 +365,7 @@ export default class GameCtrl {
         game.gameUsers.find((gameUser) => {
           return !gameUser.isBot && gameUser.userId === finderUserId;
         }) ||
-        game.residueTime <= this.gameConfig.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH
+        game.residueTime <= gameConfig.RESIDUE_TIME_TRESHOLD_FOR_GAME_SEARCH
       );
     });
 

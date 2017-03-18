@@ -1,8 +1,6 @@
 import Sequelize from 'sequelize';
 import models from '../models';
 import GameCtrl from './game';
-import gameConfig from '../game-config';
-import { generateGameWonExperienceFromLevel } from '../helpers';
 import { mockUser, mockGameUser, mockGame, mockTask, mockGameAction } from '../mocks';
 
 const sequelize = new Sequelize('painty', 'painty', 'painty', {
@@ -12,7 +10,7 @@ const sequelize = new Sequelize('painty', 'painty', 'painty', {
 
 const db = models(sequelize);
 
-const gameCtrl = new GameCtrl(db, gameConfig, generateGameWonExperienceFromLevel);
+const gameCtrl = new GameCtrl(db);
 
 let users = [];
 let gameUsers = [];

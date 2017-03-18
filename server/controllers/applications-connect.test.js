@@ -11,7 +11,7 @@ const sequelize = new Sequelize('painty', 'painty', 'painty', {
 });
 
 const db = models(sequelize);
-const applicationsConnect = new ApplicationsConnect(db, new GameCtrl(db, gameConfig), gameConfig);
+const applicationsConnect = new ApplicationsConnect(db, new GameCtrl(db));
 
 let users = [];
 let gameApplications = [];

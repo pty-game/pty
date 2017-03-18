@@ -1,3 +1,5 @@
+import { wsGenerateMessage, wsParseMessage } from 'pty-common/wsMessage';
+
 export default class WS {
   static init(...args) {
     WS.instance = new WS(...args);
@@ -5,34 +7,32 @@ export default class WS {
     return WS.instance;
   }
 
-  constructor({ baseUrlSocket, token, wsGenerateMessage, wsParseMessage }) {
-    this.messageMap = {};
+  constructor({ baseUrlSocket, token }) {
+    this.messageEventMap = {};
     this.baseUrlSocket = baseUrlSocket;
     this.token = token;
-    this.wsGenerateMessage = wsGenerateMessage;
-    this.wsParseMessage = wsParseMessage;
   }
 
   on(type, cb) {
-    this.messageMap[type] = cb;
+    this.messageEventMap[type] = cb;
   }
 
   connect() {
-    this.socket = new WebSocket(`${this.baseUrlSocket}/$token=${this.token}`);
+    this.socket = new WebSocket(`${this.baseUrlSocket}/?token=${this.token}`);
 
     this.assign();
   }
 
-  emit(type, payload) {
-    this.socket.send(this.wsGenerateMessage(type, { ...payload, token: this.token }));
+  send(type, payload) {
+    this.socket.send(wsGenerateMessage(type, payload, this.token));
   }
 
   assign() {
     this.socket.onmessage = ({ data }) => {
-      const { type, payload } = this.wsParseMessage(data);
+      const { type, payload } = wsParseMessage(data);
 
-      if (this.messageMap[type]) {
-        this.messageMap[type](payload);
+      if (this.messageEventMap[type]) {
+        this.messageEventMap[type](payload);
       }
     };
   }

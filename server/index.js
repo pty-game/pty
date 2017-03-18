@@ -8,6 +8,7 @@ import socketEvents from './socket-events';
 import gameConfig from './game-config';
 import GameCtrl from './controllers/game';
 import ApplicationConnect from './controllers/applications-connect';
+import WS from './helpers/ws';
 
 const sequelize = new Sequelize('painty', 'painty', 'painty', {
   host: 'localhost',
@@ -24,10 +25,9 @@ const wsServer = new WebSocket.Server({
   port: 3001,
 });
 
-wsServer.on('connection', (socket) => {
-  socketEvents(socket);
-});
+const ws = new WS(wsServer);
 
+socketEvents(ws, db);
 routes(app, db);
 
 CronJob(`*/${gameConfig.GAME_APPLICATION_CRONTAB_TIMEOUT} * * * * *`, applicationConnect.interval);
