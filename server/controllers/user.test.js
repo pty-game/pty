@@ -1,17 +1,10 @@
-import Sequelize from 'sequelize';
-import models from '../models';
+import db from '../helpers/db';
 import UserCtrl from './user';
 import { mockUser } from '../mocks';
 
-const sequelize = new Sequelize('painty', 'painty', 'painty', {
-  host: 'localhost',
-  dialect: 'postgres',
-});
-
-const db = models(sequelize);
-
 const userCtrl = new UserCtrl(db);
 
+let existedUser;
 let user;
 
 const notExistedLogin = 'user2367';
@@ -19,11 +12,12 @@ const existedLogin = 'user1';
 const password = '123456';
 
 beforeAll(async () => {
-  user = await db.User.create(mockUser({ login: existedLogin }));
+  existedUser = await db.User.create(mockUser({ login: existedLogin }));
 });
 
 afterAll(async () => {
   await db.User.destroy({ where: { id: user.id } });
+  await db.User.destroy({ where: { id: existedUser.id } });
 });
 
 describe('user', () => {

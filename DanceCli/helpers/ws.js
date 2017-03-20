@@ -1,4 +1,4 @@
-import { wsGenerateMessage, wsParseMessage } from 'pty-common/wsMessage';
+import { wsGenerateMessage, wsParseMessage } from 'pty-common/ws-message';
 
 export default class WS {
   static init(...args) {
@@ -7,14 +7,21 @@ export default class WS {
     return WS.instance;
   }
 
-  constructor({ baseUrlSocket, token }) {
+  constructor({ baseUrlSocket }) {
     this.messageEventMap = {};
     this.baseUrlSocket = baseUrlSocket;
+  }
+
+  setToken(token) {
     this.token = token;
   }
 
   on(type, cb) {
     this.messageEventMap[type] = cb;
+  }
+
+  off(type) {
+    delete this.messageEventMap[type];
   }
 
   connect() {
@@ -25,11 +32,14 @@ export default class WS {
 
   send(type, payload) {
     this.socket.send(wsGenerateMessage(type, payload, this.token));
+    console.log(`sent ${type} with payload ${JSON.stringify(payload)}`);
   }
 
   assign() {
     this.socket.onmessage = ({ data }) => {
       const { type, payload } = wsParseMessage(data);
+
+      console.log(`recieved ${type} with payload ${JSON.stringify(payload)}`);
 
       if (this.messageEventMap[type]) {
         this.messageEventMap[type](payload);

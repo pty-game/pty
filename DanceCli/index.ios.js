@@ -7,13 +7,17 @@ import { Scene, Router } from 'react-native-router-flux';
 import Home from './components/Home';
 import Pending from './components/Pending';
 import Capture from './components/Capture';
+import Game from './components/Game';
 import Estimation from './components/Estimation';
 import Video from './components/Video';
 import Authentication from './components/Authentication';
+import Error from './components/Error';
 import createStore, { sagaMiddleware, rootSaga } from './redux';
+import SignUpSuccess from './components/SignUpSuccess';
+import { baseUrlSocket } from './config';
+import WS from './helpers/ws';
 
-/* global window */
-window.navigator.userAgent = 'ReactNative';
+WS.init({ baseUrlSocket });
 
 const store = createStore();
 
@@ -23,11 +27,14 @@ const DanceCli = () => {
       <Router>
         <Scene key="root">
           <Scene key="authentication" initial component={Authentication} hideNavBar />
-          <Scene key="home" component={Home} />
-          <Scene key="pending" component={Pending} />
+          <Scene key="signUpSuccess" component={SignUpSuccess} hideNavBar />
+          <Scene key="home" component={Home} hideNavBar />
+          <Scene key="pending" component={Pending} hideNavBar />
           <Scene key="capture" component={Capture} hideNavBar />
-          <Scene key="estimation" component={Estimation} />
+          <Scene key="game" component={Game} hideNavBar />
+          <Scene key="estimation" component={Estimation} hideNavBar />
           <Scene key="video" component={Video} hideNavBar />
+          <Scene key="error" component={Error} hideNavBar />
         </Scene>
       </Router>
     </Provider>

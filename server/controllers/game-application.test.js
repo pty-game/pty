@@ -1,14 +1,6 @@
-import Sequelize from 'sequelize';
-import models from '../models';
+import db from '../helpers/db';
 import GameApplicationCtrl from './game-application';
 import { mockUser } from '../mocks';
-
-const sequelize = new Sequelize('painty', 'painty', 'painty', {
-  host: 'localhost',
-  dialect: 'postgres',
-});
-
-const db = models(sequelize);
 
 const gameApplicationCtrl = new GameApplicationCtrl(db);
 

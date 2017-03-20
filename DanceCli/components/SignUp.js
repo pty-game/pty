@@ -17,7 +17,7 @@ const styles = {
   },
 };
 
-class SignIn extends Component {
+class SignUp extends Component {
   constructor() {
     super();
 
@@ -31,7 +31,7 @@ class SignIn extends Component {
     return (
       <Container>
         <Form style={styles.form}>
-          <Item last>
+          <Item>
             <Input
               placeholder="Username"
               onChangeText={(login) => { this.setState({ login }); }}
@@ -50,26 +50,26 @@ class SignIn extends Component {
             style={styles.btn}
             block
             onPress={() => {
-              this.props.signIn({
+              this.props.signUp({
                 login: this.state.login,
                 password: this.state.password,
               });
             }}
           >
             <Text>
-              Sign In
+              Sign Up
             </Text>
           </Button>
           {
-            this.props.signInError && <Text style={styles.errorMessage}>
-              {this.props.signInError}
+            this.props.signUpError && <Text style={styles.errorMessage}>
+              {this.props.signUpError}
             </Text>
           }
           <Text
             style={{ marginTop: 20, textAlign: 'center', color: 'blue' }}
             onPress={this.props.toggleNewUser}
           >
-            Sign Up
+            Sign In
           </Text>
         </Form>
       </Container>
@@ -77,14 +77,14 @@ class SignIn extends Component {
   }
 }
 
-SignIn.defaultProps = {
-  signInError: null,
+SignUp.defaultProps = {
+  signUpError: null,
 };
 
-SignIn.propTypes = {
-  signIn: PropTypes.func.isRequired,
-  signInError: PropTypes.string,
+SignUp.propTypes = {
+  signUp: PropTypes.func.isRequired,
+  signUpError: PropTypes.string,
   toggleNewUser: PropTypes.func.isRequired,
 };
 
-export default withAuthentication(SignIn);
+export default withAuthentication(SignUp);

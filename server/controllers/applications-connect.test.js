@@ -1,22 +1,14 @@
-import Sequelize from 'sequelize';
-import models from '../models';
 import gameConfig from '../game-config';
 import ApplicationsConnect from './applications-connect';
 import GameCtrl from '../controllers/game';
-import { mockUser, mockGameApplication, mockGameUser, mockGame, mockTask } from '../mocks';
+import { mockUser, mockGameApplication, mockGameUser, mockGame, mockTask, mockWs } from '../mocks';
+import db from '../helpers/db';
 
-const sequelize = new Sequelize('painty', 'painty', 'painty', {
-  host: 'localhost',
-  dialect: 'postgres',
-});
-
-const db = models(sequelize);
-const applicationsConnect = new ApplicationsConnect(db, new GameCtrl(db));
+const applicationsConnect = new ApplicationsConnect(db, mockWs(), new GameCtrl(db));
 
 let users = [];
 let gameApplications = [];
 let games = [];
-let gameUsers = [];
 let tasks = [];
 
 beforeAll(async () => {
@@ -39,17 +31,15 @@ beforeAll(async () => {
     await db.Game.create(mockGame()),
   ];
 
-  gameUsers = [
-    await db.GameUser.create(mockGameUser(users[0].id, games[0].id)),
-    await db.GameUser.create(mockGameUser(users[1].id, games[0].id)),
-    await db.GameUser.create(mockGameUser(users[2].id, games[0].id, true)),
-    await db.GameUser.create(mockGameUser(users[3].id, games[0].id, true)),
-    await db.GameUser.create(mockGameUser(users[4].id, games[0].id, true)),
+  await db.GameUser.create(mockGameUser(users[0].id, games[0].id));
+  await db.GameUser.create(mockGameUser(users[1].id, games[0].id));
+  await db.GameUser.create(mockGameUser(users[2].id, games[0].id, true));
+  await db.GameUser.create(mockGameUser(users[3].id, games[0].id, true));
+  await db.GameUser.create(mockGameUser(users[4].id, games[0].id, true));
 
-    // game without estimators
-    await db.GameUser.create(mockGameUser(users[5].id, games[1].id)),
-    await db.GameUser.create(mockGameUser(users[6].id, games[1].id)),
-  ];
+  // game without estimators
+  await db.GameUser.create(mockGameUser(users[5].id, games[1].id));
+  await db.GameUser.create(mockGameUser(users[6].id, games[1].id));
 
   gameApplications = [
     await db.GameApplication.create(mockGameApplication({
@@ -87,18 +77,28 @@ afterAll(async () => {
   await tasks.map((item) => {
     return item.destroy();
   });
-  await games.map((item) => {
+
+  const allGames = await db.Game.findAll();
+
+  await Promise.all(allGames.map((item) => {
     return item.destroy();
-  });
+  }));
+
+  const allGameUsers = await db.GameUser.findAll();
+
+  await Promise.all(allGameUsers.map((item) => {
+    return item.destroy();
+  }));
+
   await users.map((item) => {
     return item.destroy();
   });
-  await gameUsers.map((item) => {
+
+  const allGameApplications = await db.GameApplication.findAll();
+
+  await Promise.all(allGameApplications.map((item) => {
     return item.destroy();
-  });
-  await gameApplications.map((item) => {
-    return item.destroy();
-  });
+  }));
 });
 
 describe('applications connect', () => {
@@ -122,11 +122,20 @@ describe('applications connect', () => {
         gameApplication: gameApplications[4],
         db,
       });
+
+      games.push(result);
+
       expect(
         result.gameUsers.filter((gameUser) => {
           return gameUser.isEstimator;
         }).length,
       ).toBe(0);
+
+      const userIds = result.gameUsers.map((gameUser) => {
+        return gameUser.userId;
+      });
+      expect(typeof userIds[0]).toBe('number');
+      expect(typeof userIds[1]).toBe('number');
     } catch (err) {
       throw new Error(err.stack);
     }
@@ -139,7 +148,27 @@ describe('applications connect', () => {
         index: 0,
         db,
       });
+
+      games.push(result);
+
       expect(result.residueTime).toBe(gameConfig.GAME_DURATION);
+      expect(
+        result.gameUsers.filter((gameUser) => {
+          return gameUser.isEstimator;
+        }).length,
+      ).toBe(0);
+      expect(
+        result.gameUsers.filter((gameUser) => {
+          return !gameUser.isEstimator;
+        }).length,
+      ).toBe(2);
+
+      const userIds = result.gameUsers.map((gameUser) => {
+        return gameUser.userId;
+      });
+
+      expect(typeof userIds[0]).toBe('number');
+      expect(typeof userIds[1]).toBe('number');
     } catch (err) {
       throw new Error(err.stack);
     }

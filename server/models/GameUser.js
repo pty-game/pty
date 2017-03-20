@@ -1,5 +1,4 @@
 import Sequelize from 'sequelize';
-import gameConfig from '../game-config';
 
 export default (sequelize) => {
   return sequelize.define('GameUser', {
@@ -10,10 +9,6 @@ export default (sequelize) => {
     isEstimator: {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
-    },
-    residueTime: {
-      type: Sequelize.INTEGER,
-      defaultValue: gameConfig.GAME_APPLICATION_DURATION,
     },
   }, {
     name: {

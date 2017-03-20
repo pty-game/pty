@@ -71,3 +71,11 @@ export const mockGameApplication = ({ userId, isEstimator = false }) => {
     isEstimator,
   };
 };
+
+export const mockWs = () => {
+  return {
+    on: () => {},
+    assignEvents: () => {},
+    send: () => {},
+  };
+};

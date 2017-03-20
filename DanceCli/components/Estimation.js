@@ -1,7 +1,9 @@
 import React from 'react';
-import { Button, Text } from 'native-base';
 import { View, Image } from 'react-native';
+import { Text } from 'native-base';
 import { Actions } from 'react-native-router-flux';
+import Container from './Container';
+import Button from './Button';
 
 const styles = {
   container: {
@@ -36,10 +38,14 @@ const EstimationItem = () => {
 };
 
 const Estimation = () => {
-  return (<View style={styles.container}>
-    { EstimationItem() }
-    { EstimationItem() }
-  </View>);
+  return (
+    <Container>
+      <View style={styles.container}>
+        { EstimationItem() }
+        { EstimationItem() }
+      </View>
+    </Container>
+  );
 };
 
 export default Estimation;

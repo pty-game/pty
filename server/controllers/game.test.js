@@ -1,16 +1,8 @@
-import Sequelize from 'sequelize';
-import models from '../models';
+import db from '../helpers/db';
 import GameCtrl from './game';
-import { mockUser, mockGameUser, mockGame, mockTask, mockGameAction } from '../mocks';
+import { mockUser, mockGameUser, mockGame, mockTask, mockGameAction, mockWs } from '../mocks';
 
-const sequelize = new Sequelize('painty', 'painty', 'painty', {
-  host: 'localhost',
-  dialect: 'postgres',
-});
-
-const db = models(sequelize);
-
-const gameCtrl = new GameCtrl(db);
+const gameCtrl = new GameCtrl(db, mockWs());
 
 let users = [];
 let gameUsers = [];
@@ -75,46 +67,28 @@ afterAll(async () => {
     return user.destroy();
   });
 
-  await gameUsers.map((gameUser) => {
-    return gameUser.destroy();
-  });
+  const allGameUsers = await db.GameUser.findAll();
 
-  await games.map((game) => {
-    return game.destroy();
-  });
+  await Promise.all(allGameUsers.map((item) => {
+    return item.destroy();
+  }));
+
+  const allGames = await db.Game.findAll();
+
+  await Promise.all(allGames.map((item) => {
+    return item.destroy();
+  }));
 
   await tasks.map((task) => {
     return task.destroy();
   });
 
-  await gameActions.map((gameAction) => {
+  await Promise.all(await gameActions.map((gameAction) => {
     return gameAction.destroy();
-  });
+  }));
 });
 
 describe('game', () => {
-  it('subscribe', async () => {
-    try {
-      const gameId = games[0].id;
-
-      const result = await gameCtrl.subscribe({ userId: users[0].id, gameId, db });
-      expect(result.id).toBe(gameId);
-    } catch (err) {
-      throw new Error(err.stack);
-    }
-  });
-
-  it('unsubscribe', async () => {
-    try {
-      const gameId = games[0].id;
-
-      const result = await gameCtrl.unsubscribe({ userId: users[0].id, gameId, db });
-      expect(result.id).toBe(gameId);
-    } catch (err) {
-      throw new Error(err.stack);
-    }
-  });
-
   it('addUserAction', async () => {
     try {
       const userId = users[0].id;
@@ -216,6 +190,28 @@ describe('game', () => {
       expect(result).toBe(true);
     } catch (err) {
       throw new Error(err.stack);
+    }
+  });
+
+  it('createBotForGame estimator', async () => {
+    try {
+      const game = games[0];
+
+      const result = await gameCtrl.createBotForGame({ game, isEstimator: true });
+      expect(result.isBot).toBe(true);
+      expect(result.isEstimator).toBe(true);
+    } catch (err) {
+      throw new Error(err.stack);
+    }
+  });
+
+  it('createBotForGame player', async () => {
+    try {
+      const game = games[0];
+
+      await gameCtrl.createBotForGame({ game, isEstimator: false });
+    } catch (err) {
+      expect(err.message).toBe('GameUser with the same task is not found');
     }
   });
 });

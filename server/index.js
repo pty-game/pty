@@ -1,8 +1,7 @@
-import { CronJob } from 'cron';
+import schedule from 'node-schedule';
 import express from 'express';
 import WebSocket from 'ws';
-import Sequelize from 'sequelize';
-import models from './models';
+import db, { dbConnection } from './helpers/db';
 import routes from './routes';
 import socketEvents from './socket-events';
 import gameConfig from './game-config';
@@ -10,14 +9,6 @@ import GameCtrl from './controllers/game';
 import ApplicationConnect from './controllers/applications-connect';
 import WS from './helpers/ws';
 
-const sequelize = new Sequelize('painty', 'painty', 'painty', {
-  host: 'localhost',
-  dialect: 'postgres',
-});
-
-const db = models(sequelize);
-
-const applicationConnect = new ApplicationConnect(db, new GameCtrl(db), gameConfig);
 const app = express();
 
 const wsServer = new WebSocket.Server({
@@ -25,14 +16,25 @@ const wsServer = new WebSocket.Server({
   port: 3001,
 });
 
-const ws = new WS(wsServer);
+const ws = new WS(wsServer, db);
+
+const applicationConnect = new ApplicationConnect(db, ws, new GameCtrl(db));
+
+schedule.scheduleJob(
+  `*/${gameConfig.GAME_APPLICATION_CRONTAB_TIMEOUT} * * * * *`,
+  async () => {
+    try {
+      await applicationConnect.interval();
+    } catch (err) {
+      console.error(err);
+    }
+  },
+);
 
 socketEvents(ws, db);
 routes(app, db);
 
-CronJob(`*/${gameConfig.GAME_APPLICATION_CRONTAB_TIMEOUT} * * * * *`, applicationConnect.interval);
-
-sequelize.sync().then(() => {
+dbConnection.sync().then(() => {
   console.log('sunc success');
 });
 

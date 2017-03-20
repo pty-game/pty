@@ -1,20 +1,13 @@
 import React from 'react';
-import { View } from 'react-native';
 import { Spinner } from 'native-base';
-
-const styles = {
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-};
+import Container from './Container';
 
 const Pending = () => {
-  return (<View style={styles.container}>
-    <Spinner />
-  </View>);
+  return (
+    <Container>
+      <Spinner />
+    </Container>
+  );
 };
 
 export default Pending;

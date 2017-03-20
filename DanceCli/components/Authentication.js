@@ -3,8 +3,17 @@ import { AsyncStorage } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import withAuthentication from '../containers/withAuthentication';
 import SignIn from '../components/SignIn';
+import SignUp from '../components/SignUp';
 
 class Authentication extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      isNewUser: false,
+    };
+  }
+
   async componentDidMount() {
     const token = await AsyncStorage.getItem('token');
 
@@ -19,12 +28,26 @@ class Authentication extends Component {
     }
 
     if (nextProps.userData && !this.props.userData) {
-      Actions.home();
+      if (this.state.isNewUser) {
+        Actions.signUpSuccess();
+
+        setTimeout(() => {
+          Actions.home();
+        }, 2000);
+      } else {
+        Actions.home();
+      }
     }
   }
 
+  toggleNewUser(isNewUser = !this.state.isNewUser) {
+    this.setState({ isNewUser });
+  }
+
   render() {
-    return <SignIn />;
+    return this.state.isNewUser ?
+      <SignUp toggleNewUser={() => { this.toggleNewUser(); }} /> :
+      <SignIn toggleNewUser={() => { this.toggleNewUser(); }} />;
   }
 }
 

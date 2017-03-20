@@ -1,8 +1,9 @@
 import gameConfig from '../game-config';
 
 export default class ApplicationsConnect {
-  constructor(db, gameCtrl) {
+  constructor(db, ws, gameCtrl) {
     this.db = db;
+    this.ws = ws;
     this.gameCtrl = gameCtrl;
   }
   async findOpponentForPlayer({ gameApplication, gameApplications }) {
@@ -84,6 +85,8 @@ export default class ApplicationsConnect {
 
     await this.db.GameUser.bulkCreate(gameUsers);
 
+    game.gameUsers = gameUsers;
+
     await gameApplication.destroy();
 
     gameApplications.splice(index, 1);
@@ -111,10 +114,10 @@ export default class ApplicationsConnect {
     gameApplications.splice(index, 1);
     index -= 1;
 
-    // TODO websocket
-    // GameApplication.message(
-    //   gameApplication.id,wsResponses.message('gameApplicationExpired')
-    // );
+    this.ws.send(
+      gameApplication.userId,
+      'GAME_APPLICATION_EXPIRED',
+    );
     /* eslint-enable no-param-reassign */
   }
 
@@ -144,11 +147,11 @@ export default class ApplicationsConnect {
       });
 
       if (game) {
-        // TODO websocket
-        // GameApplication.message(
-        //   gameApplication.id,
-        //   wsResponses.message('gameFound', {gameId: game.id})
-        // )
+        const userIds = game.gameUsers.map((gameUser) => {
+          return gameUser.userId;
+        });
+
+        this.ws.send(userIds, 'GAME_FOUND', { gameId: game.id });
       }
     }
 

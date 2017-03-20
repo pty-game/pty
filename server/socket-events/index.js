@@ -2,7 +2,7 @@ import GameCtrl from '../controllers/game';
 import GameApplicationCtrl from '../controllers/game-application';
 
 export default (ws, db) => {
-  const gameCtrl = new GameCtrl(db);
+  const gameCtrl = new GameCtrl(db, ws);
   const gameApplicationCtrl = new GameApplicationCtrl(db);
 
   ws.on('GAME_APPLICATION_CREATE', ({ isEstimator }, { id: userId }) => {

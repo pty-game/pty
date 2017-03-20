@@ -4,35 +4,9 @@ import gameConfig from '../game-config';
 import { generateGameWonExperienceFromLevel } from '../helpers/experience';
 
 export default class GameCtrl {
-  constructor(db) {
+  constructor(db, ws) {
     this.db = db;
-  }
-
-  async subscribe({ userId, gameId }) {
-    const game = await this.db.Game.find({
-      where: { id: gameId },
-      include: [this.db.GameUser],
-    });
-
-    const isUserInThisGame = game.gameUsers.find((gameUser) => {
-      return gameUser.userId === userId;
-    });
-
-    if (!isUserInThisGame) {
-      throw new Error('User is not in this game');
-    }
-    // TODO socket
-    // this.db.Game.subscribe(req, game);
-
-    return game;
-  }
-
-  async unsubscribe({ gameId }) {
-    const game = await this.db.Game.findOne({ where: { id: gameId } });
-    // TODO socket
-    // this.db.Game.unsubscribe(req, game);
-
-    return game;
+    this.ws = ws;
   }
 
   async addUserAction({ userId, gameId, action }) {
@@ -45,15 +19,18 @@ export default class GameCtrl {
     const gameAction = await this.addAction({
       action,
       gameId,
+      userId,
       gameUserId: gameUser.id,
-
     });
 
     return gameAction;
   }
 
-  async addAction({ gameId, gameUserId, action }) {
-    const game = this.db.Game.find({ where: { id: gameId } });
+  async addAction({ gameId, userId, gameUserId, action }) {
+    const game = await this.db.Game.find({
+      where: { id: gameId },
+      include: [this.db.GameUser],
+    });
 
     if (game.residueTime <= 0) {
       throw new Error('This Game is finished');
@@ -65,8 +42,15 @@ export default class GameCtrl {
       gameUserId,
     });
 
-    // TODO socket
-    // Game.message(this.id, wsResponses.message('actionAdded', gameAction), req || null);
+    const userIds = game.gameUsers.map((gameUser) => {
+      return gameUser.userId;
+    });
+
+    const userIdsWithoutCurrentUser = userIds.filter((item) => {
+      return item !== userId;
+    });
+
+    this.ws.send(userIdsWithoutCurrentUser, 'ACTION_ADDED', gameAction);
 
     return gameAction;
   }
@@ -113,7 +97,7 @@ export default class GameCtrl {
   }
 
   async finishGame({ game }) {
-    const gameWinnerGameUserId = await this.getGameWinnerGameUserId({ game });
+    const winnerGameUserId = await this.getGameWinnerGameUserId({ game });
 
     const gameUsers = game.gameUsers || await game.getGameUsers();
 
@@ -128,9 +112,9 @@ export default class GameCtrl {
     const users = await Promise.all(usersPromises);
     let gameWinnerUser = null;
 
-    if (gameWinnerGameUserId) {
+    if (winnerGameUserId) {
       const gameWinnerGameUserIndex = gameUsersPlayers.findIndex((gameUsersPlayer) => {
-        return gameUsersPlayer.id === gameWinnerGameUserId;
+        return gameUsersPlayer.id === winnerGameUserId;
       });
 
       gameWinnerUser = users[gameWinnerGameUserIndex];
@@ -150,8 +134,8 @@ export default class GameCtrl {
       } else {
         user.gamesDraw += 1;
       }
-      // TODO socket
-      // User.message(user.id, wsResponses.message('data', {user: user}));
+
+      this.ws.send(user.id, 'USER_DATA', { user });
 
       return user.save();
     });
@@ -159,10 +143,15 @@ export default class GameCtrl {
     const updatedUsers = await Promise.all(updatedUsersPromises);
     /* eslint-enable no-param-reassign */
 
-    // TODO socket
-    // this.db.Game.message(
-    //  game.id,
-    //  wsResponses.message('finishGame', {gameWinnerGameUserId: gameWinnerGameUserId}));
+    const userIds = gameUsers.map((gameUser) => {
+      return gameUser.userId;
+    });
+
+    this.ws.send(
+     userIds,
+     'FINISH_GAME',
+     { winnerGameUserId },
+   );
 
     return { game, users: updatedUsers };
   }
@@ -198,14 +187,18 @@ export default class GameCtrl {
         game.residueTime >= 1 &&
         !isEstimatorsPresent
       ) {
-        this.db.GameUser.createBotForGame({ game, isEstimator: true });
+        this.createBotForGame({ game, isEstimator: true });
       }
 
-      // TODO
-      // this.db.Game.message(
-      //   game.id,
-      //   wsResponses.message('residueTime', { residueTime: game.residueTime }),
-      // );
+      const userIds = game.gameUsers.map((gameUser) => {
+        return gameUser.userId;
+      });
+
+      this.ws.send(
+        userIds,
+        'RESIDUE_TIME',
+        { residueTime: game.residueTime },
+      );
     }
 
     return true;
@@ -221,11 +214,13 @@ export default class GameCtrl {
         game: game.id,
       });
 
-      const playersGameUsers = game.gameUsers.filter(() => {
+      const gameUsers = await game.getGameUsers();
+
+      const playersGameUsers = gameUsers.filter(() => {
         return isEstimator === false;
       });
 
-      const randomPlayerIndex = this.getRandomIntInRange(0, playersGameUsers.length);
+      const randomPlayerIndex = _.random(0, playersGameUsers.length);
 
       this.addAction({
         gameUserId: bot.id,
@@ -233,9 +228,9 @@ export default class GameCtrl {
         action: estimatorAction(randomPlayerIndex),
       });
     } else {
-      const gamesWithSameTask = await this.db.Game.find({
+      const gamesWithSameTask = await this.db.Game.findAll({
         where: {
-          task: game.task,
+          taskId: game.taskId,
           id: {
             $not: game.id,
           },
@@ -359,7 +354,6 @@ export default class GameCtrl {
 
   async findWithMinEstimators({ finderUserId }) {
     const games = await this.db.Game.findAll({ include: [this.db.GameUser] });
-
     const filteredGames = games.filter((game) => {
       return !(
         game.gameUsers.find((gameUser) => {

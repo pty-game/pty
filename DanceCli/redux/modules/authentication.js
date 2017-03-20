@@ -2,7 +2,8 @@ import { call, put, takeLatest } from 'redux-saga/effects';
 import { AsyncStorage } from 'react-native';
 import fetch from '../../helpers/fetch';
 import WS from '../../helpers/ws';
-import { baseUrlSocket } from '../../config';
+
+// AsyncStorage.clear();
 
 export const subscribe = (token) => {
   return {
@@ -14,6 +15,14 @@ export const subscribe = (token) => {
 export const signIn = ({ login, password }) => {
   return {
     type: 'SIGN_IN_START',
+    login,
+    password,
+  };
+};
+
+export const signUp = ({ login, password }) => {
+  return {
+    type: 'SIGN_UP_START',
     login,
     password,
   };
@@ -33,7 +42,24 @@ export const signInCb = function* ({ login, password }) {
     yield put({ type: 'SIGN_IN_SUCCEEDED', token, user });
   } catch (err) {
     if (err.status) {
-      yield put({ type: 'SIGN_IN_FETCH_FAILED', error: err.body.error });
+      yield put({ type: 'SIGN_IN_FAILED', signInError: err.body.error });
+    } else {
+      throw err;
+    }
+  }
+};
+
+export const signUpCb = function* ({ login, password }) {
+  try {
+    const { body: { token, user } } = yield call(fetch, 'sign-up', {
+      values: { login, password },
+      method: 'POST',
+    });
+
+    yield put({ type: 'SIGN_UP_SUCCEEDED', token, user });
+  } catch (err) {
+    if (err.status) {
+      yield put({ type: 'SIGN_UP_FAILED', signUpError: err.body.error });
     } else {
       throw err;
     }
@@ -41,15 +67,12 @@ export const signInCb = function* ({ login, password }) {
 };
 
 const socketConnect = (token) => {
-  const ws = WS.init({ baseUrlSocket, token });
-
-  ws.connect();
+  WS.instance.setToken(token);
+  WS.instance.connect();
 
   return new Promise((resolve) => {
-    ws.on('SUBSCRIBED', (userData) => {
+    WS.instance.on('SUBSCRIBED', (userData) => {
       resolve(userData);
-      console.log('GAME_APPLICATION_CREATE');
-      ws.send('GAME_APPLICATION_CREATE', { isEstimator: false });
     });
   });
 };
@@ -59,25 +82,35 @@ export const subscribeCb = function* ({ token }) {
   yield put({ type: 'SUBSCRIBE_SUCCEEDED', userData });
 };
 
+export const subscribeSucceeddedCb = () => {
+};
+
 const initialState = {
   token: null,
   userData: null,
-  error: null,
+  signInError: null,
+  signUpError: null,
 };
 
 export const authenticationReducer = (
   state = initialState,
-  { type, token, userData, error },
+  { type, token, userData, signInError, signUpError },
 ) => {
   switch (type) {
     case 'SIGN_IN_START':
       return { ...initialState };
+    case 'SIGN_UP_START':
+      return { ...initialState };
     case 'SIGN_IN_SUCCEEDED':
-      return { ...state, token, error: null };
-    case 'SIGN_IN_FETCH_FAILED':
-      return { ...state, error };
+      return { ...state, token, signInError: null };
+    case 'SIGN_UP_SUCCEEDED':
+      return { ...state, token, signUpError: null };
+    case 'SIGN_IN_FAILED':
+      return { ...state, signInError };
+    case 'SIGN_UP_FAILED':
+      return { ...state, signUpError };
     case 'SUBSCRIBE_SUCCEEDED':
-      return { ...state, userData, error: null };
+      return { ...state, userData, signInError: null, signUpError: null };
     default:
       return state;
   }
@@ -85,6 +118,9 @@ export const authenticationReducer = (
 
 export const authenticationSaga = function* () {
   yield takeLatest('SIGN_IN_START', signInCb);
+  yield takeLatest('SIGN_UP_START', signUpCb);
   yield takeLatest('SIGN_IN_SUCCEEDED', signInSucceededCb);
+  yield takeLatest('SIGN_UP_SUCCEEDED', signInSucceededCb);
   yield takeLatest('SUBSCRIBE', subscribeCb);
+  yield takeLatest('SUBSCRIBE_SUCCEEDED', subscribeSucceeddedCb);
 };

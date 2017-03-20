@@ -1,11 +1,12 @@
 import url from 'url';
 import jwt from 'jsonwebtoken';
-import { wsGenerateMessage, wsParseMessage } from 'pty-common/wsMessage';
+import { wsGenerateMessage, wsParseMessage } from 'pty-common/ws-message';
 import { JWT_SECRET } from '../config';
 
 export default class WS {
-  constructor(wsServer) {
+  constructor(wsServer, db) {
     this.wsServer = wsServer;
+    this.db = db;
     this.messageEventMap = {};
     this.userIdSocketMap = {};
 
@@ -13,15 +14,19 @@ export default class WS {
   }
 
   connectionHandler() {
-    this.wsServer.on('connection', (socket) => {
+    this.wsServer.on('connection', async (socket) => {
       const { query: { token } } = url.parse(socket.upgradeReq.url, true);
       const userData = jwt.verify(token, JWT_SECRET);
 
-      this.userIdSocketMap[userData.id] = socket;
+      const user = await this.db.User.findOne({ where: { id: userData.id } });
 
-      this.assignEvents(socket);
+      if (user) {
+        this.userIdSocketMap[userData.id] = socket;
 
-      socket.send(wsGenerateMessage('SUBSCRIBED', userData));
+        this.assignEvents(socket);
+
+        socket.send(wsGenerateMessage('SUBSCRIBED', user));
+      }
     });
   }
 
@@ -31,6 +36,8 @@ export default class WS {
 
       if (userData) {
         cb(payload, userData);
+
+        console.log(`recieved ${type} from userId ${userData.id} with payload ${JSON.stringify(payload)}`);
       }
     };
   }
@@ -43,5 +50,25 @@ export default class WS {
         this.messageEventMap[type](payload, token);
       }
     });
+  }
+
+  send(userIds, type, payload) {
+    let userIdsArr;
+
+    if (!Array.isArray(userIds)) {
+      userIdsArr = [userIds];
+    } else {
+      userIdsArr = userIds;
+    }
+
+    userIdsArr.forEach((userId) => {
+      const socket = this.userIdSocketMap[userId];
+
+      if (socket) {
+        socket.send(wsGenerateMessage(type, payload));
+      }
+    });
+
+    console.log(`sent ${type} to userIds ${JSON.stringify(userIds)} with payload ${JSON.stringify(payload)} `);
   }
 }
