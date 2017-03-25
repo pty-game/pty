@@ -1,0 +1,2 @@
+export const GAME_PREPEARING_DURATION = 20;
+export const GAME_PLAYING_DURATION = 10;

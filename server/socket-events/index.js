@@ -5,11 +5,19 @@ export default (ws, db) => {
   const gameCtrl = new GameCtrl(db, ws);
   const gameApplicationCtrl = new GameApplicationCtrl(db);
 
-  ws.on('GAME_APPLICATION_CREATE', ({ isEstimator }, { id: userId }) => {
-    gameApplicationCtrl.create({ isEstimator, userId });
+  ws.on('GAME_APPLICATION_CREATE', async ({ isEstimator }, { id: userId }) => {
+    try {
+      await gameApplicationCtrl.create({ isEstimator, userId });
+    } catch (err) {
+      console.error(err);
+    }
   });
 
-  ws.on('GAME_ADD_ACTION', (payload) => {
-    gameCtrl.addAction(payload);
+  ws.on('ADD_GAME_ACTION', async ({ gameId, action }, { id: userId }) => {
+    try {
+      await gameCtrl.addUserAction({ gameId, userId, action });
+    } catch (err) {
+      console.error(err);
+    }
   });
 };

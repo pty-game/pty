@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import {
  View,
 } from 'react-native';
-import Sound from 'react-native-sound';
 import VideoRun from 'react-native-video';
+import { Actions } from 'react-native-router-flux';
+import withGame from '../containers/withGame';
 
 const styles = {
   container: {
@@ -24,64 +25,48 @@ const styles = {
   },
 };
 
-export default class Video extends Component {
-  constructor() {
-    super();
-    this.playPlayback();
-  }
-
-  playPlayback() {
-    Sound.setCategory('Playback');
-
-    const track = new Sound(
-      'https://freemusicarchive.org/music/download/cd03489ac769558c63563f39c1a0f65592d00019',
-      '',
-      (err) => {
-        if (err) {
-          console.error(err);
-        } else {
-          track.play((success) => {
-            if (success) {
-              console.log('successfully finished playing');
-            } else {
-              console.log('playback failed due to audio decoding errors');
-            }
-          });
-        }
-      },
-    );
+class Video extends Component {
+  componentDidMount() {
+    this.props.startGamePlayback();
   }
 
   render() {
-    return (<View style={styles.container}>
-      <VideoRun
-        ref={(ref) => {
-          this.player = ref;
-        }}
-        source={{ uri: 'cloud.mp4' }}
-        rate={1.0}
-        volume={0}
-        muted
-        paused={false}
-        resizeMode="cover"
-        repeat
-        onLoadStart={() => {
-          console.log(1);
-        }}
-        onLoad={() => {
-          console.log(2);
-        }}
-        onProgress={() => {
-          console.log(3);
-        }}
-        onEnd={() => {
-          console.log(4);
-        }}
-        onError={(err) => {
-          console.log(5, err);
-        }}
-        style={styles.backgroundVideo}
-      />
-    </View>);
+    return (
+      <View style={styles.container}>
+        <VideoRun
+          ref={(ref) => {
+            this.player = ref;
+          }}
+          source={{ uri: this.props.videoPath }}
+          rate={1.0}
+          volume={0}
+          muted
+          paused={false}
+          resizeMode="cover"
+          onLoadStart={() => {
+          }}
+          onLoad={() => {
+          }}
+          onProgress={() => {
+          }}
+          onEnd={() => {
+            this.props.stopGamePlayback();
+            Actions.estimation();
+          }}
+          onError={(err) => {
+            console.log(5, err);
+          }}
+          style={styles.backgroundVideo}
+        />
+      </View>
+    );
   }
 }
+
+Video.propTypes = {
+  videoPath: PropTypes.string.isRequired,
+  startGamePlayback: PropTypes.func.isRequired,
+  stopGamePlayback: PropTypes.func.isRequired,
+};
+
+export default withGame(Video);

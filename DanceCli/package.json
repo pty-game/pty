@@ -13,11 +13,14 @@
     "eslint-plugin-jsx-a11y": "^3.0.2",
     "eslint-plugin-react": "^6.9.0",
     "i": "^0.3.5",
+    "lz-string": "^1.4.4",
     "native-base": "^2.0.12",
     "npm": "^4.3.0",
+    "pty-common": "git+ssh://git@github.com/Danxil/pty-common.git",
     "react": "15.4.2",
     "react-native": "0.42.0",
     "react-native-camera": "^0.6.0",
+    "react-native-fs": "^2.1.0-rc.1",
     "react-native-router-flux": "^3.38.0",
     "react-native-socketio": "^0.3.0",
     "react-native-sound": "^0.9.1",
@@ -26,8 +29,7 @@
     "redux": "^3.6.0",
     "redux-saga": "^0.14.3",
     "socket.io-client": "^1.7.3",
-    "whatwg-fetch": "^2.0.3",
-    "pty-common": "git+ssh://git@github.com/Danxil/pty-common.git"
+    "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {
     "babel-jest": "19.0.0",

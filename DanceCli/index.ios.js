@@ -7,10 +7,10 @@ import { Scene, Router } from 'react-native-router-flux';
 import Home from './components/Home';
 import Pending from './components/Pending';
 import Capture from './components/Capture';
-import Game from './components/Game';
 import Estimation from './components/Estimation';
 import Video from './components/Video';
 import Authentication from './components/Authentication';
+import GameResult from './components/GameResult';
 import Error from './components/Error';
 import createStore, { sagaMiddleware, rootSaga } from './redux';
 import SignUpSuccess from './components/SignUpSuccess';
@@ -31,10 +31,10 @@ const DanceCli = () => {
           <Scene key="home" component={Home} hideNavBar />
           <Scene key="pending" component={Pending} hideNavBar />
           <Scene key="capture" component={Capture} hideNavBar />
-          <Scene key="game" component={Game} hideNavBar />
           <Scene key="estimation" component={Estimation} hideNavBar />
           <Scene key="video" component={Video} hideNavBar />
           <Scene key="error" component={Error} hideNavBar />
+          <Scene key="gameResult" component={GameResult} hideNavBar />
         </Scene>
       </Router>
     </Provider>

@@ -32,14 +32,15 @@ export default class WS {
 
   send(type, payload) {
     this.socket.send(wsGenerateMessage(type, payload, this.token));
-    console.log(`sent ${type} with payload ${JSON.stringify(payload)}`);
+
+    console.log(`sent ${type} with payload ${JSON.stringify(payload).substr(0, 10000)}`);
   }
 
   assign() {
     this.socket.onmessage = ({ data }) => {
       const { type, payload } = wsParseMessage(data);
 
-      console.log(`recieved ${type} with payload ${JSON.stringify(payload)}`);
+      console.log(`recieved ${type} with payload ${JSON.stringify(payload).substr(0, 10000)}`);
 
       if (this.messageEventMap[type]) {
         this.messageEventMap[type](payload);

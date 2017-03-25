@@ -11,11 +11,9 @@ export default class GameCtrl {
 
   async addUserAction({ userId, gameId, action }) {
     const gameUser = await this.db.GameUser.find({ where: { userId, gameId, isBot: false } });
-
     if (!gameUser) {
       throw new Error('This GameUser is not allowed for this game');
     }
-
     const gameAction = await this.addAction({
       action,
       gameId,
@@ -50,7 +48,7 @@ export default class GameCtrl {
       return item !== userId;
     });
 
-    this.ws.send(userIdsWithoutCurrentUser, 'ACTION_ADDED', gameAction);
+    this.ws.send(userIdsWithoutCurrentUser, 'GAME_ACTION_ADDED', gameAction);
 
     return gameAction;
   }
@@ -149,8 +147,8 @@ export default class GameCtrl {
 
     this.ws.send(
      userIds,
-     'FINISH_GAME',
-     { winnerGameUserId },
+     'GAME_FINISHED',
+     { gameWinnerUserId: gameWinnerUser.id, gameId: game.id },
    );
 
     return { game, users: updatedUsers };
@@ -187,7 +185,7 @@ export default class GameCtrl {
         game.residueTime >= 1 &&
         !isEstimatorsPresent
       ) {
-        this.createBotForGame({ game, isEstimator: true });
+        await this.createBotForGame({ game, isEstimator: true });
       }
 
       const userIds = game.gameUsers.map((gameUser) => {
@@ -196,8 +194,8 @@ export default class GameCtrl {
 
       this.ws.send(
         userIds,
-        'RESIDUE_TIME',
-        { residueTime: game.residueTime },
+        'GAME_RESIDUE_TIME',
+        { residueTime: game.residueTime, gameId: game.id },
       );
     }
 
@@ -216,16 +214,16 @@ export default class GameCtrl {
 
       const gameUsers = await game.getGameUsers();
 
-      const playersGameUsers = gameUsers.filter(() => {
-        return isEstimator === false;
+      const playersGameUsers = gameUsers.filter((gameUser) => {
+        return gameUser.isEstimator === false;
       });
 
-      const randomPlayerIndex = _.random(0, playersGameUsers.length);
+      const randomPlayerIndex = _.random(0, playersGameUsers.length - 1);
 
-      this.addAction({
+      await this.addAction({
         gameUserId: bot.id,
         gameId: game.id,
-        action: estimatorAction(randomPlayerIndex),
+        action: estimatorAction(playersGameUsers[randomPlayerIndex].id),
       });
     } else {
       const gamesWithSameTask = await this.db.Game.findAll({
@@ -294,13 +292,17 @@ export default class GameCtrl {
     });
 
     setTimeout(async () => {
-      const actionPromise = await this.addAction({
-        gameUserId: gameAction.gameUserId,
-        gameId,
-        action: gameAction.action,
-      });
+      try {
+        const actionPromise = await this.addAction({
+          gameUserId: gameAction.gameUserId,
+          gameId,
+          action: gameAction.action,
+        });
 
-      resolve.call(promise, actionPromise);
+        resolve.call(promise, actionPromise);
+      } catch (err) {
+        console.error(err);
+      }
     }, timeout);
 
     const action = await promise;
@@ -341,15 +343,20 @@ export default class GameCtrl {
 
     const game = await this.db.Game.create({ taskId });
 
-    const itervalId = setInterval(() => {
-      this.timeIntervalIteration({
-        itervalId,
-        gameId: game.id,
-
-      });
-    }, 1000);
-
     return game;
+  }
+
+  async start({ gameId }) {
+    const intervalId = setInterval(async () => {
+      try {
+        await this.timeIntervalIteration({
+          intervalId,
+          gameId,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }, 1000);
   }
 
   async findWithMinEstimators({ finderUserId }) {

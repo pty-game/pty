@@ -7,18 +7,11 @@ import withGameApplication from '../containers/withGameApplication';
 import Container from './Container';
 import Button from './Button';
 
-const styles = {
-  btn: {
-    marginTop: 20,
-  },
-};
-
 const Home = ({ gameApplicationCreate }) => {
   return (
     <Container>
       <View>
         <Button
-          style={styles.btn}
           block
           onPress={() => { gameApplicationCreate({ isEstimator: false }); }}
         >
@@ -27,7 +20,6 @@ const Home = ({ gameApplicationCreate }) => {
           </Text>
         </Button>
         <Button
-          style={styles.btn}
           block
           onPress={() => { gameApplicationCreate({ isEstimator: true }); }}
         >

@@ -2,31 +2,28 @@ import React, { PropTypes } from 'react';
 import { Button } from 'native-base';
 
 const ownStyles = {
-  btn: {
-    marginTop: 20,
-  },
+  marginTop: 20,
 };
 
-const Container = (props) => {
+const MyButton = (props) => {
   const { children, style } = props;
-  const propsWithoutStyle = props;
 
-  delete propsWithoutStyle.style;
+  const allProps = { ...props, style: { ...ownStyles, ...style } };
 
   return (
-    <Button style={{ ...ownStyles.btn, ...style }} {...propsWithoutStyle} >
+    <Button {...allProps} >
       {children}
     </Button>
   );
 };
 
-Container.defaultProps = {
+MyButton.defaultProps = {
   style: {},
 };
 
-Container.propTypes = {
+MyButton.propTypes = {
   children: PropTypes.element.isRequired,
   style: PropTypes.object,
 };
 
-export default Container;
+export default MyButton;

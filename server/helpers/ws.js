@@ -37,7 +37,7 @@ export default class WS {
       if (userData) {
         cb(payload, userData);
 
-        console.log(`recieved ${type} from userId ${userData.id} with payload ${JSON.stringify(payload)}`);
+        console.log(`recieved ${type} from userId ${userData.id} with payload ${JSON.stringify(payload).substr(0, 10000)}`);
       }
     };
   }
@@ -69,6 +69,6 @@ export default class WS {
       }
     });
 
-    console.log(`sent ${type} to userIds ${JSON.stringify(userIds)} with payload ${JSON.stringify(payload)} `);
+    console.log(`sent ${type} to userIds ${JSON.stringify(userIds)} with payload ${JSON.stringify(payload).substr(0, 10000)} `);
   }
 }

@@ -47,7 +47,6 @@ class SignUp extends Component {
             />
           </Item>
           <Button
-            style={styles.btn}
             block
             onPress={() => {
               this.props.signUp({

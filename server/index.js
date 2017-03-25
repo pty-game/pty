@@ -18,7 +18,7 @@ const wsServer = new WebSocket.Server({
 
 const ws = new WS(wsServer, db);
 
-const applicationConnect = new ApplicationConnect(db, ws, new GameCtrl(db));
+const applicationConnect = new ApplicationConnect(db, ws, new GameCtrl(db, ws));
 
 schedule.scheduleJob(
   `*/${gameConfig.GAME_APPLICATION_CRONTAB_TIMEOUT} * * * * *`,

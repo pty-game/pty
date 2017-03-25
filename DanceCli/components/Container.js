@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { View } from 'react-native';
 
-const styles = {
+export const styles = {
   container: {
     flex: 1,
     justifyContent: 'center',

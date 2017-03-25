@@ -51,8 +51,7 @@ export default class ApplicationsConnect {
     const gameId = game.id;
 
     if (
-      !gameApplicationSub &&
-      gameApplication.residueTime <= gameConfig.RESIDUE_TIME_FOR_PAINTER_BOTS
+      !gameApplicationSub
     ) {
       const bot = await this.gameCtrl.createBotForGame({
         game,
@@ -83,9 +82,11 @@ export default class ApplicationsConnect {
       });
     }
 
-    await this.db.GameUser.bulkCreate(gameUsers);
+    const createdGameUsers = await Promise.all(gameUsers.map((gameUser) => {
+      return this.db.GameUser.create(gameUser);
+    }));
 
-    game.gameUsers = gameUsers;
+    game.gameUsers = createdGameUsers;
 
     await gameApplication.destroy();
 
@@ -151,7 +152,16 @@ export default class ApplicationsConnect {
           return gameUser.userId;
         });
 
-        this.ws.send(userIds, 'GAME_FOUND', { gameId: game.id });
+        this.gameCtrl.start({ gameId: game.id });
+
+        this.ws.send(
+          userIds,
+          'GAME_FOUND',
+          {
+            gameId: game.id,
+            residueTime: game.residueTime,
+          },
+        );
       }
     }
 

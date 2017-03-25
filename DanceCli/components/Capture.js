@@ -1,41 +1,44 @@
-import React, { Component } from 'react';
-import {
- Dimensions,
- View,
-} from 'react-native';
+import React, { Component, PropTypes } from 'react';
 import Camera from 'react-native-camera';
+import RNFS from 'react-native-fs';
+import { Actions } from 'react-native-router-flux';
 import { Text } from 'native-base';
-import Sound from 'react-native-sound';
-
+import { View } from 'react-native';
+import withGame from '../containers/withGame';
 
 const styles = {
-  container: {
+  text: {
+    backgroundColor: 'transparent',
+    color: 'white',
+    textAlign: 'center',
+  },
+  camera: {
+    flex: 1,
+    position: 'relative',
+    padding: 20,
+  },
+  cameraView: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    flexDirection: 'column',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    position: 'absolute',
   },
-  preview: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    height: Dimensions.get('window').height,
-    width: Dimensions.get('window').width,
-  },
-  capture: {
-    flex: 0,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    color: '#000',
-    padding: 10,
-    margin: 40,
-  },
-  btn: {
-    marginTop: 20,
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, .5)',
   },
 };
 
-export default class Capture extends Component {
+class Capture extends Component {
   constructor() {
     super();
 
@@ -43,56 +46,83 @@ export default class Capture extends Component {
       isCapture: false,
     };
   }
+  componentWillReceiveProps({ prepearingResidueTime, playingResidueTime }) {
+    if (prepearingResidueTime === 0 && this.props.prepearingResidueTime > 0) {
+      this.startCapture();
+      this.props.startGamePlayback();
+    }
 
-  playPlayback() {
-    Sound.setCategory('Playback');
+    if (playingResidueTime === 0 && this.props.playingResidueTime > 0) {
+      this.stopCapture();
+      this.props.stopGamePlayback();
 
-    const track = new Sound(
-      'https://freemusicarchive.org/music/download/cd03489ac769558c63563f39c1a0f65592d00019',
-      '',
-      (err) => {
-        if (err) {
-          console.error(err);
-        } else {
-          track.play((success) => {
-            if (success) {
-              console.log('successfully finished playing');
-            } else {
-              console.log('playback failed due to audio decoding errors');
-            }
-          });
-        }
-      },
-    );
+      Actions.estimation();
+    }
   }
+
   startCapture() {
-    this.camera.capture();
-
-    this.setState({ isCapture: true });
+    this.camera.capture()
+    .then((data) => {
+      console.log((data.size / 1000000).toFixed(2) + ' MB');
+      return RNFS.readFile(data.path, 'base64');
+    })
+    .then((file) => {
+      this.props.playerGameActionAdded({ file });
+      return this.props.addPlayerGameAction({ file });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
   }
+
   stopCapture() {
     this.camera.stopCapture();
-
-    this.setState({ isCapture: false });
   }
 
   render() {
-    return (<View style={styles.container}>
+    return (
       <Camera
         ref={(cam) => {
           this.camera = cam;
         }}
-        style={styles.preview}
+        style={styles.camera}
         captureMode={Camera.constants.CaptureMode.video}
         orientation={Camera.constants.Orientation.auto}
         aspect={Camera.constants.Aspect.fill}
+        captureTarget={Camera.constants.CaptureTarget.temp}
+        captureQuality={Camera.constants.CaptureQuality.medium}
       >
-        {
-          !this.state.isCapture ?
-            <Text onPress={() => { this.startCapture(); }}>CAPTURE</Text> :
-            <Text onPress={() => { this.stopCapture(); }}>STOP CAPTURE</Text>
-        }
+        <View style={styles.cameraView}>
+          {
+            this.props.prepearingResidueTime > 0 && <View style={styles.overlay} />
+          }
+          {
+            this.props.prepearingResidueTime > 0 &&
+            <Text style={styles.text}>
+              {
+                `Video recording will start in ${this.props.prepearingResidueTime} sec. Put your device on ` +
+                'the proper surface in vertical position, and prepare to dance! ' +
+                'You have to dance when the music starts playing.'
+              }
+            </Text>
+          }
+          {
+            this.props.prepearingResidueTime === 0 && this.props.playingResidueTime > 0 &&
+            <Text style={styles.text}>{`Recording ${this.props.playingResidueTime}`}</Text>
+          }
+        </View>
       </Camera>
-    </View>);
+    );
   }
 }
+
+Capture.propTypes = {
+  addPlayerGameAction: PropTypes.func.isRequired,
+  startGamePlayback: PropTypes.func.isRequired,
+  stopGamePlayback: PropTypes.func.isRequired,
+  playerGameActionAdded: PropTypes.func.isRequired,
+  prepearingResidueTime: PropTypes.number.isRequired,
+  playingResidueTime: PropTypes.number.isRequired,
+};
+
+export default withGame(Capture);

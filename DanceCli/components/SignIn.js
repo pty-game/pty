@@ -8,9 +8,6 @@ const styles = {
   btn: {
     marginTop: 20,
   },
-  form: {
-    width: 300,
-  },
   errorMessage: {
     marginTop: 20,
     textAlign: 'center',
@@ -30,7 +27,7 @@ class SignIn extends Component {
   render() {
     return (
       <Container>
-        <Form style={styles.form}>
+        <Form>
           <Item last>
             <Input
               placeholder="Username"
@@ -47,7 +44,6 @@ class SignIn extends Component {
             />
           </Item>
           <Button
-            style={styles.btn}
             block
             onPress={() => {
               this.props.signIn({
