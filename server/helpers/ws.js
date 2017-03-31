@@ -21,6 +21,8 @@ export default class WS {
       const user = await this.db.User.findOne({ where: { id: userData.id } });
 
       if (user) {
+        this.send(user.id, 'LOG_OUT');
+
         this.userIdSocketMap[userData.id] = socket;
 
         this.assignEvents(socket);
@@ -52,7 +54,7 @@ export default class WS {
     });
   }
 
-  send(userIds, type, payload) {
+  send(userIds, type, payload = {}) {
     let userIdsArr;
 
     if (!Array.isArray(userIds)) {
@@ -65,7 +67,11 @@ export default class WS {
       const socket = this.userIdSocketMap[userId];
 
       if (socket) {
-        socket.send(wsGenerateMessage(type, payload));
+        socket.send(wsGenerateMessage(type, payload), (err) => {
+          if (err) {
+            console.error(err);
+          }
+        });
       }
     });
 

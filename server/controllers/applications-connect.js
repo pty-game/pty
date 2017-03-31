@@ -13,24 +13,39 @@ export default class ApplicationsConnect {
     });
   }
 
-  async iterationForEstimator({ gameApplication }) {
+  async gameApplicationExpired({ gameApplication, gameApplications, index }) {
+    /* eslint-disable no-param-reassign */
+    await gameApplication.destroy();
+
+    gameApplications.splice(index, 1);
+    index -= 1;
+
+    this.ws.send(
+      gameApplication.userId,
+      'GAME_APPLICATION_EXPIRED',
+    );
+    /* eslint-enable no-param-reassign */
+  }
+
+  async iterationForEstimator({ gameApplication, gameApplications, index }) {
     const gameWithMinEstimators = await this.gameCtrl.findWithMinEstimators({
       finderUserId: gameApplication.userId,
     });
 
     if (!gameWithMinEstimators) {
-      return null;
+      return { game: null, createdGameUsers: [] };
     }
 
-    await this.db.GameUser.create({
-      userId: gameApplication.user,
+    const createdGameUser = await this.db.GameUser.create({
+      userId: gameApplication.userId,
       gameId: gameWithMinEstimators.id,
-      is_estimator: true,
+      isEstimator: true,
     });
 
     await gameApplication.destroy();
+    gameApplications.splice(index, 1);
 
-    return gameWithMinEstimators;
+    return { game: gameWithMinEstimators, createdGameUsers: [createdGameUser] };
   }
 
   async iterationForPlayer({ gameApplication, gameApplications, index }) {
@@ -44,7 +59,7 @@ export default class ApplicationsConnect {
       !gameApplicationSub &&
       gameApplication.residueTime > gameConfig.RESIDUE_TIME_FOR_PAINTER_BOTS
     ) {
-      return null;
+      return { game: null, createdGameUsers: [] };
     }
 
     const game = await this.gameCtrl.create();
@@ -62,7 +77,7 @@ export default class ApplicationsConnect {
       if (!bot) {
         await game.destroy();
 
-        return null;
+        return { game: null, createdGameUsers: [] };
       }
     }
 
@@ -92,80 +107,69 @@ export default class ApplicationsConnect {
 
     gameApplications.splice(index, 1);
 
-    index -= 1;
-
     if (gameApplicationSub) {
       await gameApplicationSub.destroy();
 
-      const subIndex = gameApplications.indexOf((item) => {
+      const subIndex = gameApplications.findIndex((item) => {
         return item.id === gameApplicationSub.id;
       });
-
       gameApplications.splice(subIndex, 1);
     }
 
-    return game;
+    return { game, createdGameUsers };
     /* eslint-enable no-param-reassign */
   }
 
-  async gameApplicationExpired({ gameApplication, gameApplications, index }) {
-    /* eslint-disable no-param-reassign */
-    await gameApplication.destroy();
-
-    gameApplications.splice(index, 1);
-    index -= 1;
-
-    this.ws.send(
-      gameApplication.userId,
-      'GAME_APPLICATION_EXPIRED',
-    );
-    /* eslint-enable no-param-reassign */
-  }
-
-  async gameApplicationIteration({ gameApplications, index = 0 }) {
+  async gameApplicationIteration({ gameApplications, index = 0, result = [] }) {
     /* eslint-disable no-param-reassign */
     const gameApplication = gameApplications[index];
 
     if (!gameApplication) {
-      return true;
+      return result;
     }
 
     gameApplication.residueTime -= gameConfig.GAME_APPLICATION_CRONTAB_TIMEOUT;
+
+    const newResult = [...result];
 
     if (gameApplication.residueTime < 0) {
       await this.gameApplicationExpired({ gameApplication, gameApplications, index });
     } else {
       await gameApplication.save();
-
       const specialIterationFn = !gameApplication.isEstimator ?
       this.iterationForPlayer :
       this.iterationForEstimator;
 
-      const game = await specialIterationFn.call(this, {
+      const { game, createdGameUsers } = await specialIterationFn.call(this, {
         gameApplication,
         gameApplications,
         index,
       });
 
       if (game) {
-        const userIds = game.gameUsers.map((gameUser) => {
+        index -= 1;
+
+        const userIds = createdGameUsers.map((gameUser) => {
           return gameUser.userId;
         });
 
-        this.gameCtrl.start({ gameId: game.id });
+        if (!gameApplication.isEstimator) {
+          this.gameCtrl.start({ gameId: game.id });
+        } else {
+          game.dataValues.actions = await game.getGameActions();
+        }
+
+        newResult.push({ game, createdGameUsers });
 
         this.ws.send(
           userIds,
           'GAME_FOUND',
-          {
-            gameId: game.id,
-            residueTime: game.residueTime,
-          },
+          game.toJSON(),
         );
       }
     }
 
-    return this.gameApplicationIteration({ gameApplications, index: index + 1 });
+    return this.gameApplicationIteration({ gameApplications, index: index + 1, result: newResult });
     /* eslint-enable no-param-reassign */
   }
 

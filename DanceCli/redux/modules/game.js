@@ -2,7 +2,6 @@ import { takeLatest, put, select, race, call } from 'redux-saga/effects';
 import { playerAction, estimatorAction } from 'pty-common/actions';
 import Sound from 'react-native-sound';
 import { Actions } from 'react-native-router-flux';
-import LZstring from 'lz-string';
 import WS from '../../helpers/ws';
 import { GAME_PREPEARING_DURATION, GAME_PLAYING_DURATION } from '../../game-config';
 
@@ -88,7 +87,7 @@ export const gameResidueTimeInit = ({ gameId }) => {
 export const loadPlayback = () => {
   return new Promise((resolve) => {
     const sound = new Sound(
-      'https://freemusicarchive.org/music/download/5566c21b0bd3be065f382ca3b9b9d2edc21f143d',
+      'https://freemusicarchive.org/music/download/0d677a99e994daf5c248dcdb4ccb73adb0ba196f',
       '',
       (err) => {
         if (err) {
@@ -152,14 +151,14 @@ export const gameInitCb = function* () {
 };
 
 const initialState = {
-  gameId: null,
-  playback: null,
+  gameId: undefined,
+  playback: undefined,
   playersGameActions: [],
   estimatorsGameActions: [],
-  residueTime: null,
-  initResidueTime: null,
-  prepearingResidueTime: null,
-  playingResidueTime: null,
+  residueTime: undefined,
+  initResidueTime: undefined,
+  prepearingResidueTime: undefined,
+  playingResidueTime: undefined,
 };
 
 export const gameReducer = (

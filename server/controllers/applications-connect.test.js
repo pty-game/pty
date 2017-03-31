@@ -118,20 +118,29 @@ describe('applications connect', () => {
 describe('applications connect', () => {
   it('iterationForEstimator', async () => {
     try {
-      const result = await applicationsConnect.iterationForEstimator({
+      const { game, createdGameUsers } = await applicationsConnect.iterationForEstimator({
         gameApplication: gameApplications[4],
+        gameApplications,
         db,
       });
 
-      games.push(result);
+      games.push(game);
+
+      expect(typeof game.id).toBe('number');
 
       expect(
-        result.gameUsers.filter((gameUser) => {
+        game.gameUsers.filter((gameUser) => {
           return gameUser.isEstimator;
         }).length,
       ).toBe(0);
 
-      const userIds = result.gameUsers.map((gameUser) => {
+      expect(
+        createdGameUsers.filter((gameUser) => {
+          return gameUser.isEstimator;
+        }).length,
+      ).toBe(1);
+
+      const userIds = game.gameUsers.map((gameUser) => {
         return gameUser.userId;
       });
       expect(typeof userIds[0]).toBe('number');
@@ -142,28 +151,28 @@ describe('applications connect', () => {
   });
   it('iterationForPlayer', async () => {
     try {
-      const result = await applicationsConnect.iterationForPlayer({
+      const { game, createdGameUsers } = await applicationsConnect.iterationForPlayer({
         gameApplication: gameApplications[4],
         gameApplications,
         index: 0,
         db,
       });
 
-      games.push(result);
+      games.push(game);
 
-      expect(result.residueTime).toBe(gameConfig.GAME_DURATION);
+      expect(game.residueTime).toBe(gameConfig.GAME_DURATION);
       expect(
-        result.gameUsers.filter((gameUser) => {
+        createdGameUsers.filter((gameUser) => {
           return gameUser.isEstimator;
         }).length,
       ).toBe(0);
       expect(
-        result.gameUsers.filter((gameUser) => {
+        createdGameUsers.filter((gameUser) => {
           return !gameUser.isEstimator;
         }).length,
       ).toBe(2);
 
-      const userIds = result.gameUsers.map((gameUser) => {
+      const userIds = createdGameUsers.map((gameUser) => {
         return gameUser.userId;
       });
 
@@ -173,12 +182,25 @@ describe('applications connect', () => {
       throw new Error(err.stack);
     }
   });
-  it('interval', async () => {
+  it('gameApplicationIteration', async () => {
     try {
-      const result = await applicationsConnect.interval();
-      expect(result).toBe(true);
+      const result = await applicationsConnect.gameApplicationIteration({ gameApplications });
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(3);
+      expect(typeof result.find(({ game: { dataValues: { actions } } }) => {
+        return Array.isArray(actions);
+      })).toBe('object');
     } catch (err) {
       throw new Error(err.stack);
     }
   });
+
+  // it('interval', async () => {
+  //   try {
+  //     const result = await applicationsConnect.interval();
+  //     expect(Array.isArray(result)).toBe(true);
+  //   } catch (err) {
+  //     throw new Error(err.stack);
+  //   }
+  // });
 });

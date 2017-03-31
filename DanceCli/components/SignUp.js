@@ -8,9 +8,6 @@ const styles = {
   btn: {
     marginTop: 20,
   },
-  form: {
-    width: 300,
-  },
   errorMessage: {
     marginTop: 20,
     textAlign: 'center',
@@ -30,7 +27,7 @@ class SignUp extends Component {
   render() {
     return (
       <Container>
-        <Form style={styles.form}>
+        <Form>
           <Item>
             <Input
               placeholder="Username"

@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { signIn, signUp, subscribe } from '../redux/modules/authentication';
+import { signIn, signUp, logOut, subscribe } from '../redux/modules/authentication';
 
 export default (WrappedComponent) => {
   return connect(
@@ -18,6 +18,9 @@ export default (WrappedComponent) => {
         },
         signUp: ({ login, password }) => {
           return dispatch(signUp({ login, password }));
+        },
+        logOut: () => {
+          return dispatch(logOut());
         },
         subscribe: (token) => {
           return dispatch(subscribe(token));

@@ -12,10 +12,12 @@ import Video from './components/Video';
 import Authentication from './components/Authentication';
 import GameResult from './components/GameResult';
 import Error from './components/Error';
+import NavigationDrawer from './components/NavigationDrawer';
 import createStore, { sagaMiddleware, rootSaga } from './redux';
 import SignUpSuccess from './components/SignUpSuccess';
 import { baseUrlSocket } from './config';
 import WS from './helpers/ws';
+
 
 WS.init({ baseUrlSocket });
 
@@ -25,16 +27,33 @@ const DanceCli = () => {
   return (
     <Provider store={store}>
       <Router>
-        <Scene key="root">
-          <Scene key="authentication" initial component={Authentication} hideNavBar />
-          <Scene key="signUpSuccess" component={SignUpSuccess} hideNavBar />
-          <Scene key="home" component={Home} hideNavBar />
-          <Scene key="pending" component={Pending} hideNavBar />
-          <Scene key="capture" component={Capture} hideNavBar />
-          <Scene key="estimation" component={Estimation} hideNavBar />
-          <Scene key="video" component={Video} hideNavBar />
-          <Scene key="error" component={Error} hideNavBar />
-          <Scene key="gameResult" component={GameResult} hideNavBar />
+        <Scene key="drawer" component={NavigationDrawer} open={false}>
+          <Scene
+            key="main"
+            tabs
+            passProps
+            navigationBarStyle={{
+              backgroundColor: 'transparent',
+              borderBottomColor: 'transparent',
+            }}
+          >
+            <Scene
+              key="authentication"
+              component={Authentication}
+              hideNavBar
+            />
+            <Scene key="signUpSuccess" component={SignUpSuccess} hideNavBar />
+            <Scene
+              key="home"
+              component={Home}
+            />
+            <Scene key="pending" component={Pending} hideNavBar />
+            <Scene key="capture" component={Capture} hideNavBar />
+            <Scene key="estimation" component={Estimation} hideNavBar />
+            <Scene key="video" component={Video} hideNavBar />
+            <Scene key="error" component={Error} hideNavBar />
+            <Scene key="gameResult" component={GameResult} hideNavBar />
+          </Scene>
         </Scene>
       </Router>
     </Provider>

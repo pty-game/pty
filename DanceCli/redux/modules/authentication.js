@@ -1,9 +1,8 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { AsyncStorage } from 'react-native';
+import { Actions } from 'react-native-router-flux';
 import fetch from '../../helpers/fetch';
 import WS from '../../helpers/ws';
-
-// AsyncStorage.clear();
 
 export const subscribe = (token) => {
   return {
@@ -28,8 +27,21 @@ export const signUp = ({ login, password }) => {
   };
 };
 
+export const logOut = () => {
+  return {
+    type: 'LOG_OUT',
+  };
+};
+
 export const signInSucceededCb = function* ({ token }) {
   yield AsyncStorage.setItem('token', token);
+};
+
+export const logOutCb = function* () {
+  yield AsyncStorage.clear();
+
+  Actions.refresh({ key: 'drawer', open: false });
+  Actions.authentication();
 };
 
 export const signInCb = function* ({ login, password }) {
@@ -80,16 +92,24 @@ const socketConnect = (token) => {
 export const subscribeCb = function* ({ token }) {
   const userData = yield call(socketConnect, token);
   yield put({ type: 'SUBSCRIBE_SUCCEEDED', userData });
+
+  yield new Promise((resolve) => {
+    WS.instance.on('LOG_OUT', () => {
+      resolve(userData);
+    });
+  });
+
+  yield put(logOut());
 };
 
 export const subscribeSucceeddedCb = () => {
 };
 
 const initialState = {
-  token: null,
-  userData: null,
-  signInError: null,
-  signUpError: null,
+  token: undefined,
+  userData: undefined,
+  signInError: undefined,
+  signUpError: undefined,
 };
 
 export const authenticationReducer = (
@@ -111,6 +131,8 @@ export const authenticationReducer = (
       return { ...state, signUpError };
     case 'SUBSCRIBE_SUCCEEDED':
       return { ...state, userData, signInError: null, signUpError: null };
+    case 'LOG_OUT':
+      return { ...initialState };
     default:
       return state;
   }
@@ -123,4 +145,5 @@ export const authenticationSaga = function* () {
   yield takeLatest('SIGN_UP_SUCCEEDED', signInSucceededCb);
   yield takeLatest('SUBSCRIBE', subscribeCb);
   yield takeLatest('SUBSCRIBE_SUCCEEDED', subscribeSucceeddedCb);
+  yield takeLatest('LOG_OUT', logOutCb);
 };
