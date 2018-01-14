@@ -1,25 +1,22 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Drawer from 'react-native-drawer';
-import { Actions, DefaultRenderer } from 'react-native-router-flux';
 import Menu from './Menu';
+import withDrawer from '../containers/withDrawer';
 
-export default class NavigationDrawer extends Component {
+class NavigationDrawer extends Component {
+  componentDidMount() {
+    this.props.setDrawer(this.drawer);
+  }
+
   render() {
-    const state = this.props.navigationState;
-    const children = state.children;
     return (
       <Drawer
         ref={(ref) => {
           this.drawer = ref;
         }}
         content={<Menu />}
-        open={state.open}
-        onOpen={() => {
-          Actions.refresh({ key: state.key, open: true });
-        }}
-        onClose={() => {
-          Actions.refresh({ key: state.key, open: false });
-        }}
+        open={false}
         type="displace"
         tapToClose
         openDrawerOffset={0.2}
@@ -32,13 +29,15 @@ export default class NavigationDrawer extends Component {
         }}
         tweenEasing="easeInQuad"
       >
-        <DefaultRenderer navigationState={children[0]} onNavigate={this.props.onNavigate} />
+        {this.props.children}
       </Drawer>
     );
   }
 }
 
 NavigationDrawer.propTypes = {
-  onNavigate: PropTypes.func.isRequired,
-  navigationState: PropTypes.object.isRequired,
+  children: PropTypes.element.isRequired,
+  setDrawer: PropTypes.func.isRequired,
 };
+
+export default withDrawer(NavigationDrawer);

@@ -18,7 +18,6 @@ import SignUpSuccess from './components/SignUpSuccess';
 import { baseUrlSocket } from './config';
 import WS from './helpers/ws';
 
-
 WS.init({ baseUrlSocket });
 
 const store = createStore();
@@ -26,36 +25,22 @@ const store = createStore();
 const DanceCli = () => {
   return (
     <Provider store={store}>
-      <Router>
-        <Scene key="drawer" component={NavigationDrawer} open={false}>
-          <Scene
-            key="main"
-            tabs
-            passProps
-            navigationBarStyle={{
-              backgroundColor: 'transparent',
-              borderBottomColor: 'transparent',
-            }}
-          >
-            <Scene
-              key="authentication"
-              component={Authentication}
-              hideNavBar
-            />
-            <Scene key="signUpSuccess" component={SignUpSuccess} hideNavBar />
-            <Scene
-              key="home"
-              component={Home}
-            />
-            <Scene key="pending" component={Pending} hideNavBar />
-            <Scene key="capture" component={Capture} hideNavBar />
-            <Scene key="estimation" component={Estimation} hideNavBar />
-            <Scene key="video" component={Video} hideNavBar />
-            <Scene key="error" component={Error} hideNavBar />
-            <Scene key="gameResult" component={GameResult} hideNavBar />
-          </Scene>
-        </Scene>
-      </Router>
+      <NavigationDrawer>
+        <Router
+          passProps
+          hideNavBar
+        >
+          <Scene key="authentication" component={Authentication} />
+          <Scene key="signUpSuccess" component={SignUpSuccess} />
+          <Scene key="home" component={Home} />
+          <Scene key="pending" component={Pending} />
+          <Scene key="capture" component={Capture} />
+          <Scene key="estimation" component={Estimation} />
+          <Scene key="video" component={Video} />
+          <Scene key="error" component={Error} />
+          <Scene key="gameResult" component={GameResult} />
+        </Router>
+      </NavigationDrawer>
     </Provider>
   );
 };

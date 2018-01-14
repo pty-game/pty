@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { AsyncStorage } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import withAuthentication from '../containers/withAuthentication';

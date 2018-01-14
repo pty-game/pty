@@ -24,7 +24,12 @@ export default class GameCtrl {
     return gameAction;
   }
 
-  async addAction({ gameId, userId, gameUserId, action }) {
+  async addAction({
+    gameId,
+    // userId,
+    gameUserId,
+    action,
+  }) {
     const game = await this.db.Game.find({
       where: { id: gameId },
       include: [this.db.GameUser],
@@ -44,11 +49,11 @@ export default class GameCtrl {
       return gameUser.userId;
     });
 
-    const userIdsWithoutCurrentUser = userIds.filter((item) => {
-      return item !== userId;
-    });
+    // const userIdsWithoutCurrentUser = userIds.filter((item) => {
+    //   return item !== userId;
+    // });
 
-    this.ws.send(userIdsWithoutCurrentUser, 'GAME_ACTION_ADDED', gameAction);
+    this.ws.send(userIds, 'GAME_ACTION_ADDED', gameAction);
 
     return gameAction;
   }

@@ -187,7 +187,7 @@ describe('applications connect', () => {
       const result = await applicationsConnect.gameApplicationIteration({ gameApplications });
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBe(3);
-      expect(typeof result.find(({ game: { dataValues: { actions } } }) => {
+      expect(typeof result.find(({ response: { actions } }) => {
         return Array.isArray(actions);
       })).toBe('object');
     } catch (err) {

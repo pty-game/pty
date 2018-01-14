@@ -5,7 +5,6 @@ import Constants from '../../constants/constants'
 import Q from 'q'
 import suspend from 'suspend'
 import Template from './game.tpl.jsx'
-import History from 'react-router/lib/History.js'
 import gameHandlers from '../../utils/gameHandlers.js'
 import gameUsersStore from '../../stores/gameUsers.js'
 import gameUsersActions from '../../actions/gameUsers.js'
@@ -55,7 +54,7 @@ var componentDidMount = suspend(function *() {
   var game = yield this._getGame()
 
   this.setState({game});
-  
+
   this._initGame(game);
   this._onOpponentCanvas();
 })

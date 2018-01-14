@@ -14,8 +14,6 @@ var bundler = watchify(browserify(config.src, watchify.args));
 
 bundler.transform('babelify');
 
-bundler.transform('reactify');
-
 gulp.task('browserify', bundle);
 bundler.on('update', bundle);
 
@@ -26,4 +24,11 @@ function bundle() {
   .pipe(source(config.outputName))
   .pipe(gulp.dest(config.dest))
   .pipe(connect.reload());
+
+  // .pipe(babel({
+  //   presets: ['env']
+  // }))
+  // .pipe(source(config.outputName))
+  // .pipe(gulp.dest(config.dest))
+  // .pipe(connect.reload());
 }

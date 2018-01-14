@@ -1,10 +1,9 @@
-import React, { PropTypes } from 'react';
-import { View, Image } from 'react-native';
-import RNFS from 'react-native-fs';
-import { Text } from 'native-base';
-import { Actions } from 'react-native-router-flux';
-import Button from './Button';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { View } from 'react-native';
 import withGame from '../containers/withGame';
+import EstimationItem from './EstimationItem';
+import { estimatorsGameActionShape } from './shapes';
 
 const styles = {
   container: {
@@ -15,63 +14,64 @@ const styles = {
   },
 };
 
-const EstimationItem = ({ playerGameAction }) => {
-  return (
-    <View>
-      <Image
-        style={{ width: 130, height: 200 }}
-        source={{ uri: 'https://facebook.github.io/react/img/logo_og.png' }}
-      />
-      {
-        playerGameAction &&
-        <Button
-          onPress={() => {
-            const videoPath = `${RNFS.DocumentDirectoryPath}/test.mp4`;
-            RNFS.writeFile(videoPath, playerGameAction.file, 'base64')
-            .then(() => {
-              Actions.video({ videoPath });
-            })
-            .catch((err) => {
-              console.error(err);
-            });
-          }}
-        >
-          <Text>
-            Watch
-          </Text>
-        </Button>
-      }
-      {
-        playerGameAction &&
-        <Button>
-          <Text>
-            Vote
-          </Text>
-        </Button>
-      }
-    </View>
-  );
+const getEstimatorsGameActionsForGameUserId = ({ gameUserId, estimatorsGameActions }) => {
+  const clonedEstimatorsGameActions = estimatorsGameActions.slice(0);
+
+  const result = clonedEstimatorsGameActions
+  .reverse()
+  .reduce((prev, item) => {
+    const isExist = prev.findIndex((prevItem) => {
+      return prevItem.gameUserId === item.gameUserId;
+    }) !== -1;
+
+    return isExist ? prev : [...prev, item];
+  }, [])
+  .filter((item) => {
+    return item.action.gameUserId === gameUserId;
+  });
+
+  return result;
 };
 
-EstimationItem.defaultProps = {
-  playerGameAction: null,
-};
-
-EstimationItem.propTypes = {
-  playerGameAction: PropTypes.object,
-};
-
-const Estimation = ({ playersGameActions }) => {
+const Estimation = ({
+  playersGameActions,
+  estimatorsGameActions,
+  addEstimatorGameAction,
+}) => {
   return (
     <View style={styles.container}>
-      <EstimationItem playerGameAction={playersGameActions[0]} />
-      <EstimationItem playerGameAction={playersGameActions[1]} />
+      <EstimationItem
+        playerGameAction={playersGameActions[0]}
+        estimatorsGameActions={
+          playersGameActions[0] ?
+            getEstimatorsGameActionsForGameUserId({
+              gameUserId: playersGameActions[0].gameUserId,
+              estimatorsGameActions,
+            }) :
+            []
+        }
+        addEstimatorGameAction={addEstimatorGameAction}
+      />
+      <EstimationItem
+        playerGameAction={playersGameActions[1]}
+        estimatorsGameActions={
+          playersGameActions[1] ?
+            getEstimatorsGameActionsForGameUserId({
+              gameUserId: playersGameActions[1].gameUserId,
+              estimatorsGameActions,
+            }) :
+            []
+        }
+        addEstimatorGameAction={addEstimatorGameAction}
+      />
     </View>
   );
 };
 
 Estimation.propTypes = {
-  playersGameActions: PropTypes.array.isRequired,
+  playersGameActions: PropTypes.arrayOf(estimatorsGameActionShape).isRequired,
+  estimatorsGameActions: PropTypes.arrayOf(estimatorsGameActionShape).isRequired,
+  addEstimatorGameAction: PropTypes.func.isRequired,
 };
 
 export default withGame(Estimation);

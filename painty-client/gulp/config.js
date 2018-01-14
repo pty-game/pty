@@ -27,9 +27,6 @@ module.exports = {
     }
   },
   browserify: {
-    settings: {
-      transform: ['babelify', 'reactify']
-    },
     src: src + '/scripts/app.js',
     dest: dest + '/scripts',
     outputName: 'app.js',

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Camera from 'react-native-camera';
 import RNFS from 'react-native-fs';
 import { Actions } from 'react-native-router-flux';
@@ -63,11 +64,15 @@ class Capture extends Component {
   startCapture() {
     this.camera.capture()
     .then((data) => {
-      console.log((data.size / 1000000).toFixed(2) + ' MB');
+      console.log(11, data);
+
+      if (data.size) {
+        console.log(`${(data.size / 1000000).toFixed(2)} MB`);
+      }
+
       return RNFS.readFile(data.path, 'base64');
     })
     .then((file) => {
-      this.props.playerGameActionAdded({ file });
       return this.props.addPlayerGameAction({ file });
     })
     .catch((err) => {

@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Form, Item, Input, Text } from 'native-base';
 import withAuthentication from '../containers/withAuthentication';
 import Container from './Container';

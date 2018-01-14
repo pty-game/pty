@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { ListItem, Separator, Text, Content } from 'native-base';
 import withAuthentication from '../containers/withAuthentication';
 
@@ -22,14 +23,14 @@ Menu.defaultProps = {
 
 Menu.propTypes = {
   logOut: PropTypes.func.isRequired,
-  userData: React.PropTypes.shape({
-    id: React.PropTypes.number,
-    login: React.PropTypes.string,
-    experience: React.PropTypes.number,
-    gameWon: React.PropTypes.number,
-    gameLose: React.PropTypes.number,
-    gameDraw: React.PropTypes.number,
-    gameTotal: React.PropTypes.number,
+  userData: PropTypes.shape({
+    id: PropTypes.number,
+    login: PropTypes.string,
+    experience: PropTypes.number,
+    gameWon: PropTypes.number,
+    gameLose: PropTypes.number,
+    gameDraw: PropTypes.number,
+    gameTotal: PropTypes.number,
   }),
 };
 

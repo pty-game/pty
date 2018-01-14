@@ -20,17 +20,8 @@
 
 <script src="scripts/vendor.js"></script>
 
-<script type="text/javascript">
-  io.sails.autoConnect = false;
-  io.sails.transports = ['websocket', 'pooling'];
-  // e.g. at some point later, connect 3 sockets, using default settings
-
-  // but sockets2's `url` option will be overridden as specified:
-  window.ws = io.sails.connect(location.protocol + '//' + location.hostname + ':1338');
-</script>
-
 <!-- Fix for facebook bug with _=_ -->
-<script type="text/javascript">
+<!-- <script type="text/javascript">
     if (window.location.hash && window.location.hash == '#_=_') {
         if (window.history && history.pushState) {
             window.history.pushState("", document.title, window.location.pathname + window.location.search);
@@ -46,9 +37,9 @@
             document.body.scrollLeft = scroll.left;
         }
     }
-</script>
+</script> -->
 
-<script>
+<!-- <script>
   var setCookieUserIdAndRefresh = function functionName() {
     $.cookie('userId', FB.getAuthResponse().accessToken);
 
@@ -84,7 +75,7 @@
     js.src = "//connect.facebook.net/uk_UK/sdk.js";
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
-</script>
+</script> -->
 
 <script src="scripts/app.js"></script>
 </body>

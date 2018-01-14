@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
  View,
 } from 'react-native';
@@ -6,6 +7,7 @@ import { Text } from 'native-base';
 import withGameApplication from '../containers/withGameApplication';
 import Container from './Container';
 import Button from './Button';
+import withMenu from './withMenu';
 
 const Home = ({ gameApplicationCreate }) => {
   return (
@@ -36,4 +38,4 @@ Home.propTypes = {
   gameApplicationCreate: PropTypes.func.isRequired,
 };
 
-export default withGameApplication(Home);
+export default withMenu(withGameApplication(Home));

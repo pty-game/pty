@@ -4,7 +4,6 @@ import Constants from '../../constants/constants'
 import Q from 'q'
 import suspend from 'suspend'
 import Template from './tools.tpl.jsx'
-import History from 'react-router/lib/History.js'
 import gameUsersActionsActions from '../../actions/gameUsersActions.js'
 
 function render() {
@@ -86,7 +85,6 @@ function _initMyTools() {
 //====================================================
 
 var obj = {
-  mixins: [History],
   render,
   getInitialState,
   componentDidMount,

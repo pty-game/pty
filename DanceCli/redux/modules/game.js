@@ -31,8 +31,8 @@ export const stopGamePlayback = () => {
   };
 };
 
-export const playerGameActionAdded = ({ file }) => {
-  return { type: 'PLAYER_GAME_ACTION_ADDED', action: playerAction(file) };
+export const playerGameActionAdded = (action) => {
+  return { type: 'PLAYER_GAME_ACTION_ADDED', action };
 };
 
 export const estimatorGameActionAdded = (action) => {
@@ -62,8 +62,8 @@ export const finishGameInit = ({ gameId, userData }) => {
 
 export const gameActionInit = ({ gameId }) => {
   return new Promise((resolve) => {
-    WS.instance.on('GAME_ACTION_ADDED', ({ action, gameId: _gameId }) => {
-      if (gameId !== _gameId) {
+    WS.instance.on('GAME_ACTION_ADDED', (action) => {
+      if (gameId !== action.gameId) {
         return;
       }
 
@@ -87,7 +87,7 @@ export const gameResidueTimeInit = ({ gameId }) => {
 export const loadPlayback = () => {
   return new Promise((resolve) => {
     const sound = new Sound(
-      'https://freemusicarchive.org/music/download/0d677a99e994daf5c248dcdb4ccb73adb0ba196f',
+      'https://freemusicarchive.org/music/download/74296b1d608ade1b06a1feeec4f06a43f08e2175',
       '',
       (err) => {
         if (err) {
@@ -103,7 +103,11 @@ export const loadPlayback = () => {
 export const startGamePlaybackCb = function* () {
   const { game: { playback } } = yield select();
 
-  playback.play();
+  playback.setVolume(1).play((success) => {
+    if (!success) {
+      throw new Error('playback failed due to audio decoding errors');
+    }
+  });
 };
 
 export const stopGamePlaybackCb = function* () {
@@ -118,35 +122,41 @@ export const addGameActionCb = function* ({ action }) {
 };
 
 export const gameInitCb = function* () {
-  const { authentication: { userData }, game: { gameId, isEstimator } } = yield select();
+  try {
+    const { authentication: { userData }, game: { gameId, isEstimator } } = yield select();
 
-  const playback = yield loadPlayback();
+    const playback = yield loadPlayback();
 
-  yield put({ type: 'SET_GAME_PLAYBACK', playback });
+    yield put({ type: 'SET_GAME_PLAYBACK', playback });
 
-  if (!isEstimator) {
-    Actions.capture();
-  } else {
-    Actions.estimation();
-  }
-
-  finishGameInit({ userData, gameId });
-
-  while (true) {
-    const { action, residueTime } = yield race({
-      action: call(gameActionInit, { gameId }),
-      residueTime: call(gameResidueTimeInit, { gameId }),
-    });
-
-    if (action !== undefined) {
-      if (action.instrument === 'dance') {
-        yield put(playerGameActionAdded(action));
-      } else {
-        yield put(estimatorGameActionAdded(action));
-      }
-    } else if (residueTime !== undefined) {
-      yield put({ type: 'GAME_RESIDUE_TIME', residueTime });
+    if (!isEstimator) {
+      Actions.capture();
+    } else {
+      Actions.estimation();
     }
+
+    finishGameInit({ userData, gameId });
+
+    while (true) {
+      const { action, residueTime } = yield race({
+        action: call(gameActionInit, { gameId }),
+        residueTime: call(gameResidueTimeInit, { gameId }),
+      });
+
+      if (action !== undefined) {
+        if (action.action.instrument === 'dance') {
+          yield put(playerGameActionAdded(action));
+        } else {
+          yield put(estimatorGameActionAdded(action));
+        }
+      } else if (residueTime !== undefined) {
+        yield put({ type: 'GAME_RESIDUE_TIME', residueTime });
+      }
+    }
+  } catch (err) {
+    console.error(err.stack);
+
+    throw err;
   }
 };
 
@@ -156,26 +166,40 @@ const initialState = {
   playersGameActions: [],
   estimatorsGameActions: [],
   residueTime: undefined,
-  initResidueTime: undefined,
+  _initResidueTime: undefined,
   prepearingResidueTime: undefined,
   playingResidueTime: undefined,
 };
 
 export const gameReducer = (
   state = initialState,
-  { type, gameId, action, residueTime, isEstimator, playback },
+  { type, gameId, action, residueTime, isEstimator, playback, actions },
 ) => {
   switch (type) {
-    case 'GAME_INIT':
+    case 'GAME_INIT': {
+      const playersGameActions = [];
+      const estimatorsGameActions = [];
+
+      actions.forEach((_action) => {
+        if (_action.instrument !== 'estimation') {
+          playersGameActions.push(_action);
+        } else {
+          estimatorsGameActions.push(_action);
+        }
+      });
+
       return {
         ...state,
         gameId,
         isEstimator,
         residueTime,
-        initResidueTime: residueTime,
+        _initResidueTime: residueTime,
         prepearingResidueTime: residueTime - (residueTime - GAME_PREPEARING_DURATION),
         playingResidueTime: residueTime - (residueTime - GAME_PLAYING_DURATION),
+        playersGameActions,
+        estimatorsGameActions,
       };
+    }
     case 'PLAYER_GAME_ACTION_ADDED':
       return {
         ...state,
@@ -193,7 +217,7 @@ export const gameReducer = (
       };
 
       const prepearingResidueTime = residueTime -
-      (state.initResidueTime - GAME_PREPEARING_DURATION);
+      (state._initResidueTime - GAME_PREPEARING_DURATION);
       let playingResidueTime = state.playingResidueTime;
 
       if (prepearingResidueTime >= 0) {
@@ -202,7 +226,7 @@ export const gameReducer = (
         obj.prepearingResidueTime = 0;
 
         playingResidueTime = (residueTime + GAME_PREPEARING_DURATION) -
-        (state.initResidueTime - GAME_PLAYING_DURATION);
+        (state._initResidueTime - GAME_PLAYING_DURATION);
       }
 
       if (playingResidueTime >= 0) {

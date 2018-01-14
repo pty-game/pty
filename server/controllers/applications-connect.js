@@ -147,6 +147,12 @@ export default class ApplicationsConnect {
       });
 
       if (game) {
+        const response = {
+          gameId: game.id,
+          residueTime: game.residueTime,
+          actions: [],
+        };
+
         index -= 1;
 
         const userIds = createdGameUsers.map((gameUser) => {
@@ -156,15 +162,15 @@ export default class ApplicationsConnect {
         if (!gameApplication.isEstimator) {
           this.gameCtrl.start({ gameId: game.id });
         } else {
-          game.dataValues.actions = await game.getGameActions();
+          response.actions = await game.getGameActions();
         }
 
-        newResult.push({ game, createdGameUsers });
+        newResult.push({ response, createdGameUsers });
 
         this.ws.send(
           userIds,
           'GAME_FOUND',
-          game.toJSON(),
+          response,
         );
       }
     }

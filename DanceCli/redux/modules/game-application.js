@@ -13,8 +13,8 @@ export const gameApplicationCreateFn = (isEstimator) => {
   WS.instance.send('GAME_APPLICATION_CREATE', { isEstimator });
 
   return new Promise((resolve, reject) => {
-    WS.instance.on('GAME_FOUND', ({ gameId, residueTime }) => {
-      resolve({ gameId, residueTime });
+    WS.instance.on('GAME_FOUND', ({ gameId, residueTime, actions }) => {
+      resolve({ gameId, residueTime, actions });
     });
 
     WS.instance.on('GAME_APPLICATION_EXPIRED', (err) => {
@@ -30,8 +30,8 @@ export const gameApplicationCreateCb = function* ({ isEstimator }) {
   Actions.pending();
 
   try {
-    const { gameId, residueTime } = yield call(gameApplicationCreateFn, isEstimator);
-    yield put({ type: 'GAME_FOUND', isEstimator, gameId, residueTime });
+    const { gameId, residueTime, actions } = yield call(gameApplicationCreateFn, isEstimator);
+    yield put({ type: 'GAME_FOUND', isEstimator, gameId, residueTime, actions });
   } catch (err) {
     Actions.error({
       text: 'Sorry, we can\'t find opponents for you. Try again later.',
@@ -43,8 +43,8 @@ export const gameApplicationCreateCb = function* ({ isEstimator }) {
   }
 };
 
-export const gameFoundCb = function* ({ isEstimator, gameId, residueTime }) {
-  yield put({ type: 'GAME_INIT', isEstimator, gameId, residueTime });
+export const gameFoundCb = function* ({ isEstimator, gameId, residueTime, actions }) {
+  yield put({ type: 'GAME_INIT', isEstimator, gameId, residueTime, actions });
 };
 
 const initialState = {
