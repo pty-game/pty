@@ -16,7 +16,6 @@ export const toggleDrawer = (value) => {
 
 export const toggleDrawerCb = function* ({ value }) {
   const { drawer: { drawer } } = yield select();
-
   if (value) {
     drawer.open();
   } else {

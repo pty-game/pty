@@ -22,6 +22,7 @@ class SignUp extends Component {
     this.state = {
       login: '',
       password: '',
+      repeatPassword: '',
     };
   }
 
@@ -29,7 +30,7 @@ class SignUp extends Component {
     return (
       <Container>
         <Form>
-          <Item>
+          <Item last>
             <Input
               placeholder="Username"
               onChangeText={(login) => { this.setState({ login }); }}
@@ -42,6 +43,14 @@ class SignUp extends Component {
               secureTextEntry
               onChangeText={(password) => { this.setState({ password }); }}
               value={this.state.password}
+            />
+          </Item>
+          <Item last>
+            <Input
+              placeholder="Repeat password"
+              secureTextEntry
+              onChangeText={(password) => { this.setState({ repeatPassword: password }); }}
+              value={this.state.repeatPassword}
             />
           </Item>
           <Button

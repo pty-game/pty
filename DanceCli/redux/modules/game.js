@@ -87,7 +87,7 @@ export const gameResidueTimeInit = ({ gameId }) => {
 export const loadPlayback = () => {
   return new Promise((resolve) => {
     const sound = new Sound(
-      'https://freemusicarchive.org/music/download/74296b1d608ade1b06a1feeec4f06a43f08e2175',
+      'https://freemusicarchive.org/music/download/ddeca92db5ade23bfeb4865ea2e9b0718395c6ca',
       '',
       (err) => {
         if (err) {

@@ -11,7 +11,7 @@ class Authentication extends Component {
     super();
 
     this.state = {
-      isNewUser: false,
+      isNewUser: true,
     };
   }
 

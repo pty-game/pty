@@ -3,6 +3,7 @@ import { AsyncStorage } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import fetch from '../../helpers/fetch';
 import WS from '../../helpers/ws';
+import { toggleDrawer } from './drawer';
 
 export const subscribe = (token) => {
   return {
@@ -39,8 +40,7 @@ export const signInSucceededCb = function* ({ token }) {
 
 export const logOutCb = function* () {
   yield AsyncStorage.clear();
-
-  Actions.refresh({ key: 'drawer', open: false });
+  yield put(toggleDrawer(false));
   Actions.authentication();
 };
 

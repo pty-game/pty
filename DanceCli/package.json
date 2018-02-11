@@ -31,7 +31,8 @@
     "redux": "^3.7.2",
     "redux-saga": "^0.16.0",
     "socket.io-client": "^2.0.4",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^2.0.3",
+    "redux-logger": "^3.0.6"
   },
   "devDependencies": {
     "babel-jest": "22.0.6",
