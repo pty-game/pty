@@ -344,9 +344,9 @@ export default class GameCtrl {
   async create() {
     const tasks = await this.db.Task.findAll();
 
-    const taskId = _.sample(tasks).id;
+    const task = _.sample(tasks);
 
-    const game = await this.db.Game.create({ taskId });
+    const game = await this.db.Game.create({ taskId: task ? task.id : null });
 
     return game;
   }
