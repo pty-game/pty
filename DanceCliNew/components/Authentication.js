@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {AsyncStorage, SafeAreaView, View} from 'react-native';
-import { Actions } from 'react-native-router-flux';
+import { AsyncStorage, View } from 'react-native';
 import withAuthentication from '../containers/withAuthentication';
 import SignIn from '../components/SignIn';
 import SignUp from '../components/SignUp';
@@ -31,13 +30,13 @@ class Authentication extends Component {
 
     if (nextProps.userData && !this.props.userData) {
       if (this.state.isNewUser) {
-        Actions.signUpSuccess();
+        this.props.navigation.navigate('SignUpSuccess');
 
         setTimeout(() => {
-          Actions.home();
+          this.props.navigation.navigate('Home');
         }, 2000);
       } else {
-        Actions.home();
+        this.props.navigation.navigate('Home');
       }
     }
   }

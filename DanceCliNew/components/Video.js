@@ -4,7 +4,6 @@ import {
  View,
 } from 'react-native';
 import VideoRun from 'react-native-video';
-import { Actions } from 'react-native-router-flux';
 import withGame from '../containers/withGame';
 
 const styles = {
@@ -52,7 +51,7 @@ class Video extends Component {
           }}
           onEnd={() => {
             this.props.stopGamePlayback();
-            Actions.estimation();
+            this.props.navigation.navigate('Estimation');
           }}
           onError={(err) => {
             console.log(5, err);

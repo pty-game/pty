@@ -1,8 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-    View,
-} from 'react-native';
 import { Text } from 'native-base';
 import withGameApplication from '../containers/withGameApplication';
 import Container from './Container';
@@ -44,13 +41,16 @@ const styles = {
     }
 };
 
-const Home = ({ gameApplicationCreate }) => {
+const Home = ({ gameApplicationCreate, navigation }) => {
   return (
     <Container>
         <Button
           block
         large
-          onPress={() => { gameApplicationCreate({ isEstimator: false }); }}
+          onPress={() => {
+            gameApplicationCreate({ isEstimator: false });
+            navigation.navigate('Pending');
+          }}
         >
           <Text style={styles.btn}>
             Start dancing
@@ -59,7 +59,10 @@ const Home = ({ gameApplicationCreate }) => {
         <Button
           block
         large
-          onPress={() => { gameApplicationCreate({ isEstimator: true }); }}
+          onPress={() => {
+            gameApplicationCreate({ isEstimator: true });
+            navigation.navigate('Pending');
+          }}
         >
           <Text style={styles.btn}>
             Start estimation

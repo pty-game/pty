@@ -40,26 +40,29 @@ export const playerGameActionAdded = (action) => {
 export const estimatorGameActionAdded = (action) => {
   return { type: 'ESTIMATOR_GAME_ACTION_ADDED', action };
 };
+export const setGameResult = (payload) => {
+  return { type: 'SET_GAME_RESULT', payload };
+};
 
 export const finishGameInit = ({ gameId, userData }) => {
-  WS.instance.on('GAME_FINISHED', ({
-    gameWinnerUserId,
-    gameId: _gameId,
-  }) => {
-    if (gameId !== _gameId) {
-      return;
-    }
+   const gameWinnerUserId = call(() => new Promise((resolve) => {
+     WS.instance.on('GAME_FINISHED', ({
+                                        gameWinnerUserId,
+                                        gameId: _gameId,
+                                      }) => {
+       if (gameId !== _gameId) {
+         return;
+       }
 
-    WS.instance.off('GAME_FINISHED');
-    WS.instance.off('GAME_ACTION_ADDED');
-    WS.instance.off('GAME_RESIDUE_TIME');
+       WS.instance.off('GAME_FINISHED');
+       WS.instance.off('GAME_ACTION_ADDED');
+       WS.instance.off('GAME_RESIDUE_TIME');
 
-    Actions.gameResult({ won: gameWinnerUserId === userData.id });
+       resolve(gameWinnerUserId);
+    });
+  }));
 
-    setTimeout(() => {
-      Actions.home();
-    }, 3000);
-  });
+  put(setGameResult({ gameResult: gameWinnerUserId === userData.id }));
 };
 
 export const gameActionInit = ({ gameId }) => {
@@ -161,6 +164,7 @@ const initialState = {
   playback: undefined,
   playersGameActions: [],
   estimatorsGameActions: [],
+  gameResult: undefined,
   residueTime: undefined,
   _initResidueTime: undefined,
   prepearingResidueTime: undefined,
@@ -169,7 +173,7 @@ const initialState = {
 
 export const gameReducer = (
   state = initialState,
-  { type, gameId, action, residueTime, isEstimator, playback, actions },
+  { type, gameId, action, residueTime, isEstimator, playback, actions, gameResult },
 ) => {
   switch (type) {
     case 'GAME_INIT': {
@@ -235,6 +239,8 @@ export const gameReducer = (
     }
     case 'SET_GAME_PLAYBACK':
       return { ...state, playback };
+    case 'SET_GAME_RESULT':
+      return { ...state, gameResult };
     default:
       return state;
   }

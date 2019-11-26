@@ -3,8 +3,9 @@ import {
     View,
 } from 'react-native';
 import { Provider } from 'react-redux';
+import createAnimatedSwitchNavigator from 'react-navigation-animated-switch';
+import { createAppContainer } from 'react-navigation';
 import React from 'react';
-import { Scene, Router, Stack, ActionConst, Lightbox } from 'react-native-router-flux';
 import Home from './components/Home';
 import Pending from './components/Pending';
 import Capture from './components/Capture';
@@ -28,23 +29,46 @@ const styles = {
     backgroundColor: 'rgb(255,245,201)',
   },
 };
+
+const AppNavigator = createAnimatedSwitchNavigator({
+  Authentication: {
+    screen: Authentication,
+  },
+  SignUpSuccess: {
+    screen: SignUpSuccess,
+  },
+  Home: {
+    screen: Home,
+  },
+  Pending: {
+    screen: Pending,
+  },
+  Capture: {
+    screen: Capture,
+  },
+  Estimation: {
+    screen: Estimation,
+  },
+  Video: {
+    screen: Video,
+  },
+  Error: {
+    screen: Error,
+  },
+  GameResult: {
+    screen: GameResult,
+  },
+}, {
+  initialRouteName: 'Authentication',
+});
+
+const App = createAppContainer(AppNavigator);
+
 const DanceCliNew = () => {
   return (
     <Provider store={store}>
       <NavigationDrawer>
-        <Router hideNavBar>
-          <Scene key="root" hideNavBar cardStyle={styles.container}>
-            <Scene key="authentication" component={Authentication} />
-            <Scene key="signUpSuccess" component={SignUpSuccess} />
-            <Scene key="home" component={Home} />
-            <Scene key="pending" component={Pending} />
-            <Scene key="capture" component={Capture} />
-            <Scene key="estimation" component={Estimation} />
-            <Scene key="video" component={Video} />
-            <Scene key="error" component={Error} />
-            <Scene key="gameResult" component={GameResult} />
-          </Scene>
-        </Router>
+        <App />
       </NavigationDrawer>
     </Provider>
   );
@@ -53,7 +77,7 @@ const DanceCliNew = () => {
 sagaMiddleware.run(rootSaga);
 
 AppRegistry.registerComponent('DanceCliNew', () => {
-    return DanceCliNew;
+  return DanceCliNew;
 });
 
 export default DanceCliNew;

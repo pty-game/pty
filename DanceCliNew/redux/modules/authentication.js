@@ -1,6 +1,5 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { AsyncStorage } from 'react-native';
-import { Actions } from 'react-native-router-flux';
 import fetch from '../../helpers/fetch';
 import WS from '../../helpers/ws';
 import { toggleDrawer } from './drawer';
@@ -41,7 +40,6 @@ export const signInSucceededCb = function* ({ token }) {
 export const logOutCb = function* () {
   yield AsyncStorage.clear();
   yield put(toggleDrawer(false));
-  Actions.authentication();
 };
 
 export const signInCb = function* ({ login, password }) {

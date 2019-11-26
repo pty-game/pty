@@ -1,6 +1,6 @@
 import { takeLatest, put, call } from 'redux-saga/effects';
-import { Actions } from 'react-native-router-flux';
 import WS from '../../helpers/ws';
+import { setError } from './meta';
 
 export const gameApplicationCreate = ({ isEstimator }) => {
   return {
@@ -27,19 +27,11 @@ export const gameApplicationCreateFn = (isEstimator) => {
 };
 
 export const gameApplicationCreateCb = function* ({ isEstimator }) {
-  Actions.pending();
-
   try {
     const { gameId, residueTime, actions } = yield call(gameApplicationCreateFn, isEstimator);
     yield put({ type: 'GAME_FOUND', isEstimator, gameId, residueTime, actions });
   } catch (err) {
-    Actions.error({
-      text: 'Sorry, we can\'t find opponents for you. Try again later.',
-    });
-
-    setTimeout(() => {
-      Actions.home();
-    }, 3000);
+    yield put(setError('Sorry, we can\'t find opponents for you. Try again later.'));
   }
 };
 

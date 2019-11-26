@@ -37,10 +37,12 @@ const Estimation = ({
   playersGameActions,
   estimatorsGameActions,
   addEstimatorGameAction,
+  navigation,
 }) => {
   return (
     <View style={styles.container}>
       <EstimationItem
+        navigation={navigation}
         playerGameAction={playersGameActions[0]}
         estimatorsGameActions={
           playersGameActions[0] ?
@@ -53,6 +55,7 @@ const Estimation = ({
         addEstimatorGameAction={addEstimatorGameAction}
       />
       <EstimationItem
+        navigation={navigation}
         playerGameAction={playersGameActions[1]}
         estimatorsGameActions={
           playersGameActions[1] ?

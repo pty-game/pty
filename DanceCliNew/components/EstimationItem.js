@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { View, Image } from 'react-native';
 import RNFS from 'react-native-fs';
 import { Text } from 'native-base';
-import { Actions } from 'react-native-router-flux';
 import Button from './Button';
 import { estimatorsGameActionShape } from './shapes';
 
@@ -11,6 +10,7 @@ const EstimationItem = ({
   playerGameAction,
   addEstimatorGameAction,
   estimatorsGameActions,
+  navigation,
 }) => {
   return (
     <View>
@@ -21,7 +21,7 @@ const EstimationItem = ({
             const videoPath = `${RNFS.DocumentDirectoryPath}/test.mp4`;
             RNFS.writeFile(videoPath, playerGameAction.action.file, 'base64')
             .then(() => {
-              Actions.video({ videoPath });
+              navigation.navigate('Video', { videoPath })
             })
             .catch((err) => {
               console.error(err);

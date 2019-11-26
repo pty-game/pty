@@ -3,13 +3,16 @@ import PropTypes from 'prop-types';
 import { ListItem, Separator, Text, Content } from 'native-base';
 import withAuthentication from '../containers/withAuthentication';
 
-const Menu = ({ logOut, userData }) => {
+const Menu = ({ logOut, userData, navigation }) => {
   return (
     <Content style={{ marginTop: 40 }}>
       <Separator bordered>
         <Text>{userData.login}</Text>
       </Separator>
-      <ListItem last onPress={() => { logOut(); }}>
+      <ListItem last onPress={() => {
+        logOut();
+        navigation.navigate('Authentication');
+      }}>
         <Text>Log out</Text>
       </ListItem>
     </Content>

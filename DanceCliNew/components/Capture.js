@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { RNCamera } from 'react-native-camera';
 import { withNavigationFocus } from 'react-navigation';
 import RNFS from 'react-native-fs';
-import { Actions } from 'react-native-router-flux';
 import { Text } from 'native-base';
 import { View } from 'react-native';
 
@@ -58,8 +57,7 @@ class Capture extends Component {
     if (playingResidueTime === 0 && this.props.playingResidueTime > 0) {
       this.stopRecording();
       this.props.stopGamePlayback();
-
-      Actions.estimation();
+      this.props.navigation.navigate('Estimation');
     }
   }
 

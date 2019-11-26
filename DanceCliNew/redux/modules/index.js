@@ -4,12 +4,14 @@ import { authenticationReducer, authenticationSaga } from './authentication';
 import { gameApplicationReducer, gameApplicationSaga } from './game-application';
 import { gameReducer, gameSaga } from './game';
 import { drawerReducer, drawerSaga } from './drawer';
+import { metaReducer } from "./meta";
 
 export const rootReducer = combineReducers({
   authentication: authenticationReducer,
   gameApplication: gameApplicationReducer,
   game: gameReducer,
   drawer: drawerReducer,
+  meta: metaReducer,
 });
 
 export const rootSaga = function* () {
