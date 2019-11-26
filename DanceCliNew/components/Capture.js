@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Camera from 'react-native-camera';
+import { RNCamera } from 'react-native-camera';
+import { withNavigationFocus } from 'react-navigation';
 import RNFS from 'react-native-fs';
 import { Actions } from 'react-native-router-flux';
 import { Text } from 'native-base';
 import { View } from 'react-native';
+
 import withGame from '../containers/withGame';
 
 const styles = {
@@ -54,7 +56,7 @@ class Capture extends Component {
     }
 
     if (playingResidueTime === 0 && this.props.playingResidueTime > 0) {
-      this.stopCapture();
+      this.stopRecording();
       this.props.stopGamePlayback();
 
       Actions.estimation();
@@ -62,15 +64,20 @@ class Capture extends Component {
   }
 
   startCapture() {
-    this.camera.capture()
+    this.camera.recordAsync({
+      quality: RNCamera.Constants.VideoQuality['288p'],
+      orientation: 'portrait',
+      captureAudio: false,
+    })
     .then((data) => {
-      console.log(11, data);
-
       if (data.size) {
         console.log(`${(data.size / 1000000).toFixed(2)} MB`);
       }
-
-      return RNFS.readFile(data.path, 'base64');
+      if (data.size) {
+        console.log('data.path', data.path);
+      }
+      console.log('data.uri', data.uri);
+      return RNFS.readFile(data.uri, 'base64');
     })
     .then((file) => {
       return this.props.addPlayerGameAction({ file });
@@ -80,22 +87,21 @@ class Capture extends Component {
     });
   }
 
-  stopCapture() {
-    this.camera.stopCapture();
+  stopRecording() {
+    this.camera.stopRecording();
   }
 
   render() {
+    const { isFocused } = this.props
+    if (!isFocused) return <View />;
+
     return (
-      <Camera
+      <RNCamera
         ref={(cam) => {
           this.camera = cam;
         }}
+        captureAudio={false}
         style={styles.camera}
-        captureMode={Camera.constants.CaptureMode.video}
-        orientation={Camera.constants.Orientation.auto}
-        aspect={Camera.constants.Aspect.fill}
-        captureTarget={Camera.constants.CaptureTarget.temp}
-        captureQuality={Camera.constants.CaptureQuality.medium}
       >
         <View style={styles.cameraView}>
           {
@@ -116,7 +122,7 @@ class Capture extends Component {
             <Text style={styles.text}>{`Recording ${this.props.playingResidueTime}`}</Text>
           }
         </View>
-      </Camera>
+      </RNCamera>
     );
   }
 }
@@ -130,4 +136,4 @@ Capture.propTypes = {
   playingResidueTime: PropTypes.number.isRequired,
 };
 
-export default withGame(Capture);
+export default withGame(withNavigationFocus(Capture));

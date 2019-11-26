@@ -1,9 +1,11 @@
 import { takeLatest, put, select, race, call } from 'redux-saga/effects';
 import { playerAction, estimatorAction } from 'pty-common/actions';
-import Sound from 'react-native-sound';
 import { Actions } from 'react-native-router-flux';
+import SoundPlayer from 'react-native-sound-player'
 import WS from '../../helpers/ws';
 import { GAME_PREPEARING_DURATION, GAME_PLAYING_DURATION } from '../../game-config';
+
+let SoundPlayerCb = null;
 
 export const addPlayerGameAction = ({ file }) => {
   return {
@@ -85,29 +87,23 @@ export const gameResidueTimeInit = ({ gameId }) => {
 };
 
 export const loadPlayback = () => {
+  const url = 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Jahzzar/Travellers_Guide_Excerpt/Jahzzar_-_05_-_Siesta.mp3';
   return new Promise((resolve) => {
-    const sound = new Sound(
-      'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Jahzzar/Travellers_Guide_Excerpt/Jahzzar_-_05_-_Siesta.mp3',
-      '',
-      (err) => {
-        if (err) {
-          console.error(err);
-        } else {
-          resolve(sound);
-        }
-      },
-    );
-  });
+    if (SoundPlayerCb) SoundPlayerCb.remove();
+    SoundPlayerCb = SoundPlayer.addEventListener('FinishedLoadingURL', ({ success, url }) => {
+      resolve();
+    });
+    SoundPlayer.loadUrl(url);
+  }).then(() => SoundPlayer);
 };
 
 export const startGamePlaybackCb = function* () {
   const { game: { playback } } = yield select();
 
-  playback.setVolume(1).play((success) => {
-    if (!success) {
-      throw new Error('playback failed due to audio decoding errors');
-    }
-  });
+
+  playback.setVolume(1);
+  playback.seek(0);
+  playback.play();
 };
 
 export const stopGamePlaybackCb = function* () {

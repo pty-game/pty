@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { View } from 'react-native';
 import PropTypes from 'prop-types';
 import { Form, Item, Input, Text } from 'native-base';
 import withAuthentication from '../containers/withAuthentication';
@@ -28,57 +29,55 @@ class SignUp extends Component {
 
   render() {
     return (
-      <Container>
-        <Form>
-          <Item last>
-            <Input
-              placeholder="Username"
-              onChangeText={(login) => { this.setState({ login }); }}
-              value={this.state.login}
-            />
-          </Item>
-          <Item last>
-            <Input
-              placeholder="Password"
-              secureTextEntry
-              onChangeText={(password) => { this.setState({ password }); }}
-              value={this.state.password}
-            />
-          </Item>
-          <Item last>
-            <Input
-              placeholder="Repeat password"
-              secureTextEntry
-              onChangeText={(password) => { this.setState({ repeatPassword: password }); }}
-              value={this.state.repeatPassword}
-            />
-          </Item>
-          <Button
-            block
-            onPress={() => {
-              this.props.signUp({
-                login: this.state.login,
-                password: this.state.password,
-              });
-            }}
-          >
-            <Text>
-              Sign Up
-            </Text>
-          </Button>
-          {
-            this.props.signUpError && <Text style={styles.errorMessage}>
-              {this.props.signUpError}
-            </Text>
-          }
-          <Text
-            style={{ marginTop: 20, textAlign: 'center', color: 'blue' }}
-            onPress={this.props.toggleNewUser}
-          >
-            Sign In
+      <Form>
+        <Item last>
+          <Input
+            placeholder="Username"
+            onChangeText={(login) => { this.setState({ login }); }}
+            value={this.state.login}
+          />
+        </Item>
+        <Item last>
+          <Input
+            placeholder="Password"
+            secureTextEntry
+            onChangeText={(password) => { this.setState({ password }); }}
+            value={this.state.password}
+          />
+        </Item>
+        <Item last>
+          <Input
+            placeholder="Repeat password"
+            secureTextEntry
+            onChangeText={(password) => { this.setState({ repeatPassword: password }); }}
+            value={this.state.repeatPassword}
+          />
+        </Item>
+        <Button
+          block
+          onPress={() => {
+            this.props.signUp({
+              login: this.state.login,
+              password: this.state.password,
+            });
+          }}
+        >
+          <Text>
+            Sign Up
           </Text>
-        </Form>
-      </Container>
+        </Button>
+        {
+          this.props.signUpError && <Text style={styles.errorMessage}>
+            {this.props.signUpError}
+          </Text>
+        }
+        <Text
+          style={{ marginTop: 20, textAlign: 'center' }}
+          onPress={this.props.toggleNewUser}
+        >
+          Sign In
+        </Text>
+      </Form>
     );
   }
 }

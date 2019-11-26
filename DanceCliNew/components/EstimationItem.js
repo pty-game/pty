@@ -14,10 +14,6 @@ const EstimationItem = ({
 }) => {
   return (
     <View>
-      <Image
-        style={{ width: 130, height: 200 }}
-        source={{ uri: 'https://facebook.github.io/react/img/logo_og.png' }}
-      />
       {
         playerGameAction &&
         <Button

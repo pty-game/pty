@@ -1,9 +1,10 @@
 import {
     AppRegistry,
+    View,
 } from 'react-native';
 import { Provider } from 'react-redux';
 import React from 'react';
-import { Scene, Router, Stack } from 'react-native-router-flux';
+import { Scene, Router, Stack, ActionConst, Lightbox } from 'react-native-router-flux';
 import Home from './components/Home';
 import Pending from './components/Pending';
 import Capture from './components/Capture';
@@ -22,29 +23,31 @@ WS.init({ baseUrlSocket });
 
 const store = createStore();
 
+const styles = {
+  container: {
+    backgroundColor: 'rgb(255,245,201)',
+  },
+};
 const DanceCliNew = () => {
-    return (
-        <Provider store={store}>
-        <NavigationDrawer>
-            <Router
-        passProps
-        hideNavBar
-        >
-        <Stack key="root">
-        <Scene key="authentication" component={Authentication} />
-        <Scene key="signUpSuccess" component={SignUpSuccess} />
-        <Scene key="home" component={Home} />
-        <Scene key="pending" component={Pending} />
-        <Scene key="capture" component={Capture} />
-        <Scene key="estimation" component={Estimation} />
-        <Scene key="video" component={Video} />
-        <Scene key="error" component={Error} />
-        <Scene key="gameResult" component={GameResult} />
-        </Stack>
+  return (
+    <Provider store={store}>
+      <NavigationDrawer>
+        <Router hideNavBar>
+          <Scene key="root" hideNavBar cardStyle={styles.container}>
+            <Scene key="authentication" component={Authentication} />
+            <Scene key="signUpSuccess" component={SignUpSuccess} />
+            <Scene key="home" component={Home} />
+            <Scene key="pending" component={Pending} />
+            <Scene key="capture" component={Capture} />
+            <Scene key="estimation" component={Estimation} />
+            <Scene key="video" component={Video} />
+            <Scene key="error" component={Error} />
+            <Scene key="gameResult" component={GameResult} />
+          </Scene>
         </Router>
-        </NavigationDrawer>
-        </Provider>
-    );
+      </NavigationDrawer>
+    </Provider>
+  );
 };
 
 sagaMiddleware.run(rootSaga);

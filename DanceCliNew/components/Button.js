@@ -12,7 +12,7 @@ const MyButton = (props) => {
   const allProps = { ...props, style: { ...ownStyles, ...style } };
 
   return (
-    <Button bordered {...allProps} >
+    <Button {...allProps} >
       {children}
     </Button>
   );

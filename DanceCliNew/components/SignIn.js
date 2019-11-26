@@ -27,49 +27,47 @@ class SignIn extends Component {
 
   render() {
     return (
-      <Container>
-        <Form>
-          <Item last>
-            <Input
-              placeholder="Username"
-              onChangeText={(login) => { this.setState({ login }); }}
-              value={this.state.login}
-            />
-          </Item>
-          <Item last>
-            <Input
-              placeholder="Password"
-              secureTextEntry
-              onChangeText={(password) => { this.setState({ password }); }}
-              value={this.state.password}
-            />
-          </Item>
-          <Button
-            block
-            onPress={() => {
-              this.props.signIn({
-                login: this.state.login,
-                password: this.state.password,
-              });
-            }}
-          >
-            <Text>
-              Sign In
-            </Text>
-          </Button>
-          {
-            this.props.signInError && <Text style={styles.errorMessage}>
-              {this.props.signInError}
-            </Text>
-          }
-          <Text
-            style={{ marginTop: 20, textAlign: 'center', color: 'blue' }}
-            onPress={this.props.toggleNewUser}
-          >
-            Sign Up
+      <Form>
+        <Item last>
+          <Input
+            placeholder="Username"
+            onChangeText={(login) => { this.setState({ login }); }}
+            value={this.state.login}
+          />
+        </Item>
+        <Item last>
+          <Input
+            placeholder="Password"
+            secureTextEntry
+            onChangeText={(password) => { this.setState({ password }); }}
+            value={this.state.password}
+          />
+        </Item>
+        <Button
+          block
+          onPress={() => {
+            this.props.signIn({
+              login: this.state.login,
+              password: this.state.password,
+            });
+          }}
+        >
+          <Text>
+            Sign In
           </Text>
-        </Form>
-      </Container>
+        </Button>
+        {
+          this.props.signInError && <Text style={styles.errorMessage}>
+            {this.props.signInError}
+          </Text>
+        }
+        <Text
+          style={{ marginTop: 20, textAlign: 'center' }}
+          onPress={this.props.toggleNewUser}
+        >
+          Sign Up
+        </Text>
+      </Form>
     );
   }
 }

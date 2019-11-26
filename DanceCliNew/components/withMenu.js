@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableWithoutFeedback } from 'react-native';
+import { View, TouchableWithoutFeedback, SafeAreaView } from 'react-native';
 import withDrawer from '../containers/withDrawer';
 
 const menuBtnItemStyle = {
@@ -12,43 +12,45 @@ const menuBtnItemStyle = {
 const withMenu = (WrappedComponent) => {
   return withDrawer((props) => {
     return (
-      <View
-        style={{
-          flex: 1,
-          position: 'relative',
-        }}
-      >
+      <SafeAreaView style={{ flex: 1 }}>
         <View
           style={{
-            position: 'absolute',
-            top: 30,
-            left: 20,
-            right: 20,
-            zIndex: 333,
+            flex: 1,
+            position: 'relative',
           }}
         >
           <View
             style={{
               position: 'absolute',
-              top: 0,
-              right: 0,
+              top: 30,
+              left: 20,
+              right: 20,
+              zIndex: 333,
             }}
           >
-            <TouchableWithoutFeedback
-              onPress={() => {
-                props.toggleDrawer(true);
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
               }}
             >
-              <View>
-                <View style={menuBtnItemStyle} />
-                <View style={menuBtnItemStyle} />
-                <View style={menuBtnItemStyle} />
-              </View>
-            </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  props.toggleDrawer(true);
+                }}
+              >
+                <View>
+                  <View style={menuBtnItemStyle} />
+                  <View style={menuBtnItemStyle} />
+                  <View style={menuBtnItemStyle} />
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
           </View>
+          <WrappedComponent {...props} />
         </View>
-        <WrappedComponent {...props} />
-      </View>
+      </SafeAreaView>
     );
   });
 };

@@ -6,9 +6,7 @@ import Container from './Container';
 const SignUpSuccess = () => {
   return (
     <Container>
-      <View>
         <Text>Sign up success! Wellcome!</Text>
-      </View>
     </Container>
   );
 };

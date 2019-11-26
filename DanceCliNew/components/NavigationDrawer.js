@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Drawer from 'react-native-drawer';
+import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
 import Menu from './Menu';
 import withDrawer from '../containers/withDrawer';
 
@@ -11,26 +11,18 @@ class NavigationDrawer extends Component {
 
   render() {
     return (
-      <Drawer
-        ref={(ref) => {
-          this.drawer = ref;
+      <DrawerLayout
+        ref={drawer => {
+          this.drawer = drawer;
         }}
-        content={<Menu />}
-        open={false}
-        type="displace"
-        tapToClose
-        openDrawerOffset={0.2}
-        panCloseMask={0.2}
-        negotiatePan
-        tweenHandler={(ratio) => {
-          return {
-            main: { opacity: Math.max(0.54, 1 - ratio) },
-          };
-        }}
-        tweenEasing="easeInQuad"
+        drawerWidth={200}
+        drawerPosition={DrawerLayout.positions.Right}
+        drawerType='front'
+        drawerBackgroundColor="#ddd"
+        renderNavigationView={() => <Menu />}
       >
         {this.props.children}
-      </Drawer>
+      </DrawerLayout>
     );
   }
 }
