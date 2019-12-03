@@ -3,7 +3,8 @@ import { View, Text } from 'react-native';
 import Container from './Container';
 import { Video } from './Video';
 import VideoRun from "react-native-video";
-import VideoFile from "./dance.mp4";
+import VideoFile1 from "./final_l_1.mp4";
+import VideoFile2 from "./final_l_2.mp4";
 
 const styles = {
   container: {
@@ -52,7 +53,7 @@ const EstimationNew = ({
           ref={(ref) => {
             this.player = ref;
           }}
-          source={VideoFile}
+          source={VideoFile1}
           rate={1.0}
           volume={0}
           muted
@@ -74,7 +75,7 @@ const EstimationNew = ({
           ref={(ref) => {
             this.player = ref;
           }}
-          source={VideoFile}
+          source={VideoFile2}
           rate={1.0}
           volume={0}
           muted
