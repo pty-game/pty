@@ -1,7 +1,7 @@
 import {
     AppRegistry,
-    View,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { Provider } from 'react-redux';
 import createAnimatedSwitchNavigator from 'react-navigation-animated-switch';
 import { createAppContainer } from 'react-navigation';
@@ -17,8 +17,11 @@ import Error from './components/Error';
 import NavigationDrawer from './components/NavigationDrawer';
 import createStore, { sagaMiddleware, rootSaga } from './redux';
 import SignUpSuccess from './components/SignUpSuccess';
+import EstimationNew from './components/EstimationNew';
 import { baseUrlSocket } from './config';
 import WS from './helpers/ws';
+
+console.disableYellowBox = true;
 
 WS.init({ baseUrlSocket });
 
@@ -66,11 +69,14 @@ const App = createAppContainer(AppNavigator);
 
 const DanceCliNew = () => {
   return (
-    <Provider store={store}>
-      <NavigationDrawer>
-        <App />
-      </NavigationDrawer>
-    </Provider>
+    <LinearGradient colors={['#70e1f5', '#ffd194']} style={{ flex: 1 }}>
+      {/*<Provider store={store}>*/}
+      {/*  <NavigationDrawer>*/}
+      {/*    <App />*/}
+      {/*  </NavigationDrawer>*/}
+      {/*</Provider>*/}
+      <EstimationNew />
+    </LinearGradient>
   );
 };
 
