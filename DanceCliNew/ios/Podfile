@@ -35,6 +35,7 @@ target 'DanceCliNew' do
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
   pod 'RNFS', :path => '../node_modules/react-native-fs'
   pod 'react-native-camera', path: '../node_modules/react-native-camera'
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
   target 'DanceCliNewTests' do
     inherit! :search_paths
