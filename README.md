@@ -1,6 +1,6 @@
 This repo contains 3 projects:
 
-`server` - contains abstract logic for `competition games`: connecting players, send/receive player actions, storing game results and user achivements etc.
+`server` - contains abstract logic for `competition games`: connecting players, send/receive player/estimators actions, storing game results and user achivements etc.
 
 `painty-client` - UI with the `painty` game logic
 
