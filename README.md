@@ -2,7 +2,7 @@ This repo contains 3 projects:
 
 `server` - contains logic for creating games, connecting players, storing game results, user achivements etc.
 
-`painty-client` - UI which consist game interface
+`painty-client` - UI with the game interface
 
 
 To run app locally, first need to setup NGINX server:
@@ -34,4 +34,8 @@ server {
        } 
 }
 ```
+Then install dependencies and run each service:
 
+```
+npm i && npm start
+```
