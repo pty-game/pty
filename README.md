@@ -1,9 +1,13 @@
 This repo contains 3 projects:
 
-`server` - contains logic for creating games, connecting players, storing game results, user achivements etc.
+`server` - contains abstract logic for `competition games`: connecting players, send/receive player actions, storing game results and user achivements etc.
 
-`painty-client` - UI with the game interface
+`painty-client` - UI with the `painty` game logic
 
+`painty-client` - UI with the `paint competition` game logic (browser game, where several players competits with painting skills)
+
+`DanceCliNew` - UI with the `dance competition` game logic (mobile app game, where several players competits with dancing skills using camera)
+ 
 
 To run app locally, first need to setup NGINX server:
 
