@@ -1,5 +1,6 @@
 nginx config:
 
+```
 server { 
        listen 80; 
 
@@ -25,3 +26,4 @@ server {
                proxy_set_header Connection "upgrade"; 
        } 
 }
+```
