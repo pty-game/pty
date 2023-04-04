@@ -1,4 +1,4 @@
-This repo contains 3 projects:
+This repo contains 3 modules:
 
 `server` - contains abstract logic for `competition games`: connecting players, send/receive player/estimators actions, storing game results and user achivements etc.
 
