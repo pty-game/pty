@@ -1,6 +1,7 @@
 This repo contains 3 projects:
 
 `server` - contains logic for creating games, connecting players, storing game results, user achivements etc.
+
 `painty-client` - UI which consist game interface
 
 
